@@ -11,25 +11,31 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
-    INVALID_KEY(1001, "Invalid message key", HttpStatus.BAD_REQUEST),
-    NOT_FOUND(1002, "Not Found", HttpStatus.NOT_FOUND),
-    USER_NOT_EXISTED(1003, "User not existed", HttpStatus.BAD_REQUEST),
-    USER_EXISTED(1004, "User existed", HttpStatus.BAD_REQUEST),
-    USERNAME_NOT_EXISTED(1005, "Username not existed", HttpStatus.BAD_REQUEST),
-    PERMISSION_NOT_EXISTED(1006, "Permission not existed", HttpStatus.BAD_REQUEST),
-    PERMISSION_EXISTED(1007, "Permission existed", HttpStatus.BAD_REQUEST),
-    ROLE_NOT_EXISTED(1008, "Role not existed", HttpStatus.BAD_REQUEST),
-    ROLE_EXISTED(1009, "Role existed", HttpStatus.BAD_REQUEST),
-    PASSWORD_INVALID(1010, "password must be at least 6 character", HttpStatus.BAD_REQUEST),
-    DOB_INVALID(1011, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
-    UNAUTHENTICATE(1012, "Unauthorized", HttpStatus.UNAUTHORIZED),
-    ACCESS_DENIED(1013, "You do not have permission", HttpStatus.FORBIDDEN),
-    ORDER_NOT_EXISTED(1014, "Order not existed", HttpStatus.BAD_REQUEST),
-    ADDRESS_NOT_EXISTED(1015, "Address not existed", HttpStatus.BAD_REQUEST),
-    PAYMENT_NOT_EXISTED(1016, "Payment method not existed", HttpStatus.BAD_REQUEST),
-    PRODUCTVARIANT_NOT_EXISTED(1016, "Product variant not existed", HttpStatus.BAD_REQUEST),
-    PRODUCT_OUT_OF_STOCK(1017, "Product variant is out of stock", HttpStatus.BAD_REQUEST),
-    INTERNAL_ERROR(9999, "Internal Server Error", HttpStatus.INTERNAL_SERVER_ERROR),
+    // User
+    USER_NOT_EXIST(2001, "User does not exist", HttpStatus.BAD_REQUEST),
+    EMAIL_ALREADY_USED(2002, "Email is already in use", HttpStatus.BAD_REQUEST),
+
+    // Order
+    ORDER_NOT_EXIST(3001, "Order does not exist", HttpStatus.BAD_REQUEST),
+    ORDER_ALREADY_PROCESSED(3002, "Order has already been processed", HttpStatus.BAD_REQUEST),
+
+    // Address
+    ADDRESS_NOT_EXIST(4001, "Address does not exist", HttpStatus.BAD_REQUEST),
+
+    // Payment
+    PAYMENT_METHOD_NOT_EXIST(5001, "Payment method does not exist", HttpStatus.BAD_REQUEST),
+
+    // Product / Variant
+    PRODUCT_VARIANT_NOT_EXIST(6001, "Product variant does not exist", HttpStatus.BAD_REQUEST),
+    PRODUCT_OUT_OF_STOCK(6002, "Product variant is out of stock", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_EXIST(6003, "Product does not exist", HttpStatus.BAD_REQUEST),
+
+    // Common
+    INTERNAL_ERROR(9999, "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_INPUT(1001, "Invalid input data", HttpStatus.BAD_REQUEST),
+    NOT_FOUND(1002, "Resource not found", HttpStatus.NOT_FOUND),
+    UNAUTHORIZED(1003, "User is not authenticated", HttpStatus.UNAUTHORIZED),
+    FORBIDDEN(1004, "Access is denied", HttpStatus.FORBIDDEN),
     ;
 
     int code;

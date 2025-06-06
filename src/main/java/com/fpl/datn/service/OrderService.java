@@ -71,7 +71,7 @@ public class OrderService {
     }
 
     public OrderResponse getOrder(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
         OrderResponse response = mapper.toOrderResponse(order);
         if (order.getUser() != null && order.getPaymentMethod() != null) {
             response.setFullName(order.getUser().getFullName());
@@ -141,13 +141,13 @@ public class OrderService {
     private Order prepareOrder(OrderRequest request) {
         var user = userRepository
                 .findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
         var address = addressRepository
                 .findById(request.getAddressId())
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXIST));
         var payment = paymentRepository
                 .findById(request.getPaymentMethodId())
-                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_EXIST));
 
         var order = Order.builder()
                 .user(user)
@@ -162,9 +162,11 @@ public class OrderService {
         return order;
     }
 
-    // xử lý đặt hàng
+    // Xử lý đặt hàng
     private List<OrderDetail> processOrderItems(Order order, List<OrderItemResponse> items, boolean isUpdate) {
         List<OrderDetail> details = new ArrayList<>();
+
+        // Dùng cho Update và Delete
         if (isUpdate && order.getOrderDetails() != null) {
             for (OrderDetail detail : order.getOrderDetails()) {
                 var variant = detail.getProductVariant();
@@ -175,11 +177,12 @@ public class OrderService {
             orderDetailRepository.deleteAll(order.getOrderDetails());
             order.getOrderDetails().clear();
         }
+        // Dùng cho Create
         if (!isUpdate && items != null) {
             for (OrderItemResponse response : items) {
                 var variant = variantRepository
                         .findById(response.getProductVariantId())
-                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCTVARIANT_NOT_EXISTED));
+                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXIST));
 
                 if (variant.getQuantity() < response.getQuantity()) {
                     throw new AppException(ErrorCode.PRODUCT_OUT_OF_STOCK);
@@ -204,9 +207,9 @@ public class OrderService {
         return details;
     }
 
-    @Transactional // cái này mà sai thì nó rollback lại không có bị chèn id lên
+    @Transactional // cái này mà sai thì nó rollback lại
     public OrderResponse update(int id, UpdateOrderRequest request) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
         mapper.toUpdateOrder(order, request);
         var details = processOrderItems(order, request.getItems(), true);
         BigDecimal total = details.stream()
@@ -227,7 +230,7 @@ public class OrderService {
 
     @Transactional
     public void delete(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXISTED));
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
         processOrderItems(order, Collections.emptyList(), true);
 
         repository.delete(order);
