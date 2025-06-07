@@ -1,7 +1,4 @@
-package com.fpl.datn.dto.response;
-
-import java.util.Collections;
-import java.util.List;
+package com.fpl.datn.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -20,12 +17,10 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class PageResponse<T> {
-    int currentPage;
-    int totalPages;
-    int pageSize;
-    long totalElements;
-
+public class ApiResponse<T> {
     @Builder.Default
-    private List<T> data = Collections.emptyList();
+    int code = 1000;
+
+    String message;
+    T result;
 }

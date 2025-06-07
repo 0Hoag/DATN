@@ -12,11 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fpl.datn.dto.ApiResponse;
+import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderRequest;
+import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
-import com.fpl.datn.dto.response.ApiResponse;
 import com.fpl.datn.dto.response.OrderResponse;
-import com.fpl.datn.dto.response.PageResponse;
 import com.fpl.datn.service.OrderService;
 
 import lombok.AccessLevel;
@@ -72,6 +73,13 @@ public class OrderController {
     ApiResponse<OrderResponse> updateOrder(@PathVariable int id, @RequestBody UpdateOrderRequest request) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.update(id, request))
+                .build();
+    }
+
+    @PutMapping("/status/{id}")
+    ApiResponse<OrderResponse> updateOrderStatus(@PathVariable int id, @RequestBody OrderStatusRequest request) {
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.updateOrderStatus(id, request))
                 .build();
     }
 

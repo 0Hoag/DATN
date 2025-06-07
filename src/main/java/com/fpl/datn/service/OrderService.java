@@ -2,7 +2,9 @@ package com.fpl.datn.service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,11 +15,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderRequest;
+import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
 import com.fpl.datn.dto.response.OrderItemResponse;
 import com.fpl.datn.dto.response.OrderResponse;
-import com.fpl.datn.dto.response.PageResponse;
+import com.fpl.datn.enums.OrderStatus;
+import com.fpl.datn.enums.PaymentStatus;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.OrderMapper;
@@ -71,7 +76,7 @@ public class OrderService {
     }
 
     public OrderResponse getOrder(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         OrderResponse response = mapper.toOrderResponse(order);
         if (order.getUser() != null && order.getPaymentMethod() != null) {
             response.setFullName(order.getUser().getFullName());
@@ -141,22 +146,22 @@ public class OrderService {
     private Order prepareOrder(OrderRequest request) {
         var user = userRepository
                 .findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXIST));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         var address = addressRepository
                 .findById(request.getAddressId())
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_EXIST));
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
         var payment = paymentRepository
                 .findById(request.getPaymentMethodId())
-                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_EXIST));
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_FOUND));
 
         var order = Order.builder()
                 .user(user)
                 .address(address)
                 .paymentMethod(payment)
                 .note(request.getNote())
-                .orderStatus("Chưa Xử lí")
-                .paymentStatus("Chưa thanh toán")
-                .createdAt(LocalDate.now())
+                .orderStatus(OrderStatus.PENDING.getDescription())
+                .paymentStatus(PaymentStatus.PENDING.getDescription())
+                .createdAt(LocalDateTime.now())
                 .isReturn(false)
                 .build();
         return order;
@@ -182,7 +187,7 @@ public class OrderService {
             for (OrderItemResponse response : items) {
                 var variant = variantRepository
                         .findById(response.getProductVariantId())
-                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_EXIST));
+                        .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
                 if (variant.getQuantity() < response.getQuantity()) {
                     throw new AppException(ErrorCode.PRODUCT_OUT_OF_STOCK);
@@ -209,7 +214,7 @@ public class OrderService {
 
     @Transactional // cái này mà sai thì nó rollback lại
     public OrderResponse update(int id, UpdateOrderRequest request) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         mapper.toUpdateOrder(order, request);
         var details = processOrderItems(order, request.getItems(), true);
         BigDecimal total = details.stream()
@@ -218,7 +223,7 @@ public class OrderService {
 
         order.setTotalAmount(total);
         order.setOrderDetails(details);
-        order.setUpdatedAt(LocalDate.now());
+        order.setUpdatedAt(LocalDateTime.now());
 
         repository.save(order);
         OrderResponse response = mapper.toOrderResponse(order);
@@ -230,9 +235,41 @@ public class OrderService {
 
     @Transactional
     public void delete(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_EXIST));
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         processOrderItems(order, Collections.emptyList(), true);
 
         repository.delete(order);
+    }
+
+    // Update trạng thái đơn hàng và Trạng thái thanh toán;
+    @Transactional
+    public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) {
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (!isValidOrderStatus(request.getOrderStatus())) throw new AppException(ErrorCode.ORDER_STATUS_NOT_FOUND);
+
+        if (!isValidPaymentStatus(request.getPaymentStatus()))
+            throw new AppException(ErrorCode.PAYMENT_STATUS_NOT_FOUND);
+
+        // Nếu đã giao hàng thì báo không thể chỉnh sửa
+        if (request.getOrderStatus().equals(OrderStatus.DELIVERED.getDescription()))
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_MODIFIED);
+
+        mapper.toUpdateStatus(order, request);
+        if (request.getNote() != null && !request.getNote().isEmpty()) order.setNote(request.getNote());
+
+        order.setUpdatedAt(LocalDateTime.now());
+        repository.save(order);
+        return mapper.toOrderResponse(order);
+    }
+
+    public static boolean isValidOrderStatus(String input) {
+        return Arrays.stream(OrderStatus.values())
+                .anyMatch(status -> status.getDescription().equalsIgnoreCase(input));
+    }
+
+    public static boolean isValidPaymentStatus(String input) {
+        return Arrays.stream(PaymentStatus.values())
+                .anyMatch(status -> status.getDescription().equalsIgnoreCase(input));
     }
 }

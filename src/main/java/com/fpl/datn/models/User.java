@@ -7,6 +7,7 @@ import java.util.Set;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,6 +16,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,7 +25,7 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
-    @Column(unique = true)
+    @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     private String email;
 
     private String password;
@@ -32,18 +34,6 @@ public class User {
 
     @Column(name = "is_enable")
     private Boolean isEnable;
-
-    @Column(name = "is_admin")
-    private Boolean isAdmin;
-
-    @Column(name = "staff_member")
-    private Boolean staffMember;
-
-    @Column(name = "is_guest")
-    private Boolean isGuest;
-
-    @Column(name = "role_id")
-    private Integer roleId;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

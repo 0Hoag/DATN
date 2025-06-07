@@ -1,24 +1,19 @@
 package com.fpl.datn.exception;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
-
-@Getter
-@Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class AppException extends RuntimeException {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 1L;
+    private ErrorCode errorCode;
 
     public AppException(ErrorCode errorCode) {
         super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 
-    ErrorCode errorCode;
+    public ErrorCode getErrorCode() {
+        return errorCode;
+    }
+
+    public void setErrorCode(ErrorCode errorCode) {
+        this.errorCode = errorCode;
+    }
 }

@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,29 +15,23 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
-
-    @Column(unique = true)
-    private String name;
+    @Column(nullable = false, unique = true)
+    String name;
 
     @Column(name = "display_name")
-    private String displayName;
+    String displayName;
 
-    private String description;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    // Relationships
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users;
+    String description;
 
     @ManyToMany
     Set<Permission> permissions;
+
+    @Column(name = "created_at")
+    LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    LocalDateTime updatedAt;
 }

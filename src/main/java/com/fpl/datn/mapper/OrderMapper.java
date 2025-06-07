@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
 import com.fpl.datn.dto.response.OrderResponse;
 import com.fpl.datn.models.Order;
@@ -19,4 +20,6 @@ public interface OrderMapper {
 
     @BeanMapping(ignoreByDefault = true)
     void toUpdateOrder(@MappingTarget Order order, UpdateOrderRequest request);
+
+    void toUpdateStatus(@MappingTarget Order order, OrderStatusRequest request);
 }

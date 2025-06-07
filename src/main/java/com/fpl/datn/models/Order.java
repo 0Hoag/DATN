@@ -1,7 +1,7 @@
 package com.fpl.datn.models;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -38,10 +38,10 @@ public class Order {
     private Boolean isReturn;
 
     @Column(name = "created_at")
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
-    private LocalDate updatedAt;
+    private LocalDateTime updatedAt;
 
     // Relationships
     @ManyToOne
