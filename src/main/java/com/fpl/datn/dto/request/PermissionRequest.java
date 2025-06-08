@@ -1,6 +1,5 @@
 package com.fpl.datn.dto.request;
 
-import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
