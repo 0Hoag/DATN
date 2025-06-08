@@ -1,8 +1,9 @@
 package com.fpl.datn.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
@@ -25,10 +26,20 @@ public enum ErrorCode {
     PHONE_EXISTED(1016, "Phone existed", HttpStatus.BAD_REQUEST),
     ERROR_CREATE_USER(1017, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
-
-
+    CATEGORY_NOT_EXISTED(1019,"Category not existed", HttpStatus.BAD_REQUEST),
     UPLOAD_FILE_FAIL(1015, "Upload file to fail!", HttpStatus.BAD_REQUEST),
-    REMOVE_FILE_FAIL(1016, "Remove file to fail!", HttpStatus.BAD_REQUEST);
+    REMOVE_FILE_FAIL(1016, "Remove file to fail!", HttpStatus.BAD_REQUEST),
+    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
+    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allow", HttpStatus.BAD_REQUEST),
+    CATEGORY_HAS_CHILDREN(1022, "Category has child categories", HttpStatus.BAD_REQUEST),
+    CATEGORY_HAS_PRODUCTS(1023, "Category has products", HttpStatus.BAD_REQUEST),
+    CATEGORIES_NAME_EXISTED(1019, "Categories name existed", HttpStatus.CONFLICT),
+    CATEGORIES_SLUG_EXISTED(1020, "Categories slug existed", HttpStatus.CONFLICT),
+    PRODUCT_SLUG_NOT_EXISTED(1232, "Categories slug existed", HttpStatus.CONFLICT),
+    PRODUCT_NOT_EXISTED(1233, "Categories slug existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_NOT_EXISTED(1234, "Categories slug existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_NOT_EXISTED(1234, "Categories slug existed", HttpStatus.CONFLICT),
+    EMAIL_EXISTS(1018, "EMAIL EXITED", HttpStatus.BAD_REQUEST);
 
     private int code;
     private String message;

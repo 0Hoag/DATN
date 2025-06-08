@@ -1,12 +1,13 @@
 package com.fpl.datn.dto.response;
 
-import com.fpl.datn.models.Category;
-import com.fpl.datn.models.Product;
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.time.LocalDateTime;
 import java.util.List;
+
+import com.fpl.datn.models.Category;
+import com.fpl.datn.models.Product;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
@@ -22,7 +23,7 @@ public class CategoryResponse {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     // Relationships - Self-referencing for parent-child categories
-    Category parent;
-    List<Category> children;
-    List<Product> products;
+    String parent;
+    List<String> children;
+    List<String> products;
 }
