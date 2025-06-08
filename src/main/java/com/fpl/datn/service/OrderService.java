@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -52,20 +53,11 @@ public class OrderService {
     ProductVariantRepository variantRepository;
     OrderMapper mapper;
 
-    public PageResponse<OrderResponse> getAll(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public PageResponse<OrderResponse> getAll(int page, int size, boolean isDesc) {
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = repository.findAll(pageable);
-        var data = pageData.stream()
-                .map(order -> {
-                    OrderResponse response = mapper.toOrderResponse(order);
-                    if (order.getUser() != null && order.getPaymentMethod() != null) {
-                        response.setFullName(order.getUser().getFullName());
-                        response.setPhone(order.getUser().getPhone());
-                        response.setPaymentMethod(order.getPaymentMethod().getName());
-                    }
-                    return response;
-                })
-                .toList();
+        var data = pageData.stream().map(order -> mapper.toOrderResponse(order)).toList();
         return PageResponse.<OrderResponse>builder()
                 .currentPage(page)
                 .totalPages(pageData.getTotalPages())
@@ -77,42 +69,30 @@ public class OrderService {
 
     public OrderResponse getOrder(int id) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        OrderResponse response = mapper.toOrderResponse(order);
-        if (order.getUser() != null && order.getPaymentMethod() != null) {
-            response.setFullName(order.getUser().getFullName());
-            response.setPhone(order.getUser().getPhone());
-            response.setPaymentMethod(order.getPaymentMethod().getName());
-        }
-        return response;
+        return mapper.toOrderResponse(order);
     }
 
-    public PageResponse<OrderResponse> Search(
+    public PageResponse<OrderResponse> search(
             String keyword,
             Integer id,
+            String phone,
             String orderStatus,
             String paymentStatus,
             LocalDate startDate,
             LocalDate endDate,
             int page,
-            int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+            int size,
+            boolean isDesc) {
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         Specification<Order> spec = OrderSpecification.hasFullName(keyword)
                 .and(OrderSpecification.hasId(id))
-                .and(OrderSpecification.createAtBetween(startDate, endDate))
+                .and(OrderSpecification.hasPhone(phone))
                 .and(OrderSpecification.hasOrderStatus(orderStatus))
-                .and(OrderSpecification.hasPaymentStatus(paymentStatus));
+                .and(OrderSpecification.hasPaymentStatus(paymentStatus))
+                .and(OrderSpecification.createAtBetween(startDate, endDate));
         var pageData = repository.findAll(spec, pageable);
-        var data = pageData.stream()
-                .map(order -> {
-                    OrderResponse response = mapper.toOrderResponse(order);
-                    if (order.getUser() != null && order.getPaymentMethod() != null) {
-                        response.setFullName(order.getUser().getFullName());
-                        response.setPhone(order.getUser().getPhone());
-                        response.setPaymentMethod(order.getPaymentMethod().getName());
-                    }
-                    return response;
-                })
-                .toList();
+        var data = pageData.stream().map(order -> mapper.toOrderResponse(order)).toList();
         return PageResponse.<OrderResponse>builder()
                 .currentPage(page)
                 .totalPages(pageData.getTotalPages())
@@ -134,12 +114,7 @@ public class OrderService {
         order.setOrderDetails(details);
         repository.save(order);
 
-        OrderResponse response = mapper.toOrderResponse(order);
-        response.setFullName(order.getUser().getFullName());
-        response.setPhone(order.getUser().getPhone());
-        response.setPaymentMethod(order.getPaymentMethod().getName());
-
-        return response;
+        return mapper.toOrderResponse(order);
     }
 
     // Chuẩn bị đặt hàng
@@ -168,11 +143,11 @@ public class OrderService {
     }
 
     // Xử lý đặt hàng
-    private List<OrderDetail> processOrderItems(Order order, List<OrderItemResponse> items, boolean isUpdate) {
+    private List<OrderDetail> processOrderItems(Order order, List<OrderItemResponse> items, boolean isDelete) {
         List<OrderDetail> details = new ArrayList<>();
 
-        // Dùng cho Update và Delete
-        if (isUpdate && order.getOrderDetails() != null) {
+        // Xóa đơn hàng chi tiết và hoàng trả số lượng bán và số lượng hàng (Update,Delete)
+        if (isDelete && order.getOrderDetails() != null) {
             for (OrderDetail detail : order.getOrderDetails()) {
                 var variant = detail.getProductVariant();
                 variant.setQuantity(variant.getQuantity() + detail.getQuantity());
@@ -182,8 +157,8 @@ public class OrderService {
             orderDetailRepository.deleteAll(order.getOrderDetails());
             order.getOrderDetails().clear();
         }
-        // Dùng cho Create
-        if (!isUpdate && items != null) {
+        // Tạo đơn hàng chi tiết và update số lượng bán và số lượng hàng (Update,Create)
+        if (items != null && !items.isEmpty()) {
             for (OrderItemResponse response : items) {
                 var variant = variantRepository
                         .findById(response.getProductVariantId())
@@ -226,11 +201,8 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         repository.save(order);
-        OrderResponse response = mapper.toOrderResponse(order);
-        response.setFullName(order.getUser().getFullName());
-        response.setPhone(order.getUser().getPhone());
-        response.setPaymentMethod(order.getPaymentMethod().getName());
-        return response;
+
+        return mapper.toOrderResponse(order);
     }
 
     @Transactional
@@ -252,7 +224,7 @@ public class OrderService {
             throw new AppException(ErrorCode.PAYMENT_STATUS_NOT_FOUND);
 
         // Nếu đã giao hàng thì báo không thể chỉnh sửa
-        if (request.getOrderStatus().equals(OrderStatus.DELIVERED.getDescription()))
+        if (order.getOrderStatus().equals(OrderStatus.DELIVERED.getDescription()))
             throw new AppException(ErrorCode.ORDER_CANNOT_BE_MODIFIED);
 
         mapper.toUpdateStatus(order, request);

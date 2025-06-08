@@ -40,11 +40,12 @@ public enum ErrorCode {
     PAYMENT_METHOD_NOT_FOUND(1401, "Payment method not found", HttpStatus.BAD_REQUEST),
     PAYMENT_STATUS_NOT_FOUND(1401, "Payment status not found", HttpStatus.BAD_REQUEST),
 
-    // Product / Variant
+    // Product / Variant / Product Review
     PRODUCT_VARIANT_NOT_FOUND(1501, "Product variant not found", HttpStatus.BAD_REQUEST),
     PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
     SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
+    PRODUCT_REVIEW_NOT_FOUND(1505, "Product review not found", HttpStatus.BAD_REQUEST),
 
     // Cart
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
@@ -66,8 +67,11 @@ public enum ErrorCode {
     INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
     INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
 
+    // Voucher
+    VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
+
     // System / Common
-    RESOURCE_NOT_FOUND(2101, "Resource not found", HttpStatus.NOT_FOUND),
+    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),
     UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
 
     int code;
