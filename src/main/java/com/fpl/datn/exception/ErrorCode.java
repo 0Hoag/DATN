@@ -1,10 +1,15 @@
 package com.fpl.datn.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 @Getter
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
     MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),

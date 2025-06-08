@@ -3,7 +3,7 @@ package com.fpl.datn.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.fpl.datn.models.InvalidatedToken;
+import com.fpl.datn.models.Address;
 
 @Repository
-public interface InvalidatedRepository extends JpaRepository<InvalidatedToken, String> {}
+public interface AddressRepository extends JpaRepository<Address, Integer> {}

@@ -1,6 +1,4 @@
-package com.fpl.datn.dto;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
+package com.fpl.datn.dto.request;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -10,17 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class ApiResponse<T> {
-    @Builder.Default
-    int code = 1000;
-
-    String message;
-    T result;
+public class OrderStatusRequest {
+    String orderStatus;
+    String paymentStatus;
+    String note;
 }
