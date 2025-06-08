@@ -9,6 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
-    boolean existsByName(String name);
     boolean existsBySlug(String slug);
+    boolean existsBySlugAndIdNot(String slug, Integer id);
+
 }

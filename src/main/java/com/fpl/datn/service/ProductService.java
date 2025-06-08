@@ -36,11 +36,11 @@ public class ProductService {
     CategoryRepository cateRepo;
 // thêm sản phẩm
     public Boolean create(ProductRequest request) {
-        if (cateRepo.existsById(request.getCategory())) {
+        if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
         if (repo.existsBySlug(request.getSlug())) {
-            throw new AppException(ErrorCode.PRODUCT_SLUG_NOT_EXISTED);
+            throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
         }
         Product product = mapper.toProduct(request);
         product.setCreatedAt(LocalDateTime.now());
@@ -83,10 +83,23 @@ public class ProductService {
     public ProductResponse update(Integer id, UpdateProductRequest request) {
         Product product = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_UPDATE_NOT_EXISTED));
-                mapper.updateProduct(product, request);
-                product.setUpdatedAt(LocalDateTime.now());
-                return mapper.toProductResponse(repo.save(product));
+
+        // Kiểm tra slug có bị trùng ở sản phẩm khác
+        if (repo.existsBySlugAndIdNot(request.getSlug(), id)) {
+            throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
+        }
+
+        // Kiểm tra category có tồn tại
+        if (!cateRepo.existsById(request.getCategory())) {
+            throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
+        }
+
+        mapper.updateProduct(product, request);
+        product.setUpdatedAt(LocalDateTime.now());
+
+        return mapper.toProductResponse(repo.save(product));
     }
+
     public void delete(Integer id) {
         Product product = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED));

@@ -35,10 +35,10 @@ public enum ErrorCode {
     CATEGORY_HAS_PRODUCTS(1023, "Category has products", HttpStatus.BAD_REQUEST),
     CATEGORIES_NAME_EXISTED(1019, "Categories name existed", HttpStatus.CONFLICT),
     CATEGORIES_SLUG_EXISTED(1020, "Categories slug existed", HttpStatus.CONFLICT),
-    PRODUCT_SLUG_NOT_EXISTED(1232, "Categories slug existed", HttpStatus.CONFLICT),
-    PRODUCT_NOT_EXISTED(1233, "Categories slug existed", HttpStatus.CONFLICT),
-    PRODUCT_UPDATE_NOT_EXISTED(1234, "Categories slug existed", HttpStatus.CONFLICT),
-    PRODUCT_DELETE_NOT_EXISTED(1234, "Categories slug existed", HttpStatus.CONFLICT),
+    PRODUCT_SLUG_EXISTED(1232, "Product slug existed", HttpStatus.CONFLICT),
+    PRODUCT_NOT_EXISTED(1233, "Product create existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_NOT_EXISTED(1234, "Product update existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_NOT_EXISTED(1234, "Product delete existed", HttpStatus.CONFLICT),
     EMAIL_EXISTS(1018, "EMAIL EXITED", HttpStatus.BAD_REQUEST);
 
     private int code;
