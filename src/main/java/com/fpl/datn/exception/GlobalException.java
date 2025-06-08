@@ -23,9 +23,9 @@ public class GlobalException {
     UserMapper userMapper;
 
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handRuntimeException(RuntimeException exception) {
-        ErrorCode errorCode = ErrorCode.UNCATEGORIZE_EXCEPTION;
-        ApiResponse apiResponse = new ApiResponse();
+    ResponseEntity<ApiResponse<Void>> handRuntimeException(RuntimeException exception) {
+        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
@@ -34,9 +34,9 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse> handlRuntimeException(AppException exception) {
+    ResponseEntity<ApiResponse<Void>> handlRuntimeException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
@@ -45,7 +45,7 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> hanlMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    ResponseEntity<ApiResponse<Void>> hanlMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
 
         if (enumKey.isEmpty()) {
@@ -68,7 +68,7 @@ public class GlobalException {
             throw new IllegalArgumentException();
         }
 
-        ApiResponse apiResponse = new ApiResponse();
+        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(
@@ -85,10 +85,10 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    ResponseEntity<ApiResponse> responseEntity(AccessDeniedException exception) {
+    ResponseEntity<ApiResponse<Void>> responseEntity(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.builder()
+                .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
                         .build());

@@ -1,13 +1,5 @@
 package com.fpl.datn.models;
 
-<<<<<<< HEAD
-=======
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
->>>>>>> d411595c40385464ca042fa6a3d8a62ae2f6e186
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +7,7 @@ import java.util.Set;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

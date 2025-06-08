@@ -22,6 +22,7 @@ public interface UserMapper {
 
     User toUser(UserRequest request);
 
+    @Mapping(target = "orders", ignore = true)
     UserResponse toUserResponse(User user);
 
     @Mapping(target = "roles", ignore = true)
