@@ -47,10 +47,10 @@ public class UserService {
             HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
 
             if (userRepositories.existsByEmail(request.getEmail())) {
-                throw new AppException(ErrorCode.EMAIL_ALREADY_EXISTS);
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
             if (userRepositories.existsByPhone(request.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
+                throw new AppException(ErrorCode.PHONE_EXISTED);
             }
 
             User user = userMapper.toUser(request);
@@ -63,12 +63,12 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATING_USER);
+            throw new AppException(ErrorCode.ERROR_CREATE_USER);
         }
     }
 
     public UserResponse Update(int id, UpdateUserRequest request) {
-        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepositories.save(user));
@@ -76,22 +76,22 @@ public class UserService {
 
     public UserResponse Detail(int id) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
     }
 
     public void Delete(int id) {
         if (!userRepositories.existsById(id)) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
         try {
             userRepositories.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
         }
     }
 
@@ -126,10 +126,10 @@ public class UserService {
                     .build());
 
             if (userRepositories.existsByEmail(request.getEmail())) {
-                throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
             if (userRepositories.existsByPhone(request.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
+                throw new AppException(ErrorCode.PHONE_EXISTED);
             }
 
             User user = userMapper.toUserRegister(request);
@@ -142,18 +142,18 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATING_USER);
+            throw new AppException(ErrorCode.ERROR_CREATE_USER);
         }
     }
 
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_UPDATING_USER);
+            throw new AppException(ErrorCode.ERROR_UPDATE_USER);
         }
     }
 }

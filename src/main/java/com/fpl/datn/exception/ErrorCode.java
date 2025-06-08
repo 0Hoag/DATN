@@ -1,15 +1,10 @@
 package com.fpl.datn.exception;
 
-import org.springframework.http.HttpStatus;
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.experimental.FieldDefaults;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 
 @Getter
-@AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
     MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
@@ -45,8 +40,26 @@ public enum ErrorCode {
     PRODUCT_DELETE_NOT_EXISTED(1029, "Product delete existed", HttpStatus.CONFLICT),
     PRODUCT_REVIEW_NOT_FOUND(1030, "Product review not found", HttpStatus.BAD_REQUEST),
     VOUCHER_NOT_FOUND(1031, "Voucher not found", HttpStatus.BAD_REQUEST),
-    EMAIL_EXISTS(1032, "EMAIL EXITED", HttpStatus.BAD_REQUEST);
 
+    PRODUCT_VARIANT_NOT_FOUND(1032, "Product variant not found", HttpStatus.BAD_REQUEST),
+    PRODUCT_OUT_OF_STOCK(1033, "Product is out of stock", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FOUND(1034, "Product not found", HttpStatus.BAD_REQUEST),
+    SELECTED_PRODUCT_NOT_FOUND(1035, "Selected product not found", HttpStatus.BAD_REQUEST),
+
+    // Order
+    ORDER_NOT_FOUND(1036, "Order not found", HttpStatus.BAD_REQUEST),
+    ORDER_ALREADY_PROCESSED(1037, "Order has already been processed", HttpStatus.BAD_REQUEST),
+    ORDER_CANNOT_BE_MODIFIED(1038, "Order cannot be modified", HttpStatus.BAD_REQUEST),
+    ORDER_STATUS_NOT_FOUND(1039, "Order status not found", HttpStatus.BAD_REQUEST),
+
+    // Address
+    ADDRESS_NOT_FOUND(1040, "Address not found", HttpStatus.BAD_REQUEST),
+
+    // Payment
+    PAYMENT_METHOD_NOT_FOUND(1041, "Payment method not found", HttpStatus.BAD_REQUEST),
+    PAYMENT_STATUS_NOT_FOUND(1042, "Payment status not found", HttpStatus.BAD_REQUEST),
+
+    CART_ITEM_ALREADY_EXISTS(1043, "Cart item already exists", HttpStatus.BAD_REQUEST);
 
     private int code;
     private String message;
