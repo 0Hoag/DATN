@@ -12,6 +12,9 @@ import com.fpl.datn.repository.ProductRepository;
 import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
 
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
@@ -23,18 +26,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 
-@Slf4j
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class ProductService {
     ProductRepository repo;
     ProductMapper mapper;
     CategoryRepository cateRepo;
 // thêm sản phẩm
     public Boolean create(ProductRequest request) {
-        Category category = cateRepo.findById(request.getCategory())
-                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
-        System.out.printf("%v",category);
-        log.info("category",request.getCategory());
         if (cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }

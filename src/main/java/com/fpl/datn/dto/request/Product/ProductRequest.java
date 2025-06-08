@@ -19,8 +19,7 @@ public class ProductRequest {
     String content;
     Boolean isHome;
     Boolean isActive;
-    Integer category; // id để gán cho category
-    // default null
+    Integer category;
     List<String> productVariants;
     List<String> productReviews;
     List<String> orderDetails;
