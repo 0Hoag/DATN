@@ -68,7 +68,7 @@ public class UserService {
     }
 
     public UserResponse Update(int id, UpdateUserRequest request) {
-        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepositories.save(user));
@@ -76,7 +76,7 @@ public class UserService {
 
     public UserResponse Detail(int id) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
@@ -148,7 +148,7 @@ public class UserService {
 
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));

@@ -35,7 +35,7 @@ public class OrderController {
     ApiResponse<PageResponse<OrderResponse>> getAll(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "false") boolean sort) {
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
                 .result(orderService.getAll(page, size, sort))
                 .build();
@@ -59,7 +59,7 @@ public class OrderController {
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "false") boolean sort) {
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
                 .result(orderService.search(
                         keyword, id, phone, orderStatus, paymentStatus, startDate, endDate, page, size, sort))

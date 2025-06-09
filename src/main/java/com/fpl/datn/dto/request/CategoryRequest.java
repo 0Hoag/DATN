@@ -1,7 +1,5 @@
 package com.fpl.datn.dto.request;
 
-import java.time.LocalDateTime;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -16,7 +14,5 @@ public class CategoryRequest {
     String description;
     Boolean isShow;
     // Relationships - Self-referencing for parent-child categories
-    String parent;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+    int parent;
 }

@@ -19,9 +19,16 @@ public enum ErrorCode {
     INVALID_USERNAME(1004, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1005, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
     INVALID_DOB(1006, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
+    USER_NOT_EXISTED(1006, "USER_NOT_EXISTED", HttpStatus.NOT_FOUND),
     PASSWORD_ALREADY_USED(1007, "Password has already been used", HttpStatus.BAD_REQUEST),
     ERROR_CREATING_USER(1008, "Error while creating user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATING_USER(1009, "Error while updating user", HttpStatus.BAD_REQUEST),
+
+    PRODUCT_SLUG_EXISTED(1026, "Product slug existed", HttpStatus.CONFLICT),
+    PRODUCT_NOT_EXISTED(1027, "Product create existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_NOT_EXISTED(1028, "Product update existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_NOT_EXISTED(1029, "Product delete existed", HttpStatus.CONFLICT),
+    PRODUCT_REVIEW_NOT_FOUND(1030, "Product review not found", HttpStatus.BAD_REQUEST),
 
     // Permission
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),
@@ -40,12 +47,11 @@ public enum ErrorCode {
     PAYMENT_METHOD_NOT_FOUND(1401, "Payment method not found", HttpStatus.BAD_REQUEST),
     PAYMENT_STATUS_NOT_FOUND(1401, "Payment status not found", HttpStatus.BAD_REQUEST),
 
-    // Product / Variant / Product Review
+    // Product / Variant
     PRODUCT_VARIANT_NOT_FOUND(1501, "Product variant not found", HttpStatus.BAD_REQUEST),
     PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
     SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
-    PRODUCT_REVIEW_NOT_FOUND(1505, "Product review not found", HttpStatus.BAD_REQUEST),
 
     // Cart
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
@@ -70,8 +76,19 @@ public enum ErrorCode {
     // Voucher
     VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
 
+    // Category
+    CATEGORY_NOT_EXISTED(2201, "Category not existed", HttpStatus.BAD_REQUEST),
+    CATEGORY_HAS_CHILDREN(2202, "Category has child categories", HttpStatus.BAD_REQUEST),
+    CATEGORY_HAS_PRODUCTS(2203, "Category has products", HttpStatus.BAD_REQUEST),
+    CATEGORIES_NAME_EXISTED(2204, "Categories name existed", HttpStatus.CONFLICT),
+    CATEGORIES_SLUG_EXISTED(2205, "Categories slug existed", HttpStatus.CONFLICT),
+
     // System / Common
     RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),
+
+    // Others
+    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allow", HttpStatus.BAD_REQUEST),
+    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
     UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
 
     int code;
