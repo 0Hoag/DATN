@@ -1,30 +1,33 @@
 package com.fpl.datn.exception;
 
-import java.nio.file.AccessDeniedException;
 import java.util.Map;
 import java.util.Objects;
 
 import jakarta.validation.ConstraintViolation;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.fpl.datn.dto.ApiResponse;
-import com.fpl.datn.mapper.UserMapper;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.http.HttpStatus;
 
-@ControllerAdvice
+@RestControllerAdvice
 @Slf4j
 public class GlobalException {
-    private static final String MIN_ATTRIBUTES = "min";
-    UserMapper userMapper;
+
+    private static final String MIN_ATTRIBUTE = "min";
 
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse<Void>> handRuntimeException(RuntimeException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+    public ResponseEntity<ApiResponse<Void>> handleRuntimeException(Exception exception) {
+        log.error("Exception: ", exception);
+        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
         ApiResponse<Void> apiResponse = new ApiResponse<Void>();
 
         apiResponse.setCode(errorCode.getCode());
@@ -34,7 +37,7 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse<Void>> handlRuntimeException(AppException exception) {
+    public ResponseEntity<ApiResponse<Void>> handleAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
         ApiResponse<Void> apiResponse = new ApiResponse<Void>();
 
@@ -45,27 +48,23 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse<Void>> hanlMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
-
-        if (enumKey.isEmpty()) {
-            throw new NullPointerException();
-        }
 
         ErrorCode errorCode = ErrorCode.INVALID_KEY;
         Map<String, Object> attributes = null;
         try {
             errorCode = ErrorCode.valueOf(enumKey);
 
-            var constrainViolation =
-                    exception.getBindingResult().getAllErrors().getFirst().unwrap(ConstraintViolation.class);
+            var constraintViolation =
+                    exception.getBindingResult().getAllErrors().get(0).unwrap(ConstraintViolation.class);
 
-            attributes = constrainViolation.getConstraintDescriptor().getAttributes();
+            attributes = constraintViolation.getConstraintDescriptor().getAttributes();
 
             log.info(attributes.toString());
 
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException();
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Sử dụng errorCode mặc định
         }
 
         ApiResponse<Void> apiResponse = new ApiResponse<Void>();
@@ -80,17 +79,27 @@ public class GlobalException {
     }
 
     private String mapAttribute(String message, Map<String, Object> attributes) {
-        String minValues = String.valueOf(attributes.get(MIN_ATTRIBUTES));
-        return message.replace("{" + MIN_ATTRIBUTES + "}", minValues);
+        String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
+        return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    ResponseEntity<ApiResponse<Void>> responseEntity(AccessDeniedException exception) {
+    public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
                         .build());
+    }
+
+    @ExceptionHandler(value = HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMethodNotSupported(HttpRequestMethodNotSupportedException exception) {
+        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
+
+        apiResponse.setCode(ErrorCode.INVALID_KEY.getCode());
+        apiResponse.setMessage("Method " + exception.getMethod() + " is not supported for this endpoint. Supported methods: " + exception.getSupportedHttpMethods());
+
+        return ResponseEntity.status(HttpStatus.METHOD_NOT_ALLOWED).body(apiResponse);
     }
 }

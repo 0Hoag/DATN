@@ -5,15 +5,10 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.stereotype.Service;
-
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
-import com.fpl.datn.repository.CategoryRepository;
 import com.fpl.datn.models.Category;
+import com.fpl.datn.repository.CategoryRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,8 +33,8 @@ public class CategoryBuilder {
         while (currentParentId != null) {
             if (visited.contains(currentParentId)) return true;
 
-            Category parent = repo.findById(currentParentId)
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+            Category parent =
+                    repo.findById(currentParentId).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
             if (parent.getParent() == null) break;
 

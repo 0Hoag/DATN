@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import com.fpl.datn.dto.request.UpdateCategoryRequest;
-import com.fpl.datn.service.build.CategoryBuilder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -13,12 +11,14 @@ import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.CategoryRequest;
+import com.fpl.datn.dto.request.UpdateCategoryRequest;
 import com.fpl.datn.dto.response.CategoryResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.CategoryMapper;
 import com.fpl.datn.models.Category;
 import com.fpl.datn.repository.CategoryRepository;
+import com.fpl.datn.service.build.CategoryBuilder;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -73,9 +73,7 @@ public class CategoryService {
     }
 
     public List<CategoryResponse> list() {
-        return repo.findAll().stream()
-                .map(mapper::toCategoryResponse)
-                .collect(Collectors.toList());
+        return repo.findAll().stream().map(mapper::toCategoryResponse).collect(Collectors.toList());
     }
 
     public PageResponse<CategoryResponse> get(int page, int size) {
@@ -102,9 +100,9 @@ public class CategoryService {
     public CategoryResponse update(Integer id, UpdateCategoryRequest request) {
         Category category = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
-        if (request.getParent() != 0 ){
-            Category parent = repo.findById(request.getParent())
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        if (request.getParent() != 0) {
+            Category parent =
+                    repo.findById(request.getParent()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             if (builder.wouldCreateCircularReference(id, parent.getId())) {
                 throw new AppException(ErrorCode.CIRCULAR_REFERENCE_NOT_ALLOWED);

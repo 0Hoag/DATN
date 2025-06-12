@@ -41,6 +41,7 @@ public class VoucherService {
                 .build();
     }
 
+
     public VoucherResponse getVoucher(int id) {
         var voucher = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         return mapper.toVoucherResponse(voucher);

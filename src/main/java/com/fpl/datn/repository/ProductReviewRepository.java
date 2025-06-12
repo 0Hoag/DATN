@@ -1,9 +1,9 @@
 package com.fpl.datn.repository;
 
-import com.fpl.datn.models.ProductReview;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.fpl.datn.models.ProductReview;
+
 @Repository
-public interface ProductReviewRepository extends JpaRepository<ProductReview, Integer> {
-}
+public interface ProductReviewRepository extends JpaRepository<ProductReview, Integer> {}
