@@ -1,20 +1,18 @@
 package com.fpl.datn.exception;
 
-import java.nio.file.AccessDeniedException;
-import java.util.Map;
-import java.util.Objects;
-
+import com.fpl.datn.dto.ApiResponse;
+import com.fpl.datn.mapper.UserMapper;
 import jakarta.validation.ConstraintViolation;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+//import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.fpl.datn.dto.ApiResponse;
-import com.fpl.datn.mapper.UserMapper;
-
-import lombok.extern.slf4j.Slf4j;
+import java.nio.file.AccessDeniedException;
+import java.util.Map;
+import java.util.Objects;
 
 @ControllerAdvice
 @Slf4j
@@ -23,9 +21,9 @@ public class GlobalException {
     UserMapper userMapper;
 
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse<Void>> handRuntimeException(RuntimeException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
-        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
+    ResponseEntity<ApiResponse> handRuntimeException(RuntimeException exception) {
+        ErrorCode errorCode = ErrorCode.UNCATEGORIZE_EXCEPTION;
+        ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
@@ -34,9 +32,9 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse<Void>> handlRuntimeException(AppException exception) {
+    ResponseEntity<ApiResponse> handlRuntimeException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
-        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
+        ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
@@ -45,7 +43,7 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse<Void>> hanlMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
+    ResponseEntity<ApiResponse> hanlMethodArgumentNotValidException(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
 
         if (enumKey.isEmpty()) {
@@ -68,7 +66,7 @@ public class GlobalException {
             throw new IllegalArgumentException();
         }
 
-        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
+        ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(
@@ -85,10 +83,10 @@ public class GlobalException {
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    ResponseEntity<ApiResponse<Void>> responseEntity(AccessDeniedException exception) {
+    ResponseEntity<ApiResponse> responseEntity(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
         return ResponseEntity.status(errorCode.getStatusCode())
-                .body(ApiResponse.<Void>builder()
+                .body(ApiResponse.builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())
                         .build());

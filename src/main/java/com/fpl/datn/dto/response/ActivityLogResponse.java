@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductReviewResponse {
+public class ActivityLogResponse {
     private Integer id;
-    private Integer rating;
-    private String content;
+    private String action;
+    private String description;
+    private String module;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    private Integer productId;
-    private Integer userId;
+    private Integer userActionId;
 }

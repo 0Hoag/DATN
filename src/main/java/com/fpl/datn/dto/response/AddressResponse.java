@@ -1,4 +1,4 @@
-package com.fpl.datn.dto.request;
+package com.fpl.datn.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,13 +10,13 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryRequest {
-	String name;
-    String slug;
-    String description;
-    Boolean isShow;
-    // Relationships - Self-referencing for parent-child categories
-    String parent;
+public class AddressResponse {
+    Integer id;
+    String fullName;
+    String phone;
+    String addressLine;
+    Boolean isDefault;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    Integer userId;
 }

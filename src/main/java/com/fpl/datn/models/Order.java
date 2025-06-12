@@ -1,17 +1,13 @@
 package com.fpl.datn.models;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.persistence.*;
-
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Builder
 @Entity
 @Table(name = "orders")
 @Data
@@ -26,7 +22,7 @@ public class Order {
     private String orderStatus;
 
     @Column(name = "payment_status")
-    private String paymentStatus;
+    private Integer paymentStatus;
 
     @Column(name = "total_amount", precision = 10, scale = 2)
     private BigDecimal totalAmount;
@@ -69,3 +65,4 @@ public class Order {
     @OneToMany(mappedBy = "order")
     private List<TransactionLog> transactionLogs;
 }
+

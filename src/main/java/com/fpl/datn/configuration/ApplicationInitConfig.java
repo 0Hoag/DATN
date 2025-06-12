@@ -1,13 +1,5 @@
 package com.fpl.datn.configuration;
 
-import java.util.HashSet;
-
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.fpl.datn.constant.PredefinedPermission;
 import com.fpl.datn.constant.PredefinedRole;
 import com.fpl.datn.models.Permission;
@@ -16,12 +8,18 @@ import com.fpl.datn.models.User;
 import com.fpl.datn.repository.PermissionRepository;
 import com.fpl.datn.repository.RoleRepository;
 import com.fpl.datn.repository.UserRepository;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.HashSet;
 
 @Configuration
 @RequiredArgsConstructor
@@ -41,8 +39,7 @@ public class ApplicationInitConfig {
             prefix = "spring",
             value = "datasource.driverClassName",
             havingValue = "com.mysql.cj.jdbc.Driver")
-    ApplicationRunner applicationRunner(
-            UserRepository userRepository, RoleRepository roleRepository, PermissionRepository permissionRepository) {
+    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository, PermissionRepository permissionRepository) {
         log.info("Initializing application.....");
         return args -> {
             if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {

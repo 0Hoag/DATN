@@ -1,7 +1,10 @@
 package com.fpl.datn.dto.request;
 
+import com.fpl.datn.models.Role;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
