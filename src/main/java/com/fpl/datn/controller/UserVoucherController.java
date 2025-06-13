@@ -2,6 +2,7 @@ package com.fpl.datn.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -40,6 +41,13 @@ public class UserVoucherController {
             @RequestParam(required = false, defaultValue = "false") boolean sort) {
         return ApiResponse.<PageResponse<UserVoucherResponse>>builder()
                 .result(userVoucherService.getUserVouchers(userId, page, size, sort))
+                .build();
+    }
+
+    @PostMapping("/{userId}")
+    ApiResponse<UserVoucherResponse> create(@PathVariable int userId, @RequestParam String code) {
+        return ApiResponse.<UserVoucherResponse>builder()
+                .result(userVoucherService.create(userId, code))
                 .build();
     }
 }

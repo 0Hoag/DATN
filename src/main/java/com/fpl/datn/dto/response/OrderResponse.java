@@ -27,4 +27,7 @@ public class OrderResponse {
     // Thồn tin Đơn hàng chi tiết
     BigDecimal totalAmount;
     List<OrderDetailResponse> orderDetails;
+    String PaymentUrl;
+    // voucher
+    VoucherResponse voucher;
 }

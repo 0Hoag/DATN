@@ -10,13 +10,12 @@ import com.fpl.datn.models.Product;
 
 @Mapper(
         componentModel = "spring",
-        uses = {DateMapper.class})
+        uses = {DateMapper.class, OrderDetailMapper.class})
 public interface ProductMapper {
 
     // Entity -> Response
     @Mapping(target = "productVariants", ignore = true)
     @Mapping(target = "productReviews", ignore = true)
-    @Mapping(target = "orderDetails", ignore = true)
     ProductResponse toProductResponse(Product product);
 
     // Request DTO -> Entity

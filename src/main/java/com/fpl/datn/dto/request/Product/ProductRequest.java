@@ -2,6 +2,8 @@ package com.fpl.datn.dto.request.Product;
 
 import java.util.List;
 
+import com.fpl.datn.dto.response.OrderDetailResponse;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,5 +24,5 @@ public class ProductRequest {
     Integer category;
     List<String> productVariants;
     List<String> productReviews;
-    List<String> orderDetails;
+    List<OrderDetailResponse> orderDetails;
 }

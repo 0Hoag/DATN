@@ -2,6 +2,8 @@ package com.fpl.datn.controller;
 
 import java.time.LocalDate;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -66,17 +68,24 @@ public class OrderController {
                 .build();
     }
 
+    //    @PostMapping
+    //    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request) {
+    //        return ApiResponse.<OrderResponse>builder()
+    //                .result(orderService.create(request))
+    //                .build();
+    //    }
     @PostMapping
-    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request) {
+    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request, HttpServletRequest httpRequest) {
         return ApiResponse.<OrderResponse>builder()
-                .result(orderService.create(request))
+                .result(orderService.create(request, httpRequest))
                 .build();
     }
 
     @PutMapping("/{id}")
-    ApiResponse<OrderResponse> updateOrder(@PathVariable int id, @RequestBody UpdateOrderRequest request) {
+    ApiResponse<OrderResponse> updateOrder(
+            @PathVariable int id, @RequestBody UpdateOrderRequest request, HttpServletRequest httpRequest) {
         return ApiResponse.<OrderResponse>builder()
-                .result(orderService.update(id, request))
+                .result(orderService.update(id, request, httpRequest))
                 .build();
     }
 

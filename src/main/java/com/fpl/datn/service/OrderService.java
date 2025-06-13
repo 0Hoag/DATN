@@ -1,6 +1,7 @@
 package com.fpl.datn.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
@@ -29,12 +31,14 @@ import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.OrderMapper;
 import com.fpl.datn.models.Order;
 import com.fpl.datn.models.OrderDetail;
+import com.fpl.datn.models.Voucher;
 import com.fpl.datn.repository.AddressRepository;
 import com.fpl.datn.repository.OrderDetailRepository;
 import com.fpl.datn.repository.OrderRepository;
 import com.fpl.datn.repository.PaymentMethodRepository;
 import com.fpl.datn.repository.ProductVariantRepository;
 import com.fpl.datn.repository.UserRepository;
+import com.fpl.datn.repository.VoucherRepository;
 import com.fpl.datn.specification.OrderSpecification;
 
 import lombok.AccessLevel;
@@ -51,7 +55,9 @@ public class OrderService {
     AddressRepository addressRepository;
     PaymentMethodRepository paymentRepository;
     ProductVariantRepository variantRepository;
+    VoucherRepository voucherRepository;
     OrderMapper mapper;
+    VnpayService vnpayService;
 
     public PageResponse<OrderResponse> getAll(int page, int size, boolean isDesc) {
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
@@ -103,18 +109,58 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse create(OrderRequest request) {
+    public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest) {
         var order = prepareOrder(request);
         var details = processOrderItems(order, request.getItems(), false);
         BigDecimal total = details.stream()
                 .map(detail -> detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        // Áp dụng voucher nếu có
+        if (order.getVoucher() != null) {
+            Voucher voucher = order.getVoucher();
+
+            // Kiểm tra hợp lệ
+            if (!Boolean.TRUE.equals(voucher.getIsActive())
+                    || voucher.getStartAt().isAfter(LocalDateTime.now())
+                    || voucher.getEndAt().isBefore(LocalDateTime.now())
+                    || voucher.getUsageCount() >= voucher.getQuantity()) {
+                throw new AppException(ErrorCode.VOUCHER_INVALID_OR_EXPIRED);
+            }
+            // kiểm tra số tiền tối thiểu sử dụng
+            if (voucher.getMinOrderValue() != null && total.compareTo(voucher.getMinOrderValue()) < 0) {
+                throw new AppException(ErrorCode.VOUCHER_MIN_ORDER_NOT_MET);
+            }
+
+            // ❗ Tự xác định loại giảm giá
+            BigDecimal discount = BigDecimal.ZERO;
+            if (voucher.getDiscountValue().compareTo(BigDecimal.valueOf(100)) <= 0) {
+                // Giảm phần trăm
+                discount = total.multiply(voucher.getDiscountValue())
+                        .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
+            } else {
+                // Giảm số tiền cố định
+                discount = voucher.getDiscountValue();
+            }
+            if (discount.compareTo(total) > 0) {
+                discount = total; // không cho âm
+            }
+            total = total.subtract(discount);
+
+            order.setVoucher(voucher);
+            voucher.setUsageCount(voucher.getUsageCount() + 1);
+            voucherRepository.save(voucher);
+        }
+
         order.setTotalAmount(total);
         order.setOrderDetails(details);
         repository.save(order);
-
-        return mapper.toOrderResponse(order);
+        var response = mapper.toOrderResponse(order);
+        if (order.getPaymentMethod().getName().equalsIgnoreCase("VNPAY")) {
+            String paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
+            response.setPaymentUrl(paymentUrl);
+        }
+        return response;
     }
 
     // Chuẩn bị đặt hàng
@@ -128,7 +174,12 @@ public class OrderService {
         var payment = paymentRepository
                 .findById(request.getPaymentMethodId())
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_FOUND));
-
+        Voucher voucher = null;
+        if (request.getVoucherId() != null) {
+            voucher = voucherRepository
+                    .findById(request.getVoucherId())
+                    .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+        }
         var order = Order.builder()
                 .user(user)
                 .address(address)
@@ -138,6 +189,7 @@ public class OrderService {
                 .paymentStatus(PaymentStatus.PENDING.getDescription())
                 .createdAt(LocalDateTime.now())
                 .isReturn(false)
+                .voucher(voucher)
                 .build();
         return order;
     }
@@ -157,6 +209,7 @@ public class OrderService {
             orderDetailRepository.deleteAll(order.getOrderDetails());
             order.getOrderDetails().clear();
         }
+
         // Tạo đơn hàng chi tiết và update số lượng bán và số lượng hàng (Update,Create)
         if (items != null && !items.isEmpty()) {
             for (OrderItemResponse response : items) {
@@ -167,6 +220,8 @@ public class OrderService {
                 if (variant.getQuantity() < response.getQuantity()) {
                     throw new AppException(ErrorCode.PRODUCT_OUT_OF_STOCK);
                 }
+
+                if (order.getVoucher() != null) {}
 
                 variant.setQuantity(variant.getQuantity() - response.getQuantity());
                 variant.setSold(variant.getSold() + response.getQuantity());
@@ -187,10 +242,25 @@ public class OrderService {
         return details;
     }
 
-    @Transactional // cái này mà sai thì nó rollback lại
-    public OrderResponse update(int id, UpdateOrderRequest request) {
+    @Transactional
+    public OrderResponse update(int id, UpdateOrderRequest request, HttpServletRequest httpRequest) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         mapper.toUpdateOrder(order, request);
+        // Tự xử lý các trường không thể map tự động
+        var user = userRepository
+                .findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var address = addressRepository
+                .findById(request.getAddressId())
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+        var paymentMethod = paymentRepository
+                .findById(request.getPaymentMethodId())
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_FOUND));
+
+        order.setUser(user);
+        order.setAddress(address);
+        order.setPaymentMethod(paymentMethod);
+
         var details = processOrderItems(order, request.getItems(), true);
         BigDecimal total = details.stream()
                 .map(detail -> detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))
@@ -201,8 +271,12 @@ public class OrderService {
         order.setUpdatedAt(LocalDateTime.now());
 
         repository.save(order);
-
-        return mapper.toOrderResponse(order);
+        var response = mapper.toOrderResponse(order);
+        if (order.getPaymentMethod().getName().equalsIgnoreCase("VNPAY")) {
+            String paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
+            response.setPaymentUrl(paymentUrl);
+        }
+        return response;
     }
 
     @Transactional

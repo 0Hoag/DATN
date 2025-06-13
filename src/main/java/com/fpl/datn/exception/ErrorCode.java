@@ -75,6 +75,10 @@ public enum ErrorCode {
 
     // Voucher
     VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
+    VOUCHER_INVALID_OR_EXPIRED(2102, "Voucher invalid or expried", HttpStatus.BAD_REQUEST),
+    VOUCHER_MIN_ORDER_NOT_MET(
+            2103, "The order value does not meet the minimum required to apply this voucher", HttpStatus.BAD_REQUEST),
+    VOUCHER_EXISTED(2104, "You already have this voucher", HttpStatus.CONFLICT),
 
     // Category
     CATEGORY_NOT_EXISTED(2201, "Category not existed", HttpStatus.BAD_REQUEST),
