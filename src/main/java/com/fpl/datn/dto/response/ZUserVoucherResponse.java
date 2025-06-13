@@ -1,7 +1,5 @@
 package com.fpl.datn.dto.response;
 
-import java.time.LocalDateTime;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,13 +8,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductReviewResponse {
+public class ZUserVoucherResponse {
     private Integer id;
-    private Integer rating;
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    private Integer productId;
     private Integer userId;
+    private Integer voucherId;
 }

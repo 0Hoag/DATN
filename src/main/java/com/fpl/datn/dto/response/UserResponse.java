@@ -26,11 +26,11 @@ public class UserResponse {
 
     Set<RoleResponse> roles;
 
-    List<Address> addresses;
-    List<OrderResponse> orders;
-    List<ProductReview> productReviews;
-    List<Cart> carts;
-    List<OrderReturn> orderReturns;
-    List<ZUserVoucher> ZUserVouchers;
-    List<ActivityLog> activityLogs;
+    private List<AddressResponse> addresses;
+    private List<OrderResponse> orders;
+    private List<ProductReviewResponse> productReviews;
+    private List<CartResponse> carts;
+    private List<OrderReturnResponse> orderReturns;
+    private List<ZUserVoucherResponse> ZUserVouchers;
+    private List<ActivityLogResponse> activityLogs;
 }

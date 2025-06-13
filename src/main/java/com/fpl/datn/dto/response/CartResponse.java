@@ -10,13 +10,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductReviewResponse {
+public class CartResponse {
     private Integer id;
-    private Integer rating;
-    private String content;
+    private String sessionId;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
-    private Integer productId;
     private Integer userId;
 }

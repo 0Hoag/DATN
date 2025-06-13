@@ -11,18 +11,15 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderResponse {
+public class OrderReturnResponse {
     private Integer id;
-    private String orderStatus;
-    private Integer paymentStatus;
-    private BigDecimal totalAmount;
-    private String note;
-    private Boolean isReturn;
+    private String reason;
+    private BigDecimal refundAmount;
+    private Integer paymentMethod;
+    private String status;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     private Integer userId;
-    private Integer addressId;
-    private Integer paymentMethodId;
-    private Integer voucherId;
+    private Integer orderId;
 }

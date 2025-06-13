@@ -46,10 +46,10 @@ public class UserService {
         try {
             HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
 
-            if (userRepositories.existsByEmail(request.getEmail())) {
+            if (!userRepositories.existsByEmail(request.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
-            if (userRepositories.existsByPhone(request.getPhone())) {
+            if (!userRepositories.existsByPhone(request.getPhone())) {
                 throw new AppException(ErrorCode.PHONE_EXISTED);
             }
 
