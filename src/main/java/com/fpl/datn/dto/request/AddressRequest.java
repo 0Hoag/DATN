@@ -1,4 +1,4 @@
-package com.fpl.datn.dto.response;
+package com.fpl.datn.dto.request;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -10,16 +10,9 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductReviewResponse {
-    // user
+public class AddressRequest {
+    String addressLine;
     String fullName;
-    String email;
-
-    // product
-    int productId;
-    String producName;
-    String thumbnail;
-
-    Integer rating;
-    String content;
+    String phone;
+    Boolean isDefault;
 }

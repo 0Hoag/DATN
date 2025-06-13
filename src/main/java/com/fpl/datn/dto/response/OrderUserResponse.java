@@ -10,16 +10,8 @@ import lombok.experimental.FieldDefaults;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductReviewResponse {
-    // user
+public class OrderUserResponse {
     String fullName;
     String email;
-
-    // product
-    int productId;
-    String producName;
-    String thumbnail;
-
-    Integer rating;
-    String content;
+    String phone;
 }

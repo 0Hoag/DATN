@@ -2,6 +2,8 @@ package com.fpl.datn.controller;
 
 import java.time.LocalDate;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -34,9 +36,10 @@ public class OrderController {
     @GetMapping
     ApiResponse<PageResponse<OrderResponse>> getAll(
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-                .result(orderService.getAll(page, size))
+                .result(orderService.getAll(page, size, sort))
                 .build();
     }
 
@@ -48,31 +51,41 @@ public class OrderController {
     }
 
     @GetMapping("/search")
-    ApiResponse<PageResponse<OrderResponse>> Search(
-            @RequestParam(required = false) Integer id,
+    ApiResponse<PageResponse<OrderResponse>> search(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Integer id,
+            @RequestParam(required = false) String phone,
             @RequestParam(required = false) String orderStatus,
             @RequestParam(required = false) String paymentStatus,
             @RequestParam(required = false) LocalDate startDate,
             @RequestParam(required = false) LocalDate endDate,
             @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-                .result(orderService.Search(keyword, id, orderStatus, paymentStatus, startDate, endDate, page, size))
+                .result(orderService.search(
+                        keyword, id, phone, orderStatus, paymentStatus, startDate, endDate, page, size, sort))
                 .build();
     }
 
+    //    @PostMapping
+    //    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request) {
+    //        return ApiResponse.<OrderResponse>builder()
+    //                .result(orderService.create(request))
+    //                .build();
+    //    }
     @PostMapping
-    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request) {
+    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request, HttpServletRequest httpRequest) {
         return ApiResponse.<OrderResponse>builder()
-                .result(orderService.create(request))
+                .result(orderService.create(request, httpRequest))
                 .build();
     }
 
     @PutMapping("/{id}")
-    ApiResponse<OrderResponse> updateOrder(@PathVariable int id, @RequestBody UpdateOrderRequest request) {
+    ApiResponse<OrderResponse> updateOrder(
+            @PathVariable int id, @RequestBody UpdateOrderRequest request, HttpServletRequest httpRequest) {
         return ApiResponse.<OrderResponse>builder()
-                .result(orderService.update(id, request))
+                .result(orderService.update(id, request, httpRequest))
                 .build();
     }
 

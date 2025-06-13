@@ -31,7 +31,8 @@ public class VoucherService {
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = repository.findAll(pageable);
-        var data = pageData.stream().map(mapper::toVoucherResponse).toList();
+        var data =
+                pageData.stream().map(order -> mapper.toVoucherResponse(order)).toList();
         return PageResponse.<VoucherResponse>builder()
                 .currentPage(page)
                 .totalPages(pageData.getTotalPages())

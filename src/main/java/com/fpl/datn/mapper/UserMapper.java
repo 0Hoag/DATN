@@ -11,6 +11,7 @@ import com.fpl.datn.dto.request.RegisterRequest;
 import com.fpl.datn.dto.request.UpdateProfileRequest;
 import com.fpl.datn.dto.request.UpdateUserRequest;
 import com.fpl.datn.dto.request.UserRequest;
+import com.fpl.datn.dto.response.OrderUserResponse;
 import com.fpl.datn.dto.response.UserResponse;
 import com.fpl.datn.models.Permission;
 import com.fpl.datn.models.Role;
@@ -24,6 +25,8 @@ public interface UserMapper {
 
     @Mapping(target = "orders", ignore = true)
     UserResponse toUserResponse(User user);
+
+    OrderUserResponse toOrderUserResponse(User user);
 
     @Mapping(target = "roles", ignore = true)
     void updateUser(@MappingTarget User user, UpdateUserRequest request);

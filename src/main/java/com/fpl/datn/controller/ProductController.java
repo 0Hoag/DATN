@@ -50,7 +50,7 @@ public class ProductController {
                 .build();
     }
 
-    @GetMapping("/Get")
+    @GetMapping
     public ApiResponse<PageResponse<ProductResponse>> Get(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {

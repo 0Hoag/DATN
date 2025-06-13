@@ -60,7 +60,7 @@ public class Order {
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "order")

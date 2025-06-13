@@ -71,11 +71,11 @@ public class AuthenticationService {
     public AuthenticationResponse authenticated(AuthenticationRequest request) {
         var user = userRepository
                 .findByEmail(request.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated) throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        if (!authenticated) throw new AppException(ErrorCode.USER_NOT_FOUND);
 
         var token = generateToken(user);
 

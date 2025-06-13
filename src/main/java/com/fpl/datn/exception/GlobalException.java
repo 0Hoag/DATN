@@ -41,7 +41,7 @@ public class GlobalException {
         apiResponse.setCode(errorCode.getCode());
         apiResponse.setMessage(errorCode.getMessage());
 
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+        return ResponseEntity.status(errorCode.getHttpStatus()).body(apiResponse);
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
@@ -52,7 +52,7 @@ public class GlobalException {
             throw new NullPointerException();
         }
 
-        ErrorCode errorCode = ErrorCode.INVALID_KEY;
+        ErrorCode errorCode = ErrorCode.INVALID_MESSAGE_KEY;
         Map<String, Object> attributes = null;
         try {
             errorCode = ErrorCode.valueOf(enumKey);
@@ -87,7 +87,7 @@ public class GlobalException {
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse<Void>> responseEntity(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
-        return ResponseEntity.status(errorCode.getStatusCode())
+        return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())
                         .message(errorCode.getMessage())

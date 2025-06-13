@@ -63,7 +63,7 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATE_USER);
+            throw new AppException(ErrorCode.ERROR_CREATING_USER);
         }
     }
 
@@ -79,19 +79,19 @@ public class UserService {
             User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
     }
 
     public void Delete(int id) {
         if (!userRepositories.existsById(id)) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
         try {
             userRepositories.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
     }
 
@@ -126,10 +126,10 @@ public class UserService {
                     .build());
 
             if (userRepositories.existsByEmail(request.getEmail())) {
-                throw new AppException(ErrorCode.EMAIL_EXISTED);
+                throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
             }
             if (userRepositories.existsByPhone(request.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_EXISTED);
+                throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
             }
 
             User user = userMapper.toUserRegister(request);
@@ -142,7 +142,7 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATE_USER);
+            throw new AppException(ErrorCode.ERROR_CREATING_USER);
         }
     }
 
@@ -153,7 +153,7 @@ public class UserService {
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_UPDATE_USER);
+            throw new AppException(ErrorCode.ERROR_UPDATING_USER);
         }
     }
 }

@@ -21,7 +21,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
             throws IOException, ServletException {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
 
-        response.setStatus(errorCode.getStatusCode().value());
+        response.setStatus(errorCode.getHttpStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
         ApiResponse<?> apiResponse = ApiResponse.builder()
@@ -32,6 +32,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         ObjectMapper objectMapper = new ObjectMapper();
 
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        System.out.println("JwtAuthenticationEntryPoint was triggered for: " + request.getRequestURI());
         response.flushBuffer();
     }
 }

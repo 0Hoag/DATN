@@ -3,6 +3,8 @@ package com.fpl.datn.dto.response.Product;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.fpl.datn.dto.response.OrderDetailResponse;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -25,5 +27,5 @@ public class ProductResponse {
     Timestamp updatedAt;
     List<String> productVariants;
     List<String> productReviews;
-    List<String> orderDetails;
+    List<OrderDetailResponse> orderDetails;
 }
