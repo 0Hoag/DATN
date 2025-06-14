@@ -38,8 +38,21 @@ public enum ErrorCode {
     PRODUCT_SLUG_EXISTED(1232, "Product slug existed", HttpStatus.CONFLICT),
     PRODUCT_NOT_EXISTED(1233, "Product create existed", HttpStatus.CONFLICT),
     PRODUCT_UPDATE_NOT_EXISTED(1234, "Product update existed", HttpStatus.CONFLICT),
-    PRODUCT_DELETE_NOT_EXISTED(1234, "Product delete existed", HttpStatus.CONFLICT),
-    EMAIL_EXISTS(1018, "EMAIL EXITED", HttpStatus.BAD_REQUEST);
+    PRODUCT_DELETE_NOT_EXISTED(1235, "Product delete existed", HttpStatus.CONFLICT),
+    PRODUCT_CREATE_VARIANT_EXISTED(1236, "Product_Variant create existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_VARIANT_EXISTED(1237, "Product_Variant UPDATE existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_VARIANT_EXISTED(1238, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_EXISTED(1239, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_DETAIL_EXISTED(1240, "Product Image detail existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_CREATE_EXISTED(1241, "Product Image Create existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_UPDATE_EXISTED(1242, "Product Image Update existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_DELETE_EXISTED(1243, "Product Image Delete existed", HttpStatus.CONFLICT),
+    VARIANT_DETAIL_EXISTED(1244, "Variant detail existed", HttpStatus.CONFLICT),
+    VARIANT_UPDATE_EXISTED(1245, "Variant update existed", HttpStatus.CONFLICT),
+    VARIANT_DELETE_EXISTED(1246, "Variant delete existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_VALUE_EXISTED(1247, "Variant delete existed", HttpStatus.CONFLICT),
+    EMAIL_EXISTS(1018, "EMAIL EXITED", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU đã tồn tại", HttpStatus.CONFLICT);
 
     private int code;
     private String message;

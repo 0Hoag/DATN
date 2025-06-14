@@ -20,7 +20,5 @@ public class ProductRequest {
     Boolean isHome;
     Boolean isActive;
     Integer category;
-    List<String> productVariants;
-    List<String> productReviews;
-    List<String> orderDetails;
+    List<ProductVariantRequest> productVariants;
 }

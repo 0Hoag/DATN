@@ -1,22 +1,24 @@
-package com.fpl.datn.service;
+package com.fpl.datn.service.Product;
 
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.Product.ProductVariantRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
-import com.fpl.datn.mapper.ProductMapper;
-import com.fpl.datn.models.Category;
-import com.fpl.datn.models.Product;
+import com.fpl.datn.mapper.Product.ProductMapper;
+import com.fpl.datn.models.*;
 import com.fpl.datn.repository.CategoryRepository;
 import com.fpl.datn.repository.ProductRepository;
 import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
 
+import com.fpl.datn.repository.ProductVariantAttributeValueRepository;
+import com.fpl.datn.repository.VariantAttributeValueRepository;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,23 +36,48 @@ public class ProductService {
     ProductRepository repo;
     ProductMapper mapper;
     CategoryRepository cateRepo;
-// thêm sản phẩm
+    ProductVariantService productVariantService;
+    // thêm sản phẩ
+    @Transactional
     public Boolean create(ProductRequest request) {
+        // 1. Kiểm tra danh mục
         if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
+
+        // 2. Kiểm tra slug
         if (repo.existsBySlug(request.getSlug())) {
             throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
         }
+
+        // 3. Map và lưu Product (chưa gắn biến thể)
         Product product = mapper.toProduct(request);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
-        repo.save(product);
+
+        // Gắn danh mục
+        Category category = cateRepo.findById(request.getCategory())
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+        product.setCategory(category);
+
+        // 4. Lưu product trước để có ID
+        Product savedProduct = repo.save(product);
+        repo.flush(); // Quan trọng để lấy productId khi sinh SKU
+
+        // 5. Gọi ProductVariantService để tạo từng biến thể
+        for (ProductVariantRequest variantRequest : request.getProductVariants()) {
+            variantRequest.setProductId(savedProduct.getId()); // cần ID cha
+            productVariantService.create(variantRequest);       // gọi đúng logic sinh SKU
+        }
+
         return true;
     }
+
+
     // xem chi tiết sản phẩm
     public ProductResponse detail(Integer id) {
-        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+        Product product = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
         return mapper.toProductResponse(product);
     }
     // xem danh sách sản phẩm

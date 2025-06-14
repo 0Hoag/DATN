@@ -1,5 +1,6 @@
 package com.fpl.datn.dto.request.Product;
 
+import com.fpl.datn.dto.response.Product.ProductVariantResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,7 +22,7 @@ public class UpdateProductRequest {
     Boolean isActive;
     Integer category; // id để gán cho category
     // default null
-    List<String> productVariants;
+    List<ProductVariantResponse> productVariants;
     List<String> productReviews;
     List<String> orderDetails;
 }

@@ -12,14 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductVariantRequest {
+public class UpdateProductVariantRequest {
+    private String sku;
     private String variantName;
     private BigDecimal price;
     private Integer quantity;
     private Integer sold;
     private Boolean isActive;
     private Integer productId; // ID sản phẩm cha
-
-    private List<Integer> attributeValueIds; // 🆕 danh sách ID thuộc tính
-    List<ProductImageRequest> images;
 }
