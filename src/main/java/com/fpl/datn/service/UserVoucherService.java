@@ -1,7 +1,11 @@
 package com.fpl.datn.service;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+import com.fpl.datn.models.User;
+import com.fpl.datn.models.ZUserVoucher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,9 +18,6 @@ import com.fpl.datn.dto.response.UserVoucherResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.UserVoucherMapper;
-import com.fpl.datn.models.User;
-import com.fpl.datn.models.Voucher;
-import com.fpl.datn.models.ZUserVoucher;
 import com.fpl.datn.repository.UserRepository;
 import com.fpl.datn.repository.VoucherRepository;
 import com.fpl.datn.repository.ZUserVoucherRepository;
@@ -55,32 +56,87 @@ public class UserVoucherService {
         return mapper.toUserVoucherResponse(userVoucher);
     }
 
+    // CHỨC NĂNG 1: ADMIN PHÁT VOUCHER CHO NHIỀU USER
     @Transactional
-    public UserVoucherResponse assignVoucherToUser(UserVoucherRequest request) {
-        // Kiểm tra user tồn tại
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        // Kiểm tra voucher tồn tại
-        Voucher voucher = voucherRepository.findById(request.getVoucherId())
+    public List<UserVoucherResponse> bulkAssignVoucherToUsers(UserVoucherRequest request) {
+        var voucher = voucherRepository.findById(request.getVoucherId())
                 .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
 
-        // Kiểm tra user đã có voucher này chưa (bằng cách tìm trong tất cả records)
-        List<ZUserVoucher> allUserVouchers = userVoucherRepository.findAll();
-        boolean exists = allUserVouchers.stream()
-                .anyMatch(uv -> uv.getUser().getId().equals(request.getUserId())
-                        && uv.getVoucher().getId().equals(request.getVoucherId()));
+        validateVoucherForAssignment(voucher);
 
-        if (exists) {
+        List<UserVoucherResponse> results = new ArrayList<>();
+
+        for (Integer userId : request.getUserIds()) {
+            try {
+                var user = userRepository.findById(userId)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+                if (userVoucherRepository.existsByUserIdAndVoucherId(userId, request.getVoucherId())) {
+                    continue;
+                }
+
+                var userVoucher = new com.fpl.datn.models.ZUserVoucher();
+                userVoucher.setUser(user);
+                userVoucher.setVoucher(voucher);
+
+                userVoucherRepository.save(userVoucher);
+                results.add(mapper.toUserVoucherResponse(userVoucher));
+
+            } catch (Exception e) {
+                continue;
+            }
+        }
+
+        return results;
+    }
+
+    // CHỨC NĂNG 2: USER TỰ NHẬN VOUCHER
+    @Transactional
+    public UserVoucherResponse claimVoucher(UserVoucherRequest request) {
+        var user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        var voucher = voucherRepository.findByCode(request.getVoucherCode())
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+
+        validateVoucherForClaim(voucher);
+
+        if (userVoucherRepository.existsByUserIdAndVoucherId(request.getUserId(), voucher.getId())) {
             throw new AppException(ErrorCode.USER_VOUCHER_ALREADY_EXISTS);
         }
 
-        // Tạo mới user-voucher
-        ZUserVoucher userVoucher = new ZUserVoucher();
+        if (voucher.getQuantity() != -1) {
+            long currentUsage = userVoucherRepository.countByVoucherId(voucher.getId());
+            if (currentUsage >= voucher.getQuantity()) {
+                throw new AppException(ErrorCode.VOUCHER_OUT_OF_STOCK);
+            }
+        }
+
+        var userVoucher = new com.fpl.datn.models.ZUserVoucher();
         userVoucher.setUser(user);
         userVoucher.setVoucher(voucher);
 
-        userVoucher = userVoucherRepository.save(userVoucher);
+        userVoucherRepository.save(userVoucher);
+        return mapper.toUserVoucherResponse(userVoucher);
+    }
+
+    @Transactional
+    public UserVoucherResponse assignVoucherToUser(UserVoucherRequest request) {
+        var user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        var voucher = voucherRepository.findById(request.getVoucherId())
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+
+        if (userVoucherRepository.existsByUserIdAndVoucherId(request.getUserId(), request.getVoucherId())) {
+            throw new AppException(ErrorCode.USER_VOUCHER_ALREADY_EXISTS);
+        }
+
+        var userVoucher = new com.fpl.datn.models.ZUserVoucher();
+        userVoucher.setUser(user);
+        userVoucher.setVoucher(voucher);
+
+        userVoucherRepository.save(userVoucher);
         return mapper.toUserVoucherResponse(userVoucher);
     }
 
@@ -93,34 +149,27 @@ public class UserVoucherService {
     }
 
     public boolean checkUserHasVoucher(int userId, int voucherId) {
-        List<ZUserVoucher> allUserVouchers = userVoucherRepository.findAll();
-        return allUserVouchers.stream()
-                .anyMatch(uv -> uv.getUser().getId().equals(userId)
-                        && uv.getVoucher().getId().equals(voucherId));
+        return userVoucherRepository.existsByUserIdAndVoucherId(userId, voucherId);
     }
 
-    public List<UserVoucherResponse> getUserVouchersByUserId(int userId) {
-        // Kiểm tra user tồn tại
+    public List<UserVoucherResponse> getUserVouchersByUserId(int userId, boolean desc) {
         if (!userRepository.existsById(userId)) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
-        List<ZUserVoucher> allUserVouchers = userVoucherRepository.findAll();
-        return allUserVouchers.stream()
-                .filter(uv -> uv.getUser().getId().equals(userId))
+        var userVouchers = userVoucherRepository.findByUserId(userId);
+        return userVouchers.stream()
                 .map(mapper::toUserVoucherResponse)
                 .toList();
     }
 
-    public List<UserVoucherResponse> getUserVouchersByVoucherId(int voucherId) {
-        // Kiểm tra voucher tồn tại
+    public List<UserVoucherResponse> getUserVouchersByVoucherId(int voucherId, boolean desc) {
         if (!voucherRepository.existsById(voucherId)) {
             throw new AppException(ErrorCode.VOUCHER_NOT_FOUND);
         }
 
-        List<ZUserVoucher> allUserVouchers = userVoucherRepository.findAll();
-        return allUserVouchers.stream()
-                .filter(uv -> uv.getVoucher().getId().equals(voucherId))
+        var userVouchers = userVoucherRepository.findByVoucherId(voucherId);
+        return userVouchers.stream()
                 .map(mapper::toUserVoucherResponse)
                 .toList();
     }
@@ -129,21 +178,70 @@ public class UserVoucherService {
         if (!voucherRepository.existsById(voucherId)) {
             throw new AppException(ErrorCode.VOUCHER_NOT_FOUND);
         }
-
-        List<ZUserVoucher> allUserVouchers = userVoucherRepository.findAll();
-        return allUserVouchers.stream()
-                .filter(uv -> uv.getVoucher().getId().equals(voucherId))
-                .count();
+        return userVoucherRepository.countByVoucherId(voucherId);
     }
 
     public long countVouchersByUser(int userId) {
         if (!userRepository.existsById(userId)) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
+        return userVoucherRepository.countByUserId(userId);
+    }
 
-        List<ZUserVoucher> allUserVouchers = userVoucherRepository.findAll();
-        return allUserVouchers.stream()
-                .filter(uv -> uv.getUser().getId().equals(userId))
-                .count();
+    private void validateVoucherForAssignment(com.fpl.datn.models.Voucher voucher) {
+        if (!voucher.getIsActive()) {
+            throw new AppException(ErrorCode.VOUCHER_INACTIVE);
+        }
+
+        var now = LocalDateTime.now();
+        if (voucher.getStartAt().isAfter(now)) {
+            throw new AppException(ErrorCode.VOUCHER_NOT_STARTED);
+        }
+
+        if (voucher.getEndAt().isBefore(now)) {
+            throw new AppException(ErrorCode.VOUCHER_EXPIRED);
+        }
+    }
+
+    private void validateVoucherForClaim(com.fpl.datn.models.Voucher voucher) {
+        validateVoucherForAssignment(voucher);
+    }
+    // Thêm vào UserVoucherService
+    @Transactional
+    public List<UserVoucherResponse> assignVoucherToAllUsers(UserVoucherRequest request) {
+        var voucher = voucherRepository.findById(request.getVoucherId())
+                .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
+
+        validateVoucherForAssignment(voucher);
+
+        // SỬA DÒNG NÀY - Lấy tất cả user rồi filter những user active
+        List<User> allActiveUsers = userRepository.findAll()
+                .stream()
+                .filter(user -> user.getIsEnable() != null && user.getIsEnable())
+                .toList();
+
+        List<UserVoucherResponse> results = new ArrayList<>();
+
+        for (User user : allActiveUsers) {
+            try {
+                // Kiểm tra user đã có voucher này chưa
+                if (userVoucherRepository.existsByUserIdAndVoucherId(user.getId(), request.getVoucherId())) {
+                    continue; // Bỏ qua nếu đã có
+                }
+
+                var userVoucher = new ZUserVoucher();
+                userVoucher.setUser(user);
+                userVoucher.setVoucher(voucher);
+
+                userVoucherRepository.save(userVoucher);
+                results.add(mapper.toUserVoucherResponse(userVoucher));
+
+            } catch (Exception e) {
+                // Log lỗi nhưng tiếp tục với user khác
+                continue;
+            }
+        }
+
+        return results;
     }
 }

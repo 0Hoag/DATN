@@ -37,4 +37,5 @@ public class UserVoucherResponse {
     private String voucherStatus; // ACTIVE, EXPIRED, INACTIVE
     private String voucherType; // PERCENT, FIXED
     private Integer remainingUses;
+
 }
