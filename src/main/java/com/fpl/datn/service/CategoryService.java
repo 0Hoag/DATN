@@ -50,6 +50,9 @@ public class CategoryService {
         if (request.getParent() != 0) {
             Category parent = repo.findById(request.getParent())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+            if (builder.wouldCreateCircularReference(null, parent.getId())) {
+                throw new AppException(ErrorCode.CIRCULAR_REFERENCE_NOT_ALLOWED);
+            }
             category.setParent(parent);
         } else {
             category.setParent(null);
@@ -68,7 +71,8 @@ public class CategoryService {
     }
 
     public CategoryResponse detail(Integer id) {
-        Category category = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+        Category category = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
         return mapper.toCategoryResponse(category);
     }
 
@@ -83,11 +87,10 @@ public class CategoryService {
         var pageData = repo.findAll(pageable);
 
         var data = pageData.getContent().stream()
-                .map(category -> {
-                    var cat = repo.findById(category.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
-                    return mapper.toCategoryResponse(cat);
-                })
+                .map(category -> mapper.toCategoryResponse(
+                        repo.findById(category.getId())
+                                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED))
+                ))
                 .collect(Collectors.toList());
 
         return PageResponse.<CategoryResponse>builder()
@@ -125,7 +128,8 @@ public class CategoryService {
     }
 
     public void delete(Integer id) {
-        Category category = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+        Category category = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
         if (category.getChildren() != null && !category.getChildren().isEmpty()) {
             throw new AppException(ErrorCode.CATEGORY_HAS_CHILDREN);
@@ -133,6 +137,7 @@ public class CategoryService {
         if (category.getProducts() != null && !category.getProducts().isEmpty()) {
             throw new AppException(ErrorCode.CATEGORY_HAS_PRODUCTS);
         }
+
         repo.delete(category);
     }
 }
