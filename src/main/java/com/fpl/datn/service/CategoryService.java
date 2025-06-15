@@ -100,15 +100,19 @@ public class CategoryService {
     }
 
     public CategoryResponse update(Integer id, UpdateCategoryRequest request) {
-        Category category = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+        Category category = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
-        if (request.getParent() != 0 ){
-            Category parent = repo.findById(request.getParent())
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Integer newParentId = request.getParent();
 
-            if (builder.wouldCreateCircularReference(id, parent.getId())) {
+        if (newParentId != null && newParentId != 0) {
+            Category parent = repo.findById(newParentId)
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+
+            if (builder.wouldCreateCircularReference(id, newParentId)) {
                 throw new AppException(ErrorCode.CIRCULAR_REFERENCE_NOT_ALLOWED);
             }
+
             category.setParent(parent);
         } else {
             category.setParent(null);
