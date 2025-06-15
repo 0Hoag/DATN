@@ -73,7 +73,7 @@ public class AuthenticationService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated) throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        if (!authenticated) throw new AppException(ErrorCode.PASSWORD_INCORRECT);
 
         var token = generateToken(user);
 
