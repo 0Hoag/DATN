@@ -52,6 +52,7 @@ public enum ErrorCode {
     VARIANT_DELETE_EXISTED(1246, "Variant delete existed", HttpStatus.CONFLICT),
     PRODUCT_VARIANT_VALUE_EXISTED(1247, "Variant delete existed", HttpStatus.CONFLICT),
     EMAIL_EXISTS(1018, "EMAIL EXITED", HttpStatus.BAD_REQUEST),
+    UPLOAD_IMAGE_FAILED(1018, "UPLOAD IMAGE EXITED", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU đã tồn tại", HttpStatus.CONFLICT);
 
     private int code;
