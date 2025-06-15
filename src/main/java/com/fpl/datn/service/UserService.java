@@ -13,6 +13,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.constant.PredefinedRole;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.fpl.datn.constant.PredefinedRole;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.RegisterRequest;
 import com.fpl.datn.dto.request.UpdateProfileRequest;
@@ -26,6 +39,7 @@ import com.fpl.datn.models.Role;
 import com.fpl.datn.models.User;
 import com.fpl.datn.repository.RoleRepository;
 import com.fpl.datn.repository.UserRepository;
+
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -53,6 +67,7 @@ import java.util.stream.Collectors;
 public class UserService {
     UserRepository userRepositories;
     UserMapper userMapper;
+    RoleRepository roleRepository;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
@@ -121,6 +136,8 @@ public class UserService {
 
         var data =
                 pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
+        var data =
+                pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
 
         return PageResponse.<UserResponse>builder()
                 .currentPage(page)
@@ -135,6 +152,10 @@ public class UserService {
     public UserResponse Register(RegisterRequest request) {
         try {
             Set<Role> roles = new HashSet<>();
+            roles.add(Role.builder()
+                    .name(PredefinedRole.ROLE_CUSTOMER)
+                    .description("Customer role")
+                    .build());
             roles.add(Role.builder()
                     .name(PredefinedRole.ROLE_CUSTOMER)
                     .description("Customer role")
@@ -173,6 +194,7 @@ public class UserService {
     // Api client
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             userMapper.updateProfile(user, request);
