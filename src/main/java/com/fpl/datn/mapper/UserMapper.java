@@ -3,6 +3,7 @@ package com.fpl.datn.mapper;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fpl.datn.models.PaymentMethod;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -22,7 +23,6 @@ public interface UserMapper {
 
     User toUser(UserRequest request);
 
-    @Mapping(target = "orders", ignore = true)
     UserResponse toUserResponse(User user);
 
     @Mapping(target = "roles", ignore = true)
@@ -48,5 +48,9 @@ public interface UserMapper {
             return null;
         }
         return permissions.stream().map(Permission::getName).collect(Collectors.toSet());
+    }
+
+    default String map(PaymentMethod paymentMethod) {
+        return paymentMethod != null ? paymentMethod.getName() : null;
     }
 }

@@ -76,7 +76,7 @@ public class OrderService {
     }
 
     public OrderResponse getOrder(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
         OrderResponse response = mapper.toOrderResponse(order);
         if (order.getUser() != null && order.getPaymentMethod() != null) {
             response.setFullName(order.getUser().getFullName());
@@ -146,7 +146,7 @@ public class OrderService {
     private Order prepareOrder(OrderRequest request) {
         var user = userRepository
                 .findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         var address = addressRepository
                 .findById(request.getAddressId())
                 .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));

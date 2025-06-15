@@ -14,6 +14,7 @@ public enum ErrorCode {
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "INVALID MESSAGE KEY", HttpStatus.BAD_REQUEST),
     USER_EXITED(1002, "USER EXITED", HttpStatus.BAD_REQUEST),
+    USER_NOT_FOUND(1003, "USER NOT FOUND", HttpStatus.BAD_REQUEST),
     SELECTED_PRODUCT_NOT_EXISTED(1003, "SELECTED_PRODUCT_NOT_EXISTED", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1004, "USERNAME MUST AT LEES THAN {min} CHARACTER", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1005, "PASSWORD NOT BE AT LEES THAN {min} CHARACTER", HttpStatus.BAD_REQUEST),
@@ -25,28 +26,38 @@ public enum ErrorCode {
     PASSWORD_EXISTED(1010, "PASSWORD_EXISTED", HttpStatus.BAD_REQUEST),
     PERMISSION_NOT_FOUND(1011, "PERMISSION_NOT_FOUND", HttpStatus.BAD_REQUEST),
     CART_ITEM_EXISTED(1012, "CART_ITEM_EXISTED", HttpStatus.BAD_REQUEST),
-    ORDERS_NOT_EXISTED(1013, "ORDERS_NOT_EXISTED", HttpStatus.BAD_REQUEST),
     IMAGE_NOT_EXISTED(1014, "Image not existed", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1015, "Email existed", HttpStatus.BAD_REQUEST),
     PHONE_EXISTED(1016, "Phone existed", HttpStatus.BAD_REQUEST),
     ERROR_CREATE_USER(1017, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
 
-    // Account
-    EMAIL_ALREADY_EXISTS(1801, "Email already exists", HttpStatus.BAD_REQUEST),
-    PHONE_ALREADY_EXISTS(1802, "Phone number already exists", HttpStatus.BAD_REQUEST),
+    // Order
+    ORDER_NOT_FOUND(1201, "Order not found", HttpStatus.BAD_REQUEST),
+    ORDER_ALREADY_PROCESSED(1202, "Order has already been processed", HttpStatus.BAD_REQUEST),
+    ORDERS_NOT_EXISTED(1203, "Orders not existed", HttpStatus.BAD_REQUEST),
+    ORDER_CANNOT_BE_MODIFIED(1204, "Order cannot be modified", HttpStatus.BAD_REQUEST),
+    ORDER_STATUS_NOT_FOUND(1205, "Order status not found", HttpStatus.BAD_REQUEST),
 
-    // Authentication & Authorization
-    UNAUTHENTICATED(1901, "Unauthenticated access", HttpStatus.UNAUTHORIZED),
-    UNAUTHORIZED(1902, "You do not have permission", HttpStatus.FORBIDDEN),
+    // Address
+    ADDRESS_NOT_FOUND(1301, "Address not found", HttpStatus.BAD_REQUEST),
+
+    // Payment
+    PAYMENT_METHOD_NOT_FOUND(1401, "Payment method not found", HttpStatus.BAD_REQUEST),
+    PAYMENT_STATUS_NOT_FOUND(1401, "Payment status not found", HttpStatus.BAD_REQUEST),
+
+    // Product / Variant
+    PRODUCT_VARIANT_NOT_FOUND(1501, "Product variant not found", HttpStatus.BAD_REQUEST),
+    PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
+    PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
+    SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
+
+    // Cart
+    CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
 
     // Input
     INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
-    INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
-
-    // System / Common
-    RESOURCE_NOT_FOUND(2101, "Resource not found", HttpStatus.NOT_FOUND),
-    UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
+    INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST);
 
     int code;
     String message;

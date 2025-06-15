@@ -77,7 +77,7 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATING_USER);
+            throw new AppException(ErrorCode.ERROR_CREATE_USER);
         }
     }
 
@@ -105,7 +105,7 @@ public class UserService {
         try {
             userRepositories.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNAUTHORIZE);
         }
     }
 
@@ -141,10 +141,10 @@ public class UserService {
                     .build());
 
             if (userRepositories.existsByEmail(request.getEmail())) {
-                throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
             if (userRepositories.existsByPhone(request.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
 
             User user = userMapper.toUserRegister(request);
@@ -157,7 +157,7 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATING_USER);
+            throw new AppException(ErrorCode.ERROR_CREATE_USER);
         }
     }
 
@@ -173,12 +173,12 @@ public class UserService {
     // Api client
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_UPDATING_USER);
+            throw new AppException(ErrorCode.ERROR_UPDATE_USER);
         }
     }
 }
