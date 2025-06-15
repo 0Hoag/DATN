@@ -61,13 +61,17 @@ public enum ErrorCode {
     PRODUCT_SLUG_EXISTED(1505, "Product slug existed", HttpStatus.CONFLICT),
     PRODUCT_UPDATE_NOT_EXISTED(1506, "Product update existed", HttpStatus.CONFLICT),
     PRODUCT_DELETE_NOT_EXISTED(1507, "Product delete existed", HttpStatus.CONFLICT),
+    PRODUCT_REVIEW_NOT_FOUND(1508, "Product review not found", HttpStatus.BAD_REQUEST),
 
     // Cart
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
 
     // Input
     INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
-    INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST);
+    INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
+
+    // Voucher
+    VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST);
 
     int code;
     String message;
