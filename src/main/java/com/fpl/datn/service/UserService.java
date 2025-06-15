@@ -1,5 +1,31 @@
 package com.fpl.datn.service;
 
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.fpl.datn.constant.PredefinedRole;
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.fpl.datn.constant.PredefinedRole;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.RegisterRequest;
 import com.fpl.datn.dto.request.UpdateProfileRequest;
@@ -13,7 +39,8 @@ import com.fpl.datn.models.Role;
 import com.fpl.datn.models.User;
 import com.fpl.datn.repository.RoleRepository;
 import com.fpl.datn.repository.UserRepository;
-import com.fpl.datn.constant.PredefinedRole;
+
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,7 +67,7 @@ import java.util.stream.Collectors;
 public class UserService {
     UserRepository userRepositories;
     UserMapper userMapper;
-	RoleRepository roleRepository;
+    RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
     public UserResponse Create(UserRequest request) {
@@ -69,8 +96,7 @@ public class UserService {
     }
 
     public UserResponse Update(int id, UpdateUserRequest request) {
-        var user = userRepositories.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepositories.save(user));
@@ -78,23 +104,22 @@ public class UserService {
 
     public UserResponse Detail(int id) {
         try {
-            User user = userRepositories.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
     }
 
     public void Delete(int id) {
         if (!userRepositories.existsById(id)) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
         }
 
         try {
             userRepositories.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
+            throw new AppException(ErrorCode.UNAUTHORIZE);
         }
     }
 
@@ -108,9 +133,8 @@ public class UserService {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = userRepositories.findAll(pageable);
 
-        var data = pageData.getContent().stream()
-                .map(userMapper::toUserResponse)
-                .collect(Collectors.toList());
+        var data =
+                pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
 
         return PageResponse.<UserResponse>builder()
                 .currentPage(page)
@@ -125,13 +149,20 @@ public class UserService {
     public UserResponse Register(RegisterRequest request) {
         try {
             Set<Role> roles = new HashSet<>();
-            roles.add(Role.builder().name(PredefinedRole.ROLE_CUSTOMER).description("Customer role").build());
+            roles.add(Role.builder()
+                    .name(PredefinedRole.ROLE_CUSTOMER)
+                    .description("Customer role")
+                    .build());
+            roles.add(Role.builder()
+                    .name(PredefinedRole.ROLE_CUSTOMER)
+                    .description("Customer role")
+                    .build());
 
             if (userRepositories.existsByEmail(request.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
             if (userRepositories.existsByPhone(request.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_EXISTED);
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
 
             User user = userMapper.toUserRegister(request);
@@ -160,8 +191,7 @@ public class UserService {
     // Api client
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
-            User user = userRepositories.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));

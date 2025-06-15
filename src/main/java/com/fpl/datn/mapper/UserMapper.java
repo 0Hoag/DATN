@@ -1,5 +1,13 @@
 package com.fpl.datn.mapper;
 
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.fpl.datn.models.PaymentMethod;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
 import com.fpl.datn.dto.request.RegisterRequest;
 import com.fpl.datn.dto.request.UpdateProfileRequest;
 import com.fpl.datn.dto.request.UpdateUserRequest;
@@ -8,12 +16,6 @@ import com.fpl.datn.dto.response.UserResponse;
 import com.fpl.datn.models.Permission;
 import com.fpl.datn.models.Role;
 import com.fpl.datn.models.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
@@ -45,8 +47,10 @@ public interface UserMapper {
         if (permissions == null) {
             return null;
         }
-        return permissions.stream()
-                .map(Permission::getName)
-                .collect(Collectors.toSet());
+        return permissions.stream().map(Permission::getName).collect(Collectors.toSet());
+    }
+
+    default String map(PaymentMethod paymentMethod) {
+        return paymentMethod != null ? paymentMethod.getName() : null;
     }
 }

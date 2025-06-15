@@ -1,22 +1,25 @@
 package com.fpl.datn.dto.response;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductReviewResponse {
-    private Integer id;
-    private Integer rating;
-    private String content;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    // user
+    String fullName;
+    String email;
 
-    private Integer productId;
-    private Integer userId;
+    // product
+    int productId;
+    String producName;
+    String thumbnail;
+
+    Integer rating;
+    String content;
 }
