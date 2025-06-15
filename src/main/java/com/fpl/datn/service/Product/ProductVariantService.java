@@ -113,6 +113,10 @@ public class ProductVariantService {
         return true;
     }
 
+    public List<ProductVariant> findByProductId(Integer productId) {
+        return repo.findAllByProduct_Id(productId);
+    }
+
 
     public ProductVariantResponse detail(Integer id) {
         ProductVariant productVariant = repo.findById(id)

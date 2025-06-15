@@ -19,5 +19,4 @@ public class ProductImageRequest {
     int sortOrder;
     Integer productVariantId;
     MultipartFile image;
-
 }

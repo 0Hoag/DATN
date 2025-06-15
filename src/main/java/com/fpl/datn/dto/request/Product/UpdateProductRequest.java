@@ -22,7 +22,5 @@ public class UpdateProductRequest {
     Boolean isActive;
     Integer category; // id để gán cho category
     // default null
-    List<ProductVariantResponse> productVariants;
-    List<String> productReviews;
-    List<String> orderDetails;
+    List<UpdateProductVariantRequest> productVariants;
 }

@@ -3,6 +3,7 @@ package com.fpl.datn.service.Product;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.Product.ProductVariantRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
+import com.fpl.datn.dto.request.Product.UpdateProductVariantRequest;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductMapper;
@@ -73,7 +74,63 @@ public class ProductService {
         return true;
     }
 
+    @Transactional
+    public ProductResponse update(Integer id, UpdateProductRequest request) {
+        Product product = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_UPDATE_NOT_EXISTED));
 
+        // Kiểm tra slug
+        if (repo.existsBySlugAndIdNot(request.getSlug(), id)) {
+            throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
+        }
+
+        // Kiểm tra category
+        if (!cateRepo.existsById(request.getCategory())) {
+            throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
+        }
+
+        // Cập nhật product chính
+        mapper.updateProduct(product, request);
+        product.setUpdatedAt(LocalDateTime.now());
+        repo.save(product);
+
+        // Xử lý biến thể
+        List<ProductVariant> oldVariants = productVariantService.findByProductId(id);
+        List<UpdateProductVariantRequest> newVariants = request.getProductVariants();
+
+        List<Integer> newIds = newVariants.stream()
+                .map(UpdateProductVariantRequest::getProductId)
+                .filter(i -> i != null)
+                .toList();
+
+        // 1. Xóa biến thể không còn
+        for (ProductVariant old : oldVariants) {
+            if (!newIds.contains(old.getId())) {
+                productVariantService.delete(old.getId());
+            }
+        }
+
+        // 2. Cập nhật hoặc tạo mới biến thể
+        for (UpdateProductVariantRequest variantRequest : newVariants) {
+            variantRequest.setProductId(id); // Gán productId
+            if (variantRequest.getId() == null) {
+                // Tạo mới
+                ProductVariantRequest createRequest = ProductVariantRequest.builder()
+                        .productId(id)
+                        .price(variantRequest.getPrice())
+                        .quantity(variantRequest.getQuantity())
+                        .variantName(variantRequest.getVariantName())
+                        .attributeValueIds(variantRequest.getAttributeValueIds())
+                        .isActive(variantRequest.getIsActive())
+                        .build();
+                productVariantService.create(createRequest);
+            } else {
+                // Cập nhật
+                productVariantService.update(variantRequest.getId(), variantRequest);
+            }
+        }
+        return mapper.toProductResponse(product);
+    }
     // xem chi tiết sản phẩm
     public ProductResponse detail(Integer id) {
         Product product = repo.findById(id)
@@ -107,26 +164,6 @@ public class ProductService {
                 .data(data)
                 .build();
     }
-    public ProductResponse update(Integer id, UpdateProductRequest request) {
-        Product product = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_UPDATE_NOT_EXISTED));
-
-        // Kiểm tra slug có bị trùng ở sản phẩm khác
-        if (repo.existsBySlugAndIdNot(request.getSlug(), id)) {
-            throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
-        }
-
-        // Kiểm tra category có tồn tại
-        if (!cateRepo.existsById(request.getCategory())) {
-            throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
-        }
-
-        mapper.updateProduct(product, request);
-        product.setUpdatedAt(LocalDateTime.now());
-
-        return mapper.toProductResponse(repo.save(product));
-    }
-
     public void delete(Integer id) {
         Product product = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED));
@@ -135,5 +172,11 @@ public class ProductService {
             }
             repo.delete(product);
     }
-}
+    public List<ProductResponse> search(String keyword) {
+        List<Product> products = repo.searchByNameOrSku(keyword);
+        return products.stream()
+                .map(mapper::toProductResponse)
+                .collect(Collectors.toList());
+    }
 
+}
