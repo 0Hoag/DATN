@@ -88,4 +88,18 @@ public class VnpayService {
             throw new RuntimeException("Lỗi tạo secure hash", e);
         }
     }
+
+    public String extractTxnRefFromUrl(String url) {
+        try {
+            String[] parts = url.split("[?&]");
+            for (String part : parts) {
+                if (part.startsWith("vnp_TxnRef=")) {
+                    return part.split("=")[1];
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +23,9 @@ import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
 import com.fpl.datn.dto.response.OrderItemResponse;
 import com.fpl.datn.dto.response.OrderResponse;
+import com.fpl.datn.enums.OrderActionType;
 import com.fpl.datn.enums.OrderStatus;
+import com.fpl.datn.enums.PaymentMethod;
 import com.fpl.datn.enums.PaymentStatus;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
@@ -57,6 +58,7 @@ public class OrderService {
     ProductVariantRepository variantRepository;
     VoucherRepository voucherRepository;
     OrderMapper mapper;
+    TransactionLogService logService;
     VnpayService vnpayService;
 
     public PageResponse<OrderResponse> getAll(int page, int size, boolean isDesc) {
@@ -112,57 +114,25 @@ public class OrderService {
     public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest) {
         var order = prepareOrder(request);
         var details = processOrderItems(order, request.getItems(), false);
-        BigDecimal total = details.stream()
-                .map(detail -> detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // tính tổng tiền
+        BigDecimal total = calculateTotal(details);
 
         // Áp dụng voucher nếu có
-        if (order.getVoucher() != null) {
-            Voucher voucher = order.getVoucher();
-
-            // Kiểm tra hợp lệ
-            if (!Boolean.TRUE.equals(voucher.getIsActive())
-                    || voucher.getStartAt().isAfter(LocalDateTime.now())
-                    || voucher.getEndAt().isBefore(LocalDateTime.now())
-                    || voucher.getUsageCount() >= voucher.getQuantity()) {
-                throw new AppException(ErrorCode.VOUCHER_INVALID_OR_EXPIRED);
-            }
-            // kiểm tra số tiền tối thiểu sử dụng
-            if (voucher.getMinOrderValue() != null && total.compareTo(voucher.getMinOrderValue()) < 0) {
-                throw new AppException(ErrorCode.VOUCHER_MIN_ORDER_NOT_MET);
-            }
-
-            // ❗ Tự xác định loại giảm giá
-            BigDecimal discount = BigDecimal.ZERO;
-            if (voucher.getDiscountValue().compareTo(BigDecimal.valueOf(100)) <= 0) {
-                // Giảm phần trăm
-                discount = total.multiply(voucher.getDiscountValue())
-                        .divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP);
-            } else {
-                // Giảm số tiền cố định
-                discount = voucher.getDiscountValue();
-            }
-            if (discount.compareTo(total) > 0) {
-                discount = total; // không cho âm
-            }
-            total = total.subtract(discount);
-
-            order.setVoucher(voucher);
-            voucher.setUsageCount(voucher.getUsageCount() + 1);
-            voucherRepository.save(voucher);
-        }
+        total = applyVoucher(order, total);
 
         order.setTotalAmount(total);
         order.setOrderDetails(details);
         repository.save(order);
         var response = mapper.toOrderResponse(order);
-        if (order.getPaymentMethod().getName().equalsIgnoreCase("VNPAY")) {
+        if (isVnpay(order)) {
             String paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
             response.setPaymentUrl(paymentUrl);
         }
+        //        String txnRef = vnpayService.extractTxnRefFromUrl(response.getPaymentUrl());
+        logService.logPayment(order, OrderActionType.CREATE.getType(), response.getPaymentUrl());
         return response;
     }
-
     // Chuẩn bị đặt hàng
     private Order prepareOrder(OrderRequest request) {
         var user = userRepository
@@ -188,6 +158,7 @@ public class OrderService {
                 .orderStatus(OrderStatus.PENDING.getDescription())
                 .paymentStatus(PaymentStatus.PENDING.getDescription())
                 .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
                 .isReturn(false)
                 .voucher(voucher)
                 .build();
@@ -196,10 +167,13 @@ public class OrderService {
 
     // Xử lý đặt hàng
     private List<OrderDetail> processOrderItems(Order order, List<OrderItemResponse> items, boolean isDelete) {
-        List<OrderDetail> details = new ArrayList<>();
+        if (isDelete) restoreInventory(order);
+        return createOrderDetails(order, items);
+    }
 
-        // Xóa đơn hàng chi tiết và hoàng trả số lượng bán và số lượng hàng (Update,Delete)
-        if (isDelete && order.getOrderDetails() != null) {
+    // Xử lí hoàn hàng tồn kho
+    private void restoreInventory(Order order) {
+        if (order.getOrderDetails() != null) {
             for (OrderDetail detail : order.getOrderDetails()) {
                 var variant = detail.getProductVariant();
                 variant.setQuantity(variant.getQuantity() + detail.getQuantity());
@@ -209,8 +183,10 @@ public class OrderService {
             orderDetailRepository.deleteAll(order.getOrderDetails());
             order.getOrderDetails().clear();
         }
-
-        // Tạo đơn hàng chi tiết và update số lượng bán và số lượng hàng (Update,Create)
+    }
+    // Xử lí tạo hàng tồn kho
+    private List<OrderDetail> createOrderDetails(Order order, List<OrderItemResponse> items) {
+        List<OrderDetail> details = new ArrayList<>();
         if (items != null && !items.isEmpty()) {
             for (OrderItemResponse response : items) {
                 var variant = variantRepository
@@ -220,8 +196,6 @@ public class OrderService {
                 if (variant.getQuantity() < response.getQuantity()) {
                     throw new AppException(ErrorCode.PRODUCT_OUT_OF_STOCK);
                 }
-
-                if (order.getVoucher() != null) {}
 
                 variant.setQuantity(variant.getQuantity() - response.getQuantity());
                 variant.setSold(variant.getSold() + response.getQuantity());
@@ -233,20 +207,65 @@ public class OrderService {
                         .productVariant(variant)
                         .quantity(response.getQuantity())
                         .price(variant.getPrice())
-                        .discount(BigDecimal.ZERO) // Chưa làm voucher
                         .build();
-
                 details.add(detail);
             }
         }
         return details;
     }
 
+    // Xử lí tính tổng tiền
+    private BigDecimal calculateTotal(List<OrderDetail> details) {
+        return details.stream()
+                .map(detail -> detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // Xử lí thanh toán
+    private boolean isVnpay(Order order) {
+        return PaymentMethod.VNPAY
+                .name()
+                .equalsIgnoreCase(order.getPaymentMethod().getName());
+    }
+
+    // Xử lí voucher
+    private BigDecimal applyVoucher(Order order, BigDecimal total) {
+        var voucher = order.getVoucher();
+        if (voucher == null) return total;
+        boolean isExpired = voucher.getStartAt().isAfter(LocalDateTime.now())
+                || voucher.getEndAt().isBefore(LocalDateTime.now());
+        boolean isOverused = voucher.getUsageCount() >= voucher.getQuantity();
+        boolean notEnoughMinOrder =
+                voucher.getMinOrderValue() != null && total.compareTo(voucher.getMinOrderValue()) < 0;
+        if (!Boolean.TRUE.equals(voucher.getIsActive()) || isExpired || isOverused) {
+            throw new AppException(ErrorCode.VOUCHER_INVALID);
+        }
+        if (isExpired) {
+            throw new AppException(ErrorCode.VOUCHER_EXPIRED);
+        }
+        if (isOverused) {
+            throw new AppException(ErrorCode.VOUCHER_ORVERUSED);
+        }
+        if (notEnoughMinOrder) {
+            throw new AppException(ErrorCode.VOUCHER_MIN_ORDER_NOT_MET);
+        }
+
+        BigDecimal discount = (voucher.getDiscountValue().compareTo(BigDecimal.valueOf(100)) <= 0)
+                ? total.multiply(voucher.getDiscountValue()).divide(BigDecimal.valueOf(100), 0, RoundingMode.HALF_UP)
+                : voucher.getDiscountValue();
+        total = total.subtract(discount.min(total)); // tránh âm
+
+        // Cập nhật voucher
+        voucher.setUsageCount(voucher.getUsageCount() + 1);
+        voucherRepository.save(voucher);
+        return total;
+    }
+
     @Transactional
     public OrderResponse update(int id, UpdateOrderRequest request, HttpServletRequest httpRequest) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         mapper.toUpdateOrder(order, request);
-        // Tự xử lý các trường không thể map tự động
+
         var user = userRepository
                 .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -262,9 +281,7 @@ public class OrderService {
         order.setPaymentMethod(paymentMethod);
 
         var details = processOrderItems(order, request.getItems(), true);
-        BigDecimal total = details.stream()
-                .map(detail -> detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity())))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal total = calculateTotal(details);
 
         order.setTotalAmount(total);
         order.setOrderDetails(details);
@@ -272,18 +289,19 @@ public class OrderService {
 
         repository.save(order);
         var response = mapper.toOrderResponse(order);
-        if (order.getPaymentMethod().getName().equalsIgnoreCase("VNPAY")) {
+        if (isVnpay(order)) {
             String paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
             response.setPaymentUrl(paymentUrl);
         }
+        logService.logPayment(order, OrderActionType.UPDATE.getType(), response.getPaymentUrl());
         return response;
     }
 
     @Transactional
     public void delete(int id) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        processOrderItems(order, Collections.emptyList(), true);
-
+        //        processOrderItems(order, Collections.emptyList(), true); // có 2 cách dùng cách nào cũng được
+        restoreInventory(order);
         repository.delete(order);
     }
 
@@ -306,7 +324,9 @@ public class OrderService {
 
         order.setUpdatedAt(LocalDateTime.now());
         repository.save(order);
-        return mapper.toOrderResponse(order);
+        var response = mapper.toOrderResponse(order);
+        logService.logPayment(order, OrderActionType.UPDATESTATUS.getType(), response.getPaymentUrl());
+        return response;
     }
 
     public static boolean isValidOrderStatus(String input) {

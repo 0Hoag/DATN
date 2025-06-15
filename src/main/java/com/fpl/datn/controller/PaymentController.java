@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fpl.datn.enums.OrderStatus;
 import com.fpl.datn.enums.PaymentStatus;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
@@ -33,7 +32,7 @@ public class PaymentController {
 
         if ("00".equals(responseCode)) {
             order.setPaymentStatus(PaymentStatus.PAID.getDescription());
-            order.setOrderStatus(OrderStatus.CONFIRMED.getDescription());
+            //            order.setOrderStatus(OrderStatus.CONFIRMED.getDescription());
             orderRepository.save(order);
             return ResponseEntity.ok("Thanh toán thành công cho đơn hàng #" + orderId);
         } else {
