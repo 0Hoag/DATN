@@ -1,10 +1,15 @@
 package com.fpl.datn.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
+
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.experimental.FieldDefaults;
 
 @Getter
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "INVALID MESSAGE KEY", HttpStatus.BAD_REQUEST),
@@ -27,19 +32,23 @@ public enum ErrorCode {
     ERROR_CREATE_USER(1017, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
 
+    // Account
+    EMAIL_ALREADY_EXISTS(1801, "Email already exists", HttpStatus.BAD_REQUEST),
+    PHONE_ALREADY_EXISTS(1802, "Phone number already exists", HttpStatus.BAD_REQUEST),
 
-    UPLOAD_FILE_FAIL(1015, "Upload file to fail!", HttpStatus.BAD_REQUEST),
-    REMOVE_FILE_FAIL(1016, "Remove file to fail!", HttpStatus.BAD_REQUEST);
+    // Authentication & Authorization
+    UNAUTHENTICATED(1901, "Unauthenticated access", HttpStatus.UNAUTHORIZED),
+    UNAUTHORIZED(1902, "You do not have permission", HttpStatus.FORBIDDEN),
 
-    private int code;
-    private String message;
-    private HttpStatusCode statusCode;
+    // Input
+    INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
+    INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
 
-    ErrorCode(int code, String message, HttpStatusCode statusCode) {
-        this.code = code;
-        this.message = message;
-        this.statusCode = statusCode;
-    }
+    // System / Common
+    RESOURCE_NOT_FOUND(2101, "Resource not found", HttpStatus.NOT_FOUND),
+    UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
 
-    ErrorCode() {}
+    int code;
+    String message;
+    HttpStatus httpStatus;
 }

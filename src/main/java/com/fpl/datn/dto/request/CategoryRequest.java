@@ -1,9 +1,9 @@
 package com.fpl.datn.dto.request;
 
+import java.time.LocalDateTime;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryRequest {
-	String name;
+    String name;
     String slug;
     String description;
     Boolean isShow;
