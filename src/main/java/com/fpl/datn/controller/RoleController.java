@@ -1,18 +1,16 @@
 package com.fpl.datn.controller;
 
-import java.util.List;
-
-import org.springframework.web.bind.annotation.*;
-
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.request.RoleRequest;
 import com.fpl.datn.dto.response.RoleResponse;
 import com.fpl.datn.service.RoleService;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/roles")

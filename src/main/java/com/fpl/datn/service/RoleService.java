@@ -1,11 +1,5 @@
 package com.fpl.datn.service;
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
-
 import com.fpl.datn.dto.request.RoleRequest;
 import com.fpl.datn.dto.response.RoleResponse;
 import com.fpl.datn.exception.AppException;
@@ -13,11 +7,16 @@ import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.RoleMapper;
 import com.fpl.datn.repository.PermissionRepository;
 import com.fpl.datn.repository.RoleRepository;
-
+import com.fpl.datn.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor

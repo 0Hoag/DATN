@@ -11,18 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderResponse {
+public class ZUserVoucherResponse {
     private Integer id;
-    private String orderStatus;
-    private Integer paymentStatus;
-    private BigDecimal totalAmount;
-    private String note;
-    private Boolean isReturn;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
     private Integer userId;
-    private Integer addressId;
-    private Integer paymentMethodId;
     private Integer voucherId;
 }

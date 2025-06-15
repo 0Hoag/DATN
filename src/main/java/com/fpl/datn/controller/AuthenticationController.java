@@ -1,9 +1,5 @@
 package com.fpl.datn.controller;
 
-import java.text.ParseException;
-
-import org.springframework.web.bind.annotation.*;
-
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.request.AuthenticationRequest;
 import com.fpl.datn.dto.request.IntrospectRequest;
@@ -13,10 +9,12 @@ import com.fpl.datn.dto.response.AuthenticationResponse;
 import com.fpl.datn.dto.response.IntrospectResponse;
 import com.fpl.datn.service.AuthenticationService;
 import com.nimbusds.jose.JOSEException;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/auth")

@@ -1,12 +1,10 @@
 package com.fpl.datn.models;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.math.BigDecimal;
 
 @Entity
 @Table(name = "cart_items")
@@ -32,3 +30,4 @@ public class CartItem {
     @JoinColumn(name = "product_variant_id")
     private ProductVariant productVariant;
 }
+
