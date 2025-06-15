@@ -25,5 +25,6 @@ public interface OrderMapper {
     void toUpdateOrder(@MappingTarget Order order, UpdateOrderRequest request);
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
+    @Mapping(target = "note", ignore = true)
     void toUpdateStatus(@MappingTarget Order order, OrderStatusRequest request);
 }

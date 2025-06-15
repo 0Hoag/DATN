@@ -35,12 +35,18 @@ public enum ErrorCode {
     // Permission
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),
 
-    // Order
+    // Order, Order Return
     ORDER_NOT_FOUND(1201, "Order not found", HttpStatus.BAD_REQUEST),
     ORDER_ALREADY_PROCESSED(1202, "Order has already been processed", HttpStatus.BAD_REQUEST),
     ORDERS_NOT_EXISTED(1203, "Orders not existed", HttpStatus.BAD_REQUEST),
     ORDER_CANNOT_BE_MODIFIED(1204, "Order cannot be modified", HttpStatus.BAD_REQUEST),
     ORDER_STATUS_NOT_FOUND(1205, "Order status not found", HttpStatus.BAD_REQUEST),
+    INVALID_ORDER_STATUS(1206, "Order must be in DELIVERED status to perform this action", HttpStatus.BAD_REQUEST),
+    RETURN_PERIOD_EXPIRED(1207, "The return period 7 days has expired for this order", HttpStatus.BAD_REQUEST),
+    RETURN_REQUEST_ALREADY_EXISTS(1208, "A return request for this order already exists", HttpStatus.BAD_REQUEST),
+    ORDER_RETURN_NOT_FOUND(1209, "Order return not found", HttpStatus.BAD_REQUEST),
+    ORDER_STATUS_CANNOT_BE_MODIFIED(1204, "Order status cannot be modified", HttpStatus.BAD_REQUEST),
+    ORDER_RETURN_STATUS_NOT_FOUND(1210, "Order return status not found", HttpStatus.BAD_REQUEST),
 
     // Address
     ADDRESS_NOT_FOUND(1301, "Address not found", HttpStatus.BAD_REQUEST),
@@ -77,10 +83,12 @@ public enum ErrorCode {
 
     // Voucher
     VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
-    VOUCHER_INVALID_OR_EXPIRED(2102, "Voucher invalid or expried", HttpStatus.BAD_REQUEST),
+    VOUCHER_EXPIRED(2102, "Voucher expried", HttpStatus.BAD_REQUEST),
     VOUCHER_MIN_ORDER_NOT_MET(
             2103, "The order value does not meet the minimum required to apply this voucher", HttpStatus.BAD_REQUEST),
     VOUCHER_EXISTED(2104, "You already have this voucher", HttpStatus.CONFLICT),
+    VOUCHER_INVALID(2105, "Voucher invalid", HttpStatus.BAD_REQUEST),
+    VOUCHER_ORVERUSED(2106, "Voucher Overused", HttpStatus.BAD_REQUEST),
 
     // Category
     CATEGORY_NOT_EXISTED(2201, "Category not existed", HttpStatus.BAD_REQUEST),
