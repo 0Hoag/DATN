@@ -17,7 +17,9 @@ import com.fpl.datn.models.Permission;
 import com.fpl.datn.models.Role;
 import com.fpl.datn.models.User;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {OrderReturnMapper.class})
 public interface UserMapper {
     User toUserRegister(RegisterRequest request);
 

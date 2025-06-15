@@ -68,12 +68,6 @@ public class OrderController {
                 .build();
     }
 
-    //    @PostMapping
-    //    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request) {
-    //        return ApiResponse.<OrderResponse>builder()
-    //                .result(orderService.create(request))
-    //                .build();
-    //    }
     @PostMapping
     ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request, HttpServletRequest httpRequest) {
         return ApiResponse.<OrderResponse>builder()
