@@ -68,7 +68,6 @@ public class UserService {
     UserRepository userRepositories;
     UserMapper userMapper;
     RoleRepository roleRepository;
-    RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
     public UserResponse Create(UserRequest request) {
@@ -136,8 +135,6 @@ public class UserService {
 
         var data =
                 pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
-        var data =
-                pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
 
         return PageResponse.<UserResponse>builder()
                 .currentPage(page)
@@ -194,7 +191,6 @@ public class UserService {
     // Api client
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
             User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             userMapper.updateProfile(user, request);

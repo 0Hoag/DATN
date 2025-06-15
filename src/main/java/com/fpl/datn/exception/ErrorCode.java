@@ -12,6 +12,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
+    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
+    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allow", HttpStatus.BAD_REQUEST),
     INVALID_KEY(1001, "INVALID MESSAGE KEY", HttpStatus.BAD_REQUEST),
     USER_EXITED(1002, "USER EXITED", HttpStatus.BAD_REQUEST),
     USER_NOT_FOUND(1003, "USER NOT FOUND", HttpStatus.BAD_REQUEST),
@@ -31,6 +33,11 @@ public enum ErrorCode {
     PHONE_EXISTED(1016, "Phone existed", HttpStatus.BAD_REQUEST),
     ERROR_CREATE_USER(1017, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_EXISTED(1019,"Category not existed", HttpStatus.BAD_REQUEST),
+    CATEGORIES_NAME_EXISTED(1020, "Categories name existed", HttpStatus.CONFLICT),
+    CATEGORIES_SLUG_EXISTED(1021, "Categories slug existed", HttpStatus.CONFLICT),
+    CATEGORY_HAS_CHILDREN(1022, "Category has child categories", HttpStatus.BAD_REQUEST),
+    CATEGORY_HAS_PRODUCTS(1023, "Category has products", HttpStatus.BAD_REQUEST),
 
     // Order
     ORDER_NOT_FOUND(1201, "Order not found", HttpStatus.BAD_REQUEST),
@@ -51,6 +58,9 @@ public enum ErrorCode {
     PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
     SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
+    PRODUCT_SLUG_EXISTED(1505, "Product slug existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_NOT_EXISTED(1506, "Product update existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_NOT_EXISTED(1507, "Product delete existed", HttpStatus.CONFLICT),
 
     // Cart
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
