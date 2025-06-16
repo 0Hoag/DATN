@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: datn
+  datasource:
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/datn}
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: root
+    password: root
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /datn
+
+jwt:
+  signerKey: "bf9204f8dcf907346f3fb5e76523ecd1e28a1941dd2424699378bf9b36e127284cd6e1b238e356c99598beec19c0debce0f89f0710f15246c62edca1a49a78ae6a862f30369eb952c11f42fc8814835264823663984a6a9a0960a7a7150ee2df0901eef78d4eb0de122ecd2ec4c0e8885a13c8dcea0d24bbcbe86deee3ad554a4bfd5473b500ec07e74c62911eea9041b9b28e72544f19263db986a2a9938fa3e3c43c3a2d3ecaefe5b3eba642e6a56e5ed7bfb710c7f596da6e37004bd374a6d6b3ed82be43fdf0eb8cd2e76fa972e7d092a0f3630e92532e9abd9ae92d6445cc0bae6516aae4b0380b148dbb182436a70f2893551b0ae50bc6f9be00ea7dab"
+  valid-duration: 6000 # in second
+  refreshtable-duration: 1200 # in seconds
+
+vnpay:
+  tmn-code: XTKS4ZS4
+  hash-secret: 38BJLQOEGNK84OS6GNQ66NIP2LI6HAMG
+  url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+  return-url: http://localhost:8080/datn/payment/vnpay-return
+
+
