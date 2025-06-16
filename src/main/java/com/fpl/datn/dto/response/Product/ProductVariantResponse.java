@@ -1,6 +1,9 @@
 package com.fpl.datn.dto.response.Product;
 
+import com.fpl.datn.mapper.Product.ProductImageMapper;
 import lombok.*;
+import lombok.experimental.FieldDefaults;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -9,6 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantResponse {
     private Integer id;
     private String sku;
@@ -21,6 +25,6 @@ public class ProductVariantResponse {
     private LocalDateTime updatedAt;
 
     private Integer productId;
-    private List<String> productImages;
-    private List<String> attributeValues;
+    private List<ProductImageResponse> productImages;
+    private List<ProductVariantAttributeValueResponse> attributeValues;
 }

@@ -23,7 +23,7 @@ public class ProductResponse {
     Boolean isActive;
     Timestamp createdAt;
     Timestamp updatedAt;
-    List<String> productVariants;
+    List<ProductVariantResponse> productVariants;
     List<String> productReviews;
     List<String> orderDetails;
 

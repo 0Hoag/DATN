@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductVariantAttributeValueRequest {
+public class UpdateProductVariantAttributeValueRequest {
     private Integer productVariantId;
     private Integer attributeValueId;
 }

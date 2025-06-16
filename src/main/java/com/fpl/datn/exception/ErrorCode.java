@@ -38,44 +38,37 @@ public enum ErrorCode {
     CATEGORIES_SLUG_EXISTED(1021, "Categories slug existed", HttpStatus.CONFLICT),
     CATEGORY_HAS_CHILDREN(1022, "Category has child categories", HttpStatus.BAD_REQUEST),
     CATEGORY_HAS_PRODUCTS(1023, "Category has products", HttpStatus.BAD_REQUEST),
+    CATEGORIES_NAME_EXISTED(1019, "Categories name existed", HttpStatus.CONFLICT),
+    CATEGORIES_SLUG_EXISTED(1020, "Categories slug existed", HttpStatus.CONFLICT),
+    PRODUCT_SLUG_EXISTED(1232, "Product slug existed", HttpStatus.CONFLICT),
+    PRODUCT_NOT_EXISTED(1233, "Product create existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_NOT_EXISTED(1234, "Product update existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_NOT_EXISTED(1235, "Product delete existed", HttpStatus.CONFLICT),
+    PRODUCT_CREATE_VARIANT_EXISTED(1236, "Product_Variant create existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_VARIANT_EXISTED(1237, "Product_Variant UPDATE existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_VARIANT_EXISTED(1238, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_EXISTED(1239, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_DETAIL_EXISTED(1240, "Product Image detail existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_CREATE_EXISTED(1241, "Product Image Create existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_UPDATE_EXISTED(1242, "Product Image Update existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_DELETE_EXISTED(1243, "Product Image Delete existed", HttpStatus.CONFLICT),
+    VARIANT_DETAIL_EXISTED(1244, "Variant detail existed", HttpStatus.CONFLICT),
+    VARIANT_UPDATE_EXISTED(1245, "Variant update existed", HttpStatus.CONFLICT),
+    VARIANT_DELETE_EXISTED(1246, "Variant delete existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_VALUE_EXISTED(1247, "Variant delete existed", HttpStatus.CONFLICT),
+    EMAIL_EXISTS(1018, "EMAIL EXITED", HttpStatus.BAD_REQUEST),
+    UPLOAD_IMAGE_FAILED(1018, "UPLOAD IMAGE EXITED", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU đã tồn tại", HttpStatus.CONFLICT);
 
-    // Order
-    ORDER_NOT_FOUND(1201, "Order not found", HttpStatus.BAD_REQUEST),
-    ORDER_ALREADY_PROCESSED(1202, "Order has already been processed", HttpStatus.BAD_REQUEST),
-    ORDERS_NOT_EXISTED(1203, "Orders not existed", HttpStatus.BAD_REQUEST),
-    ORDER_CANNOT_BE_MODIFIED(1204, "Order cannot be modified", HttpStatus.BAD_REQUEST),
-    ORDER_STATUS_NOT_FOUND(1205, "Order status not found", HttpStatus.BAD_REQUEST),
+    private int code;
+    private String message;
+    private HttpStatusCode statusCode;
 
-    // Address
-    ADDRESS_NOT_FOUND(1301, "Address not found", HttpStatus.BAD_REQUEST),
+    ErrorCode(int code, String message, HttpStatusCode statusCode) {
+        this.code = code;
+        this.message = message;
+        this.statusCode = statusCode;
+    }
 
-    // Payment
-    PAYMENT_METHOD_NOT_FOUND(1401, "Payment method not found", HttpStatus.BAD_REQUEST),
-    PAYMENT_STATUS_NOT_FOUND(1401, "Payment status not found", HttpStatus.BAD_REQUEST),
-
-    // Product / Variant
-    PRODUCT_VARIANT_NOT_FOUND(1501, "Product variant not found", HttpStatus.BAD_REQUEST),
-    PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
-    PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
-    SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
-    PRODUCT_SLUG_EXISTED(1505, "Product slug existed", HttpStatus.CONFLICT),
-    PRODUCT_UPDATE_NOT_EXISTED(1506, "Product update existed", HttpStatus.CONFLICT),
-    PRODUCT_DELETE_NOT_EXISTED(1507, "Product delete existed", HttpStatus.CONFLICT),
-    PRODUCT_REVIEW_NOT_FOUND(1508, "Product review not found", HttpStatus.BAD_REQUEST),
-
-    // Cart
-    CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
-
-    // Input
-    INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
-    INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
-    CATEGORY_CHILD_CANNOT_HAVE_PARENT(1024, "Category child cannot have parent", HttpStatus.BAD_REQUEST),
-    // Voucher
-    VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
-    UNKNOWN_ERROR(9000, "Unknown server error", HttpStatus.INTERNAL_SERVER_ERROR),
-    DASHBOARD_ERROR(1044, "Dashboard statistics retrieval error", HttpStatus.INTERNAL_SERVER_ERROR);
-
-    int code;
-    String message;
-    HttpStatus httpStatus;
+    ErrorCode() {}
 }
