@@ -69,9 +69,11 @@ public enum ErrorCode {
     // Input
     INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
     INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
-
+    CATEGORY_CHILD_CANNOT_HAVE_PARENT(1024, "Category child cannot have parent", HttpStatus.BAD_REQUEST),
     // Voucher
-    VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST);
+    VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
+    UNKNOWN_ERROR(9000, "Unknown server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    DASHBOARD_ERROR(1044, "Dashboard statistics retrieval error", HttpStatus.INTERNAL_SERVER_ERROR);
 
     int code;
     String message;
