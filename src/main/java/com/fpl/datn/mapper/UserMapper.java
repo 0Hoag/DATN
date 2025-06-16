@@ -13,19 +13,19 @@ import com.fpl.datn.dto.request.UpdateUserRequest;
 import com.fpl.datn.dto.request.UserRequest;
 import com.fpl.datn.dto.response.OrderUserResponse;
 import com.fpl.datn.dto.response.UserResponse;
+import com.fpl.datn.models.PaymentMethod;
 import com.fpl.datn.models.Permission;
 import com.fpl.datn.models.Role;
 import com.fpl.datn.models.User;
 
 @Mapper(
         componentModel = "spring",
-        uses = {OrderReturnMapper.class})
+        uses = {OrderMapper.class, OrderReturnMapper.class, AddressMapper.class, UserVoucherMapper.class})
 public interface UserMapper {
     User toUserRegister(RegisterRequest request);
 
     User toUser(UserRequest request);
 
-    @Mapping(target = "orders", ignore = true)
     UserResponse toUserResponse(User user);
 
     OrderUserResponse toOrderUserResponse(User user);
@@ -53,5 +53,9 @@ public interface UserMapper {
             return null;
         }
         return permissions.stream().map(Permission::getName).collect(Collectors.toSet());
+    }
+
+    default String map(PaymentMethod paymentMethod) {
+        return paymentMethod != null ? paymentMethod.getName() : null;
     }
 }

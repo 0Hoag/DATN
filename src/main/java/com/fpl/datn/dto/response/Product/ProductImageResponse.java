@@ -18,6 +18,6 @@ public class ProductImageResponse {
     Boolean isThumbnail;
     int sortOrder;
     Timestamp createdAt;
-    Timestamp updateAt;
-    String productVariant;
+    Timestamp updatedAt;
+    Integer productVariantId;
 }

@@ -25,6 +25,9 @@ public enum ErrorCode {
     ERROR_UPDATING_USER(1009, "Error while updating user", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1010, "Email already exists", HttpStatus.BAD_REQUEST),
     PHONE_EXISTED(1011, "Phone already exists", HttpStatus.BAD_REQUEST),
+    ERROR_CREATE_USER(1017, "Error create user", HttpStatus.BAD_REQUEST),
+    ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
+    PASSWORD_INCORRECT(1006, "PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
 
     PRODUCT_SLUG_EXISTED(1026, "Product slug existed", HttpStatus.CONFLICT),
     PRODUCT_NOT_EXISTED(1027, "Product create existed", HttpStatus.CONFLICT),
@@ -60,6 +63,17 @@ public enum ErrorCode {
     PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
     SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_EXISTED(1239, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
+    UPLOAD_IMAGE_FAILED(1018, "UPLOAD IMAGE EXITED", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_DETAIL_EXISTED(1240, "Product Image detail existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_UPDATE_EXISTED(1242, "Product Image Update existed", HttpStatus.CONFLICT),
+    PRODUCT_IMAGE_DELETE_EXISTED(1243, "Product Image Delete existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_VALUE_EXISTED(1247, "Variant delete existed", HttpStatus.CONFLICT),
+    VARIANT_DETAIL_EXISTED(1244, "Variant detail existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_VARIANT_EXISTED(1238, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU existed", HttpStatus.CONFLICT),
+    VARIANT_UPDATE_EXISTED(1245, "Variant update existed", HttpStatus.CONFLICT),
+    VARIANT_DELETE_EXISTED(1246, "Variant delete existed", HttpStatus.CONFLICT),
 
     // Cart
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),

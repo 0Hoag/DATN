@@ -5,8 +5,6 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.fpl.datn.exception.AppException;
-import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.models.Category;
 import com.fpl.datn.repository.CategoryRepository;
 
@@ -21,25 +19,26 @@ import lombok.experimental.FieldDefaults;
 @Service
 @FieldDefaults(makeFinal = true)
 public class CategoryBuilder {
-    CategoryRepository repo;
+    CategoryRepository categoryRepository;
 
-    public boolean wouldCreateCircularReference(Integer categoryId, Integer parentId) {
-        if (categoryId.equals(parentId)) return true;
+    public boolean wouldCreateCircularReference(Integer categoryId, Integer newParentId) {
+        if (categoryId == null || newParentId == null) return false;
+        if (categoryId.equals(newParentId)) return true;
 
         Set<Integer> visited = new HashSet<>();
-        visited.add(categoryId);
+        Integer current = newParentId;
 
-        Integer currentParentId = parentId;
-        while (currentParentId != null) {
-            if (visited.contains(currentParentId)) return true;
+        while (current != null) {
+            if (!visited.add(current)) break;
 
-            Category parent =
-                    repo.findById(currentParentId).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+            if (current.equals(categoryId)) {
+                return true;
+            }
 
-            if (parent.getParent() == null) break;
+            Category parent = categoryRepository.findById(current).orElse(null);
+            if (parent == null) break;
 
-            currentParentId = parent.getParent().getId();
-            visited.add(currentParentId);
+            current = parent.getParent() != null ? parent.getParent().getId() : null;
         }
 
         return false;

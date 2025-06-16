@@ -137,7 +137,7 @@ public class OrderService {
     private Order prepareOrder(OrderRequest request) {
         var user = userRepository
                 .findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         var address = addressRepository
                 .findById(request.getAddressId())
                 .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));

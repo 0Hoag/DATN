@@ -25,9 +25,7 @@ public class ProductReviewService {
     public PageResponse<ProductReviewResponse> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repository.findAll(pageable);
-        var data = pageData.stream()
-                .map(productReview -> mapper.toProductReviewResponse(productReview))
-                .toList();
+        var data = pageData.stream().map(mapper::toProductReviewResponse).toList();
         return PageResponse.<ProductReviewResponse>builder()
                 .currentPage(page)
                 .totalPages(pageData.getTotalPages())
@@ -39,8 +37,7 @@ public class ProductReviewService {
 
     public ProductReviewResponse getReview(int id) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
-        var response = mapper.toProductReviewResponse(order);
-        return response;
+        return mapper.toProductReviewResponse(order);
     }
 
     public void delete(int id) {

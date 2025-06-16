@@ -3,12 +3,15 @@ package com.fpl.datn.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
-import java.util.List;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderReturnRequest;
 import com.fpl.datn.dto.request.OrderReturnStatusRequest;
 import com.fpl.datn.dto.response.OrderReturnResponse;
@@ -37,11 +40,20 @@ public class OrderReturnService {
     OrderReturnMapper mapper;
     TransactionLogService logService;
 
-    public List<OrderReturnResponse> get() {
-        List<OrderReturn> orderReturns = repository.findAll();
-        return orderReturns.stream()
-                .map(oderReturn -> mapper.toOrderReturnResponse(oderReturn))
+    public PageResponse<OrderReturnResponse> get(int page, int size, boolean isDesc) {
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        var pageData = repository.findAll(pageable);
+        var data = pageData.stream()
+                .map(orderReturn -> mapper.toOrderReturnResponse(orderReturn))
                 .toList();
+        return PageResponse.<OrderReturnResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
     }
 
     @Transactional
@@ -52,12 +64,15 @@ public class OrderReturnService {
         var user = userRepository
                 .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
         // Chỉ cho trả hàng nếu đã giao hàng
         if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.DELIVERED.getDescription()))
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+
         // Chỉ cho trả hàng trong vòng 7 ngày sau khi giao
         if (Duration.between(order.getUpdatedAt(), LocalDateTime.now()).toDays() > 7)
             throw new AppException(ErrorCode.RETURN_PERIOD_EXPIRED);
+
         // Chỉ cho trả lại nếu chưa trả hoặc đã bị từ chối
         if (repository.existsByOrderAndStatusNot(order, OrderReturnEnums.REJECTED.getDescription())) {
             throw new AppException(ErrorCode.RETURN_REQUEST_ALREADY_EXISTS);

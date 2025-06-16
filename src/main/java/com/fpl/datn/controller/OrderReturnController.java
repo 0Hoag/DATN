@@ -1,16 +1,16 @@
 package com.fpl.datn.controller;
 
-import java.util.List;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fpl.datn.dto.ApiResponse;
+import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderReturnRequest;
 import com.fpl.datn.dto.request.OrderReturnStatusRequest;
 import com.fpl.datn.dto.response.OrderReturnResponse;
@@ -28,9 +28,12 @@ public class OrderReturnController {
     OrderReturnService orderReturnService;
 
     @GetMapping
-    ApiResponse<List<OrderReturnResponse>> getAll() {
-        return ApiResponse.<List<OrderReturnResponse>>builder()
-                .result(orderReturnService.get())
+    ApiResponse<PageResponse<OrderReturnResponse>> getAll(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
+        return ApiResponse.<PageResponse<OrderReturnResponse>>builder()
+                .result(orderReturnService.get(page, size, sort))
                 .build();
     }
 

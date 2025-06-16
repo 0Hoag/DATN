@@ -1,17 +1,18 @@
 package com.fpl.datn.dto.response;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.FieldDefaults;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Builder
-@Getter
-@Setter
-@FieldDefaults(level = AccessLevel.PRIVATE)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserVoucherResponse {
-    int id;
-    OrderUserResponse user;
-    VoucherResponse voucher;
+    private Integer id;
+    private Integer userId;
+    private String userFullName;
+    private String userEmail;
+    private Integer voucherId;
+    private String voucherCode;
+    private String voucherDescription;
 }

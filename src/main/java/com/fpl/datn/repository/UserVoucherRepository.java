@@ -12,4 +12,6 @@ public interface UserVoucherRepository extends JpaRepository<ZUserVoucher, Integ
     Page<ZUserVoucher> findByUser_Id(int userId, Pageable pageable);
 
     boolean existsByUser_IdAndVoucher_Code(Integer userId, String code);
+
+    boolean existsByVoucherId(Integer voucherId);
 }

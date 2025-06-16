@@ -50,7 +50,7 @@ public class CategoryController {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/Get")
     public ApiResponse<PageResponse<CategoryResponse>> Get(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {

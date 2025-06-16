@@ -1,11 +1,13 @@
 package com.fpl.datn.dto.request.Product;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantAttributeValueRequest {
     private Integer productVariantId;
     private Integer attributeValueId;

@@ -5,11 +5,13 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantResponse {
     private Integer id;
     private String sku;
@@ -22,6 +24,6 @@ public class ProductVariantResponse {
     private LocalDateTime updatedAt;
 
     private Integer productId;
-    private List<String> productImages;
-    private List<String> attributeValues;
+    private List<ProductImageResponse> productImages;
+    private List<ProductVariantAttributeValueResponse> attributeValues;
 }

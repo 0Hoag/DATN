@@ -18,5 +18,4 @@ public class AddressResponse {
     Boolean isDefault;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
-    Integer userId;
 }

@@ -8,5 +8,4 @@ import lombok.*;
 public class VariantAttributeValueResponse {
     private Integer id;
     private String value;
-    private String attributeName;
 }

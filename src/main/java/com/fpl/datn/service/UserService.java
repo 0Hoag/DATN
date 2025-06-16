@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -46,10 +47,10 @@ public class UserService {
         try {
             HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
 
-            if (!userRepositories.existsByEmail(request.getEmail())) {
+            if (userRepositories.existsByEmail(request.getEmail())) {
                 throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
-            if (!userRepositories.existsByPhone(request.getPhone())) {
+            if (userRepositories.existsByPhone(request.getPhone())) {
                 throw new AppException(ErrorCode.PHONE_EXISTED);
             }
 
@@ -63,12 +64,12 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATING_USER);
+            throw new AppException(ErrorCode.ERROR_CREATE_USER);
         }
     }
 
     public UserResponse Update(int id, UpdateUserRequest request) {
-        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepositories.save(user));
@@ -76,7 +77,7 @@ public class UserService {
 
     public UserResponse Detail(int id) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
@@ -117,6 +118,7 @@ public class UserService {
                 .build();
     }
 
+    // Api client
     public UserResponse Register(RegisterRequest request) {
         try {
             Set<Role> roles = new HashSet<>();
@@ -124,12 +126,16 @@ public class UserService {
                     .name(PredefinedRole.ROLE_CUSTOMER)
                     .description("Customer role")
                     .build());
+            roles.add(Role.builder()
+                    .name(PredefinedRole.ROLE_CUSTOMER)
+                    .description("Customer role")
+                    .build());
 
             if (userRepositories.existsByEmail(request.getEmail())) {
-                throw new AppException(ErrorCode.EMAIL_ALREADY_USED);
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
             if (userRepositories.existsByPhone(request.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_ALREADY_EXISTS);
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
             }
 
             User user = userMapper.toUserRegister(request);
@@ -142,10 +148,22 @@ public class UserService {
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATING_USER);
+            throw new AppException(ErrorCode.ERROR_CREATE_USER);
         }
     }
 
+    public UserResponse getMyInfo() {
+        var context = SecurityContextHolder.getContext();
+        String userId = context.getAuthentication().getName();
+
+        User user = userRepositories
+                .findById(Integer.valueOf(userId))
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        return userMapper.toUserResponse(user);
+    }
+
+    // Api client
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
             User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -153,7 +171,7 @@ public class UserService {
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));
         } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_UPDATING_USER);
+            throw new AppException(ErrorCode.ERROR_UPDATE_USER);
         }
     }
 }
