@@ -106,24 +106,44 @@ public class CategoryService {
         Category category = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
-        Integer newParentId = request.getParent();
-
-        if (newParentId != null && newParentId != 0) {
-            Category parent = repo.findById(newParentId)
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
-
-            if (builder.wouldCreateCircularReference(id, newParentId)) {
-                throw new AppException(ErrorCode.CIRCULAR_REFERENCE_NOT_ALLOWED);
+        if (request.getName() != null && !request.getName().equals(category.getName())) {
+            if (repo.existsByName(request.getName())) {
+                throw new AppException(ErrorCode.CATEGORIES_NAME_EXISTED);
             }
-
-            category.setParent(parent);
-        } else {
-            category.setParent(null);
+            category.setName(request.getName());
         }
 
-        mapper.update(category, request);
+        if (request.getSlug() != null && !request.getSlug().equals(category.getSlug())) {
+            if (repo.existsBySlug(request.getSlug())) {
+                throw new AppException(ErrorCode.CATEGORIES_SLUG_EXISTED);
+            }
+            category.setSlug(request.getSlug());
+        }
+
+        category.setDescription(request.getDescription());
+        category.setIsShow(request.getIsShow());
         category.setUpdatedAt(LocalDateTime.now());
 
+        if (request.getParent() != 0) {
+            Integer newParentId = request.getParent();
+
+            if (newParentId != null) {
+                if (newParentId.equals(id)) {
+                    throw new AppException(ErrorCode.CIRCULAR_REFERENCE_NOT_ALLOWED);
+                }
+
+                Category parent = repo.findById(newParentId)
+                        .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+
+                if (builder.wouldCreateCircularReference(id, newParentId)) {
+                    throw new AppException(ErrorCode.CIRCULAR_REFERENCE_NOT_ALLOWED);
+                }
+
+                category.setParent(parent);
+            }
+        } else if (request.getParent() == 0) {
+            category.setParent(null);
+        }
         return mapper.toCategoryResponse(repo.save(category));
     }
 
