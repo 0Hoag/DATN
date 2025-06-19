@@ -60,7 +60,7 @@ public class VariantAttributeService {
 
     public VariantAttributeResponse detail(Integer id) {
         VariantAttribute variantAttribute =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUEID_NOT_FOUND));
         return mapper.toResponse(variantAttribute);
     }
 
@@ -75,7 +75,7 @@ public class VariantAttributeService {
         var data = pageData.getContent().stream()
                 .map(product -> {
                     var cat = repo.findById(product.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+                            .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUEID_NOT_FOUND));
                     return mapper.toResponse(cat);
                 })
                 .collect(Collectors.toList());

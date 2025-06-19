@@ -15,18 +15,10 @@ import java.util.List;
 public class ProductResponse {
     Integer id;
     String name;
-    String slug;
     String description;
     String brand;
     String thumbnail;
-    String content;
-    Boolean isHome;
-    Boolean isActive;
     Timestamp createdAt;
-    Timestamp updatedAt;
     List<ProductVariantResponse> productVariants;
-    List<String> productReviews;
-    List<String> orderDetails;
     CategoryResponse category;
-
 }

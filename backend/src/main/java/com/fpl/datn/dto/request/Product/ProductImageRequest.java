@@ -1,12 +1,7 @@
 package com.fpl.datn.dto.request.Product;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
@@ -15,11 +10,20 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductImageRequest {
-    String imageUrl;
+
     String altText;
+
     String specDescription;
+
+    @NotNull(message = "Trạng thái ảnh đại diện không được để trống")
     Boolean isThumbnail;
-    int sortOrder;
+
+    @NotNull(message = "Thứ tự ảnh không được để trống")
+    Integer sortOrder;
+
+    @NotNull(message = "ID biến thể không được để trống")
     Integer productVariantId;
-    MultipartFile image;
+
+    @NotNull(message = "ID ảnh upload không được để trống")
+    Integer uploadImageId;
 }

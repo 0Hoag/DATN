@@ -21,9 +21,6 @@ public class ProductVariantResponse {
     private Integer sold;
     private Boolean isActive;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
     private Integer productId;
-    private List<ProductImageResponse> productImages;
-    private List<ProductVariantAttributeValueResponse> attributeValues;
+    private List<ProductImageResponse> images;
 }

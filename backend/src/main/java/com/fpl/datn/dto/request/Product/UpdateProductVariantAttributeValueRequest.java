@@ -1,5 +1,6 @@
 package com.fpl.datn.dto.request.Product;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProductVariantAttributeValueRequest {
     private Integer productVariantId;
+
     private Integer attributeValueId;
 }

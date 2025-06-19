@@ -62,7 +62,7 @@ public class ProductVariantController {
 
     @PutMapping("/{id}")
     public ApiResponse<ProductVariantResponse> Update(
-            @PathVariable("id") int id, @RequestBody UpdateProductVariantRequest request) {
+            @PathVariable("id") int id, @RequestBody @Valid UpdateProductVariantRequest request) {
         return ApiResponse.<ProductVariantResponse>builder()
                 .code(1000)
                 .result(productVariantService.update(id, request))

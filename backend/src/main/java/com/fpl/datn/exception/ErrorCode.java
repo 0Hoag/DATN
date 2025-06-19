@@ -29,11 +29,12 @@ public enum ErrorCode {
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
     PASSWORD_INCORRECT(1006, "PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
 
-    PRODUCT_SLUG_EXISTED(1026, "Product slug existed", HttpStatus.CONFLICT),
+    PRODUCT_SLUG_EXISTED(1026, "Slug đã tồn tại", HttpStatus.CONFLICT),
     PRODUCT_NOT_EXISTED(1027, "Product create existed", HttpStatus.CONFLICT),
-    PRODUCT_UPDATE_NOT_EXISTED(1028, "Product update existed", HttpStatus.CONFLICT),
+    PRODUCT_ID_NOT_EXISTED(1028, "ID Sản phẩm không tồn tại", HttpStatus.CONFLICT),
     PRODUCT_DELETE_NOT_EXISTED(1029, "Product delete existed", HttpStatus.CONFLICT),
     PRODUCT_REVIEW_NOT_FOUND(1030, "Product review not found", HttpStatus.BAD_REQUEST),
+    UPLOAD_IMAGE_NOT_FOUND(1031, "Không tìm thấy hình ảnh", HttpStatus.BAD_REQUEST),
 
     // Permission
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),
@@ -62,16 +63,17 @@ public enum ErrorCode {
     PRODUCT_VARIANT_NOT_FOUND(1501, "Product variant not found", HttpStatus.BAD_REQUEST),
     PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_EXISTED(1503, "Tên sản phẩm đã tồn tại", HttpStatus.BAD_REQUEST),
     SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_EXISTED(1239, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_ID_NOT_EXISTED(1239, "Không tìm thấy ID", HttpStatus.CONFLICT),
     UPLOAD_IMAGE_FAILED(1018, "UPLOAD IMAGE EXITED", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_DETAIL_EXISTED(1240, "Product Image detail existed", HttpStatus.CONFLICT),
     PRODUCT_IMAGE_UPDATE_EXISTED(1242, "Product Image Update existed", HttpStatus.CONFLICT),
     PRODUCT_IMAGE_DELETE_EXISTED(1243, "Product Image Delete existed", HttpStatus.CONFLICT),
     PRODUCT_VARIANT_VALUE_EXISTED(1247, "Variant delete existed", HttpStatus.CONFLICT),
-    VARIANT_DETAIL_EXISTED(1244, "Variant detail existed", HttpStatus.CONFLICT),
+    VARIANT_VALUEID_NOT_FOUND(1244, "Không tìm thấy ID thuộc tính", HttpStatus.CONFLICT),
     PRODUCT_DELETE_VARIANT_EXISTED(1238, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
-    PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU existed", HttpStatus.CONFLICT),
+    PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU đã tồn tại", HttpStatus.CONFLICT),
     VARIANT_UPDATE_EXISTED(1245, "Variant update existed", HttpStatus.CONFLICT),
     VARIANT_DELETE_EXISTED(1246, "Variant delete existed", HttpStatus.CONFLICT),
 
@@ -105,7 +107,7 @@ public enum ErrorCode {
     VOUCHER_ORVERUSED(2106, "Voucher Overused", HttpStatus.BAD_REQUEST),
 
     // Category
-    CATEGORY_NOT_EXISTED(2201, "Category not existed", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_EXISTED(2201, "Không tìm thấy danh mục", HttpStatus.BAD_REQUEST),
     CATEGORY_HAS_CHILDREN(2202, "Category has child categories", HttpStatus.BAD_REQUEST),
     CATEGORY_HAS_PRODUCTS(2203, "Category has products", HttpStatus.BAD_REQUEST),
     CATEGORIES_NAME_EXISTED(2204, "Categories name existed", HttpStatus.CONFLICT),

@@ -2,6 +2,8 @@ package com.fpl.datn.service.Product;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
@@ -44,7 +46,10 @@ public class ProductService {
         if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
-
+        // Kiểm tra name
+        if(repo.existsByName(request.getName())) {
+            throw new AppException(ErrorCode.PRODUCT_NAME_EXISTED);
+        }
         // 2. Kiểm tra slug
         if (repo.existsBySlug(request.getSlug())) {
             throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
@@ -69,69 +74,72 @@ public class ProductService {
             variantRequest.setProductId(savedProduct.getId()); // cần ID cha
             productVariantService.create(variantRequest); // gọi đúng logic sinh SKU
         }
-
         return true;
     }
 
     @Transactional
     public ProductResponse update(Integer id, UpdateProductRequest request) {
-        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_UPDATE_NOT_EXISTED));
+        Product product = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_ID_NOT_EXISTED));
 
-        // Kiểm tra slug
         if (repo.existsBySlugAndIdNot(request.getSlug(), id)) {
             throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
         }
 
-        // Kiểm tra category
         if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
 
-        // Cập nhật product chính
         mapper.updateProduct(product, request);
         product.setUpdatedAt(LocalDateTime.now());
         repo.save(product);
 
-        // Xử lý biến thể
         List<ProductVariant> oldVariants = productVariantService.findByProductId(id);
         List<UpdateProductVariantRequest> newVariants = request.getProductVariants();
 
-        List<Integer> newIds = newVariants.stream()
-                .map(UpdateProductVariantRequest::getProductId)
-                .filter(i -> i != null)
-                .toList();
+        Set<Integer> newIds = newVariants.stream()
+                .map(UpdateProductVariantRequest::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
 
-        // 1. Xóa biến thể không còn
-        for (ProductVariant old : oldVariants) {
-            if (!newIds.contains(old.getId())) {
-                productVariantService.delete(old.getId());
+        for (ProductVariant oldVariant : oldVariants) {
+            if (!newIds.contains(oldVariant.getId())) {
+                if ((oldVariant.getOrderDetails() != null && !oldVariant.getOrderDetails().isEmpty()) ||
+                        (oldVariant.getCartItems() != null && !oldVariant.getCartItems().isEmpty())) {
+                    throw new AppException(ErrorCode.PRODUCT_DELETE_VARIANT_EXISTED);
+                }
+                productVariantService.delete(oldVariant.getId());
             }
         }
 
-        // 2. Cập nhật hoặc tạo mới biến thể
         for (UpdateProductVariantRequest variantRequest : newVariants) {
-            variantRequest.setProductId(id); // Gán productId
+            variantRequest.setProductId(id);
+
             if (variantRequest.getId() == null) {
-                // Tạo mới
                 ProductVariantRequest createRequest = ProductVariantRequest.builder()
                         .productId(id)
+                        .variantName(variantRequest.getVariantName())
                         .price(variantRequest.getPrice())
                         .quantity(variantRequest.getQuantity())
-                        .variantName(variantRequest.getVariantName())
-                        .attributeValueIds(variantRequest.getAttributeValueIds())
+                        .sold(variantRequest.getSold() == null ? 0 : variantRequest.getSold())
                         .isActive(variantRequest.getIsActive())
+                        .attributeValueIds(variantRequest.getAttributeValueIds())
+                        .images(variantRequest.getImages())
                         .build();
                 productVariantService.create(createRequest);
             } else {
-                // Cập nhật
                 productVariantService.update(variantRequest.getId(), variantRequest);
             }
         }
+
         return mapper.toProductResponse(product);
     }
+
+
+
     // xem chi tiết sản phẩm
     public ProductResponse detail(Integer id) {
-        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_ID_NOT_EXISTED));
         return mapper.toProductResponse(product);
     }
     // xem danh sách sản phẩm
@@ -161,7 +169,7 @@ public class ProductService {
     }
 
     public void delete(Integer id) {
-        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED));
+        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_ID_NOT_EXISTED));
         if (product.getOrderDetails() != null && !product.getOrderDetails().isEmpty()) {
             throw new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED);
         }

@@ -13,7 +13,7 @@ import feign.Param;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Integer> {
     boolean existsBySlug(String slug);
-
+    boolean existsByName(String name);
     boolean existsBySlugAndIdNot(String slug, Integer id);
     // Tìm theo tên hoặc SKU (có chứa chuỗi)
     @Query("SELECT p FROM Product p JOIN p.productVariants v\n"

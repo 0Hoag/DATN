@@ -3,7 +3,9 @@ package com.fpl.datn.service.Product;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.transaction.Transactional;
 
@@ -45,76 +47,59 @@ public class ProductVariantService {
 
     @Transactional
     public Boolean create(ProductVariantRequest request) {
-        // 1. Kiểm tra Product có tồn tại
-        Product product = productRepo
-                .findById(request.getProductId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
-
-        // 2. Tạo ProductVariant (chưa gán SKU)
-        ProductVariant productVariant = mapper.toEntity(request);
-        productVariant.setProduct(product);
-        productVariant.setCreatedAt(LocalDateTime.now());
-        productVariant.setUpdatedAt(LocalDateTime.now());
-
-        // 3. Chuẩn bị thuộc tính và tạo SKU
+        // 1. Tìm sản phẩm
+        Product product = productRepo.findById(request.getProductId())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_ID_NOT_EXISTED));
+        // 2. Map request → entity
+        ProductVariant variant = mapper.toEntity(request);
+        variant.setCreatedAt(LocalDateTime.now());
+        variant.setUpdatedAt(LocalDateTime.now());
+        // 3. Xử lý thuộc tính & tạo liên kết
+        List<VariantAttributeValue> attributeValues = new ArrayList<>();
         List<String> attributeValueTexts = new ArrayList<>();
         List<ProductVariantAttributeValue> attributeLinks = new ArrayList<>();
-
-        if (request.getAttributeValueIds() != null
-                && !request.getAttributeValueIds().isEmpty()) {
-            for (Integer valueId : request.getAttributeValueIds()) {
-                VariantAttributeValue attrValue = attributeValueRepo
-                        .findById(valueId)
-                        .orElseThrow(() -> {
-                            log.error("❌ Không tìm thấy attributeValueId = {}", valueId);
-                            return new AppException(ErrorCode.VARIANT_DETAIL_EXISTED);
-                        });
-
-                // Normalize giá trị thuộc tính để tạo SKU
-                String normalizedValue = attrValue
-                        .getValue()
-                        .toLowerCase()
-                        .replaceAll("[^a-z0-9\\s]", "") // bỏ ký tự đặc biệt
-                        .replaceAll("\\s+", "-"); // thay khoảng trắng bằng gạch
-
-                attributeValueTexts.add(normalizedValue);
-
-                // Tạo liên kết thuộc tính - biến thể
-                attributeLinks.add(ProductVariantAttributeValue.builder()
-                        .productVariant(productVariant)
-                        .attributeValue(attrValue)
-                        .build());
-            }
+        if (request.getAttributeValueIds() != null && !request.getAttributeValueIds().isEmpty()) {
+            attributeValues = request.getAttributeValueIds().stream()
+                    .map(id -> attributeValueRepo.findById(id)
+                            .orElseThrow(() -> {
+                                log.error("Không tìm thấy attributeValueId = {}", id);
+                                return new AppException(ErrorCode.VARIANT_VALUEID_NOT_FOUND);
+                            }))
+                    .toList();
+            attributeValueTexts = attributeValues.stream()
+                    .map(val -> normalize(val.getValue()))
+                    .toList();
+            attributeLinks = attributeValues.stream()
+                    .map(val -> ProductVariantAttributeValue.builder()
+                            .productVariant(variant)
+                            .attributeValue(val)
+                            .build())
+                    .toList();
         }
-
-        // 4. Tạo SKU tự động
-        String normalizedProductName =
-                product.getName().toLowerCase().replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", "-");
-
-        String generatedSku = normalizedProductName;
-        if (!attributeValueTexts.isEmpty()) {
-            generatedSku += "-" + String.join("-", attributeValueTexts);
-        }
-
-        // 5. Kiểm tra SKU đã tồn tại
+        // 4. Tạo SKU
+        String generatedSku = generateSku(product.getName(), attributeValueTexts);
         if (repo.existsBySku(generatedSku)) {
             throw new AppException(ErrorCode.PRODUCT_VARIANT_SKU_EXISTED);
         }
-
-        // Gán SKU vào biến thể
-        productVariant.setSku(generatedSku);
-
-        // 6. Lưu ProductVariant và flush để lấy ID nếu cần
-        ProductVariant savedVariant = repo.save(productVariant);
-        repo.flush();
-
-        // 7. Lưu thuộc tính liên kết
+        variant.setSku(generatedSku);
+        // 5. Lưu Variant
+        ProductVariant savedVariant = repo.saveAndFlush(variant);
+        // 6. Lưu liên kết thuộc tính
         if (!attributeLinks.isEmpty()) {
             pvaRepo.saveAll(attributeLinks);
         }
-
-        log.info("✅ Tạo biến thể thành công với SKU: {}", generatedSku);
         return true;
+    }
+    //Hàm helper chuẩn hoá text
+    private String normalize(String value) {
+        return value.toLowerCase()
+                .replaceAll("[^a-z0-9\\s]", "")
+                .replaceAll("\\s+", "-");
+    }
+    //Hàm helper tạo SKU
+    private String generateSku(String productName, List<String> attributes) {
+        String base = normalize(productName);
+        return attributes.isEmpty() ? base : base + "-" + String.join("-", attributes);
     }
 
     public List<ProductVariant> findByProductId(Integer productId) {
@@ -123,12 +108,15 @@ public class ProductVariantService {
 
     public ProductVariantResponse detail(Integer id) {
         ProductVariant productVariant =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_ID_NOT_EXISTED));
         return mapper.toResponse(productVariant);
     }
 
     public List<ProductVariantResponse> list() {
-        return repo.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
+        return repo.findAll()
+                .stream()
+                .map(mapper::toResponse)
+                .collect(Collectors.toList());
     }
 
     public PageResponse<ProductVariantResponse> get(int page, int size) {
@@ -138,7 +126,7 @@ public class ProductVariantService {
         var data = pageData.getContent().stream()
                 .map(product -> {
                     var cat = repo.findById(product.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_VALUE_EXISTED));
                     return mapper.toResponse(cat);
                 })
                 .collect(Collectors.toList());
@@ -151,15 +139,55 @@ public class ProductVariantService {
                 .data(data)
                 .build();
     }
-
+    @Transactional
     public ProductVariantResponse update(Integer id, UpdateProductVariantRequest request) {
-        ProductVariant productVariant =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_UPDATE_NOT_EXISTED));
-        mapper.toUpdate(productVariant, request);
-        productVariant.setUpdatedAt(LocalDateTime.now());
-        return mapper.toResponse(repo.save(productVariant));
+        // 1. Tìm variant
+        ProductVariant variant = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_ID_NOT_EXISTED));
+        // 2. Cập nhật thông tin cơ bản
+        mapper.toUpdate(variant, request);
+        variant.setUpdatedAt(LocalDateTime.now());
+        // 3. Xử lý attributeValueIds (nếu có)
+        List<Integer> newAttrIds = request.getAttributeValueIds();
+        if (newAttrIds != null && !newAttrIds.isEmpty()) {
+            // Lấy danh sách liên kết hiện tại
+            List<ProductVariantAttributeValue> existingLinks = pvaRepo.findAllByProductVariantId(id);
+            Set<Integer> existingAttrIds = existingLinks.stream()
+                    .map(link -> link.getAttributeValue().getId())
+                    .collect(Collectors.toSet());
+            // Tìm các attribute mới cần thêm
+            List<VariantAttributeValue> newAttrValues = newAttrIds.stream()
+                    .filter(attrId -> !existingAttrIds.contains(attrId)) // chưa có thì thêm
+                    .map(attrId -> attributeValueRepo.findById(attrId)
+                            .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUEID_NOT_FOUND)))
+                    .toList();
+            // Tạo liên kết mới
+            List<ProductVariantAttributeValue> newLinks = newAttrValues.stream()
+                    .map(attr -> ProductVariantAttributeValue.builder()
+                            .productVariant(variant)
+                            .attributeValue(attr)
+                            .build())
+                    .toList();
+            if (!newLinks.isEmpty()) {
+                pvaRepo.saveAll(newLinks);
+            }
+            // Cập nhật lại SKU nếu có thuộc tính mới
+            String base = normalize(variant.getProduct().getName());
+            List<String> allAttributeTexts = Stream.concat(
+                            existingLinks.stream().map(link -> normalize(link.getAttributeValue().getValue())),
+                            newAttrValues.stream().map(val -> normalize(val.getValue()))
+                    )
+                    .distinct() // tránh trùng
+                    .toList();
+            String newSku = base + "-" + String.join("-", allAttributeTexts);
+            if (!newSku.equals(variant.getSku()) && repo.existsBySku(newSku)) {
+                throw new AppException(ErrorCode.PRODUCT_VARIANT_SKU_EXISTED);
+            }
+            variant.setSku(newSku);
+        }
+        // 4. Lưu và trả về
+        return mapper.toResponse(repo.save(variant));
     }
-
     public void delete(Integer id) {
         ProductVariant productVariant =
                 repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_VARIANT_EXISTED));

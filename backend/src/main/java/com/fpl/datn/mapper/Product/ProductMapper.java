@@ -13,25 +13,19 @@ import org.mapstruct.*;
 public interface ProductMapper {
 
     // Entity -> Response
-    @Mapping(target = "productReviews", ignore = true)
-    @Mapping(target = "orderDetails", ignore = true)
     ProductResponse toProductResponse(Product product);
 
     // Request DTO -> Entity
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "productVariants", ignore = true)
-    @Mapping(target = "orderDetails", ignore = true)
-    @Mapping(target = "productReviews", ignore = true)
     @Mapping(target = "category", source = "category", qualifiedByName = "mapCategoryIdToCategory")
+    @Mapping(target = "productVariants", ignore = true) // ✳️ THÊM DÒNG NÀY để không map tự động
     Product toProduct(ProductRequest request);
+
 
     // Update existing entity from DTO
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "productVariants", ignore = true)
-    @Mapping(target = "productReviews", ignore = true)
-    @Mapping(target = "orderDetails", ignore = true)
     @Mapping(target = "category", source = "category", qualifiedByName = "mapCategoryIdToCategory")
     void updateProduct(@MappingTarget Product product, UpdateProductRequest request);
 

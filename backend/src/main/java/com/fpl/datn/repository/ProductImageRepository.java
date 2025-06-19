@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 import com.fpl.datn.models.ProductImage;
 
 @Repository
-public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {}
+public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {
+}
