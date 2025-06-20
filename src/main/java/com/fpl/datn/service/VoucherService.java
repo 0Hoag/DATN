@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -46,6 +47,7 @@ public class VoucherService {
         return mapper.toVoucherResponse(voucher);
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public VoucherResponse create(VoucherRequest request) {
         var voucher = mapper.toVoucherRequest(request);
         voucher.setCreatedAt(LocalDateTime.now());
@@ -55,6 +57,7 @@ public class VoucherService {
         return mapper.toVoucherResponse(voucher);
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public VoucherResponse update(int id, UpdateVoucherRequest request) {
         var voucher = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         mapper.toUpdateVoucher(voucher, request);
@@ -65,6 +68,7 @@ public class VoucherService {
         return mapper.toVoucherResponse(voucher);
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public void delete(int id) {
         if (!repository.existsById(id)) throw new AppException(ErrorCode.VOUCHER_NOT_FOUND);
         repository.deleteById(id);

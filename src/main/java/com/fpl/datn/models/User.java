@@ -39,7 +39,6 @@ public class User {
 
     private String password;
 
-    @NotBlank
     @Pattern(regexp = "^\\d{10,11}$", message = "Invalid phone number")
     private String phone;
 

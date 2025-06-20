@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -52,6 +53,7 @@ public class OrderService {
     ProductVariantRepository variantRepository;
     OrderMapper mapper;
 
+    @PreAuthorize("hasAuthority('VIEW_ORDER')")
     public PageResponse<OrderResponse> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repository.findAll(pageable);
@@ -75,6 +77,7 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('VIEW_ORDER')")
     public OrderResponse getOrder(int id) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDERS_NOT_EXISTED));
         OrderResponse response = mapper.toOrderResponse(order);
@@ -86,6 +89,7 @@ public class OrderService {
         return response;
     }
 
+    @PreAuthorize("hasAuthority('VIEW_ORDER')")
     public PageResponse<OrderResponse> Search(
             String keyword,
             Integer id,
@@ -122,6 +126,7 @@ public class OrderService {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority('BUY_PRODUCT')")
     @Transactional
     public OrderResponse create(OrderRequest request) {
         var order = prepareOrder(request);
@@ -143,6 +148,7 @@ public class OrderService {
     }
 
     // Chuẩn bị đặt hàng
+    @PreAuthorize("hasAuthority('BUY_PRODUCT')")
     private Order prepareOrder(OrderRequest request) {
         var user = userRepository
                 .findById(request.getUserId())
@@ -168,6 +174,7 @@ public class OrderService {
     }
 
     // Xử lý đặt hàng
+    @PreAuthorize("hasAuthority('BUY_PRODUCT')")
     private List<OrderDetail> processOrderItems(Order order, List<OrderItemResponse> items, boolean isUpdate) {
         List<OrderDetail> details = new ArrayList<>();
 
@@ -213,6 +220,7 @@ public class OrderService {
     }
 
     @Transactional // cái này mà sai thì nó rollback lại
+    @PreAuthorize("hasAuthority('VIEW_ORDER')")
     public OrderResponse update(int id, UpdateOrderRequest request) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         mapper.toUpdateOrder(order, request);
@@ -233,6 +241,7 @@ public class OrderService {
         return response;
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_ORDERS')")
     @Transactional
     public void delete(int id) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -242,6 +251,7 @@ public class OrderService {
     }
 
     // Update trạng thái đơn hàng và Trạng thái thanh toán;
+    @PreAuthorize("hasAuthority('MANAGE_ORDERS')")
     @Transactional
     public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));

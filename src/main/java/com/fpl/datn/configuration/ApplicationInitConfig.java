@@ -1,6 +1,7 @@
 package com.fpl.datn.configuration;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -46,79 +47,81 @@ public class ApplicationInitConfig {
         log.info("Initializing application.....");
         return args -> {
             if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {
-                permissionRepository.save(Permission.builder()
-                        .name(PredefinedPermission.DELETE_PRODUCT_ANY)
-                        .description("Xóa bất kỳ sản phẩm nào")
-                        .build());
-
-                permissionRepository.save(Permission.builder()
-                        .name(PredefinedPermission.DELETE_USER_ANY)
-                        .description("Xóa bất kỳ tài khoản nào")
-                        .build());
-
-                permissionRepository.save(Permission.builder()
+                var system_backup = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.SYSTEM_BACKUP)
                         .description("Sao lưu / phục hồi dữ liệu hệ thống")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var system_settings = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.SYSTEM_SETTINGS)
                         .description("Thay đổi cấu hình hệ thống (email, tích hợp, bảo mật...)")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var assign_role = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.ASSIGN_ROLE)
                         .description("Cấp / thu hồi quyền cho người dùng khác")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var manager_products = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.MANAGE_PRODUCTS)
                         .description("Quản lý toàn bộ sản phẩm trong hệ thống")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var manager_users = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.MANAGE_USERS)
                         .description("Xem, chỉnh sửa, khóa tài khoản người dùng")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var manager_orders = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.MANAGE_ORDERS)
                         .description("Xem và cập nhật trạng thái đơn hàng toàn hệ thống")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var track_order = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.TRACK_ORDER)
                         .description("Theo dõi đơn hàng đã đặt")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var view_order = permissionRepository.save(Permission.builder()
+                        .name(PredefinedPermission.VIEW_ORDER)
+                        .description("Xem đơn hàng")
+                        .build());
+
+                var create_review = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.CREATE_REVIEW)
                         .description("Viết đánh giá sản phẩm")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var buy_product = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.BUY_PRODUCT)
                         .description("Thêm vào giỏ hàng, thanh toán")
                         .build());
 
-                permissionRepository.save(Permission.builder()
+                var view_product = permissionRepository.save(Permission.builder()
                         .name(PredefinedPermission.VIEW_PRODUCT)
                         .description("Xem danh sách & chi tiết sản phẩm")
                         .build());
 
+                var view_dashboard = permissionRepository.save(Permission.builder()
+                        .name(PredefinedPermission.VIEW_DASHBOARD)
+                        .description("Xem thống kê && doanh thu")
+                        .build());
+
+                Set<Permission> guestPermissions = Set.of(view_product);
+                Set<Permission> CustomerPermissions = Set.of(view_product, track_order, create_review, buy_product, view_order);
+                Set<Permission> ManagerPermissions = Set.of(view_product, track_order, create_review, buy_product, view_order, manager_users, manager_products, manager_orders);
+                Set<Permission> AdminPermissions = Set.of(assign_role, system_settings, system_backup, view_dashboard);
+
                 roleRepository.save(Role.builder()
                         .name(PredefinedRole.ROLE_GUEST)
                         .description("Guest role")
+                        .permissions(guestPermissions)
                         .build());
 
                 roleRepository.save(Role.builder()
                         .name(PredefinedRole.ROLE_CUSTOMER)
                         .description("Customer role")
-                        .build());
-
-                roleRepository.save(Role.builder()
-                        .name(PredefinedRole.ROLE_MANAGER)
-                        .description("Manager role")
+                        .permissions(CustomerPermissions)
                         .build());
 
                 roleRepository.save(Role.builder()
@@ -126,13 +129,21 @@ public class ApplicationInitConfig {
                         .description("Shift staff role")
                         .build());
 
+                Role managerRole = roleRepository.save(Role.builder()
+                        .name(PredefinedRole.ROLE_MANAGER)
+                        .description("Manager role")
+                        .permissions(ManagerPermissions)
+                        .build());
+
                 Role adminRole = roleRepository.save(Role.builder()
                         .name(PredefinedRole.ROLE_ADMIN)
                         .description("Admin role")
+                        .permissions(AdminPermissions)
                         .build());
 
                 var roles = new HashSet<Role>();
                 roles.add(adminRole);
+                roles.add(managerRole);
 
                 User user = User.builder()
                         .email(ADMIN_EMAIL)
