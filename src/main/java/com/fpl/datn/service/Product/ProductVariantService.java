@@ -47,7 +47,7 @@ public class ProductVariantService {
     public Boolean create(ProductVariantRequest request) {
         // 1. Kiểm tra Product có tồn tại
         Product product = productRepo.findById(request.getProductId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 2. Tạo ProductVariant (chưa gán SKU)
         ProductVariant productVariant = mapper.toEntity(request);
@@ -161,7 +161,7 @@ public class ProductVariantService {
     }
     public void delete(Integer id) {
         ProductVariant productVariant = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_VARIANT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED));
         repo.delete(productVariant);
     }
 }

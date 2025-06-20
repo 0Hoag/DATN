@@ -134,7 +134,7 @@ public class ProductService {
     // xem chi tiết sản phẩm
     public ProductResponse detail(Integer id) {
         Product product = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return mapper.toProductResponse(product);
     }
     // xem danh sách sản phẩm

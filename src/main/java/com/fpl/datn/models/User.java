@@ -10,6 +10,9 @@ import java.util.Set;
 
 import jakarta.persistence.*;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,11 +32,15 @@ public class User {
     @Column(name = "full_name")
     private String fullName;
 
+    @NotBlank
+    @Email
     @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     private String email;
 
     private String password;
 
+    @NotBlank
+    @Pattern(regexp = "^\\d{10,11}$", message = "Invalid phone number")
     private String phone;
 
     @Column(name = "is_enable")

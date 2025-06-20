@@ -71,7 +71,6 @@ public class UserService {
     PasswordEncoder passwordEncoder;
 
     public UserResponse Create(UserRequest request) {
-        try {
             HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
 
             if (userRepositories.existsByEmail(request.getEmail())) {
@@ -90,25 +89,34 @@ public class UserService {
 
             userRepositories.save(user);
             return userMapper.toUserResponse(user);
-        } catch (AppException e) {
-            throw new AppException(ErrorCode.ERROR_CREATE_USER);
-        }
     }
 
     public UserResponse Update(int id, UpdateUserRequest request) {
         var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (request.getEmail().equals(user.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_UNCHANGED);
+        }
+
+        if (userRepositories.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        if (request.getPhone().equals(user.getPhone())) {
+            throw new AppException(ErrorCode.PHONE_UNCHANGED);
+        }
+
+        if (userRepositories.existsByPhone(request.getPhone())) {
+            throw new AppException(ErrorCode.PHONE_EXISTED);
+        }
 
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepositories.save(user));
     }
 
     public UserResponse Detail(int id) {
-        try {
             User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             return userMapper.toUserResponse(user);
-        } catch (AppException e) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        }
     }
 
     public void Delete(int id) {
@@ -119,7 +127,7 @@ public class UserService {
         try {
             userRepositories.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNAUTHORIZE);
+            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
         }
     }
 
@@ -149,10 +157,6 @@ public class UserService {
     public UserResponse Register(RegisterRequest request) {
         try {
             Set<Role> roles = new HashSet<>();
-            roles.add(Role.builder()
-                    .name(PredefinedRole.ROLE_CUSTOMER)
-                    .description("Customer role")
-                    .build());
             roles.add(Role.builder()
                     .name(PredefinedRole.ROLE_CUSTOMER)
                     .description("Customer role")
@@ -191,7 +195,24 @@ public class UserService {
     // Api client
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = userRepositories.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+            if (request.getEmail().equals(user.getEmail())) {
+                throw new AppException(ErrorCode.EMAIL_UNCHANGED);
+            }
+
+            if (userRepositories.existsByEmail(request.getEmail())) {
+                throw new AppException(ErrorCode.EMAIL_EXISTED);
+            }
+
+            if (request.getPhone().equals(user.getPhone())) {
+                throw new AppException(ErrorCode.PHONE_UNCHANGED);
+            }
+
+            if (userRepositories.existsByPhone(request.getPhone())) {
+                throw new AppException(ErrorCode.PHONE_EXISTED);
+            }
 
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));
