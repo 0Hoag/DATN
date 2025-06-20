@@ -10,5 +10,5 @@ import java.util.List;
 public class VariantAttributeResponse {
     private Integer id;
     private String name;
-    private List<String> values;
+    private List<VariantAttributeValueResponse> values;
 }

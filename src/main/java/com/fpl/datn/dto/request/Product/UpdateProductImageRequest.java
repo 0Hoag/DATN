@@ -1,25 +1,21 @@
-package com.fpl.datn.dto.response.Product;
+package com.fpl.datn.dto.request.Product;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.cglib.core.Local;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductImageResponse {
-    int id;
+public class UpdateProductImageRequest {
     String imageUrl;
     String altText;
     String specDescription;
     Boolean isThumbnail;
     int sortOrder;
-    Timestamp createdAt;
-    Timestamp updatedAt;
     Integer productVariantId;
 }
