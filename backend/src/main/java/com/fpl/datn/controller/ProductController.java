@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
@@ -67,6 +68,7 @@ public class ProductController {
                 .code(1000)
                 .result(productService.update(id, request))
                 .build();
+
     }
 
     @DeleteMapping("/{id}")

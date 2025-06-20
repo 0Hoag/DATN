@@ -15,10 +15,11 @@ import com.fpl.datn.models.Product;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
-    @Mapping(target = "parent", source = "parent", qualifiedByName = "parentToId")
-    @Mapping(target = "children", source = "children", qualifiedByName = "childrenToNameList")
-    @Mapping(target = "products", source = "products", qualifiedByName = "productsToNameList")
+    @Mapping(source = "parent", target = "parent", qualifiedByName = "parentToId")
+    @Mapping(source = "children", target = "children", qualifiedByName = "childrenToNameList")
+    @Mapping(source = "products", target = "products", qualifiedByName = "productsToNameList")
     CategoryResponse toCategoryResponse(Category category);
+
 
     @Mapping(target = "parent", expression = "java(mapParentIdToCategory(request.getParent()))")
     Category toCategory(CategoryRequest request);

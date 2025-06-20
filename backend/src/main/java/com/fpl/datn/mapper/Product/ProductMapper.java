@@ -18,7 +18,7 @@ public interface ProductMapper {
     // Request DTO -> Entity
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "category", source = "category", qualifiedByName = "mapCategoryIdToCategory")
-    @Mapping(target = "productVariants", ignore = true) // ✳️ THÊM DÒNG NÀY để không map tự động
+    @Mapping(target = "productVariants", ignore = true)
     Product toProduct(ProductRequest request);
 
 
@@ -39,10 +39,10 @@ public interface ProductMapper {
         return category;
     }
     @Named("mapCategoryIdToCategory")
-    default Category mapCategoryIdToCategory(Integer id) {
-        if (id == null) return null;
+    default Category mapCategoryIdToCategory(Integer categoryId) {
+        if (categoryId == null) return null;
         Category category = new Category();
-        category.setId(id);
+        category.setId(categoryId);
         return category;
     }
 

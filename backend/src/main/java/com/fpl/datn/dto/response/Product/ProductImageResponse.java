@@ -20,5 +20,4 @@ public class ProductImageResponse {
     Timestamp createdAt;
     Timestamp updatedAt;
     Integer productVariantId;
-    Integer uploadImageId;
 }

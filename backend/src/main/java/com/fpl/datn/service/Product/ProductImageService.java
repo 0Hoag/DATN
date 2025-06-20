@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,17 +40,10 @@ public class ProductImageService {
     UploadImageRepository uploadImageRepo; // ✅ repo ảnh đã upload trước
 
     public Boolean create(ProductImageRequest request) {
-        // ✅ 1. Kiểm tra ProductVariant có tồn tại không
         ProductVariant variant = repoPRV.findById(request.getProductVariantId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_ID_NOT_EXISTED));
 
-        // ✅ 2. Kiểm tra ảnh đã upload có tồn tại không
-        UploadImage uploadImage = uploadImageRepo.findById(request.getUploadImageId())
-                .orElseThrow(() -> new AppException(ErrorCode.UPLOAD_IMAGE_NOT_FOUND));
-
-        // ✅ 3. Map dữ liệu sang entity và gán quan hệ
         ProductImage productImage = mapper.toEntity(request);
-        productImage.setUploadImage(uploadImage); // liên kết entity
         productImage.setProductVariant(variant);
         productImage.setCreatedAt(LocalDateTime.now());
         productImage.setUpdatedAt(LocalDateTime.now());
@@ -57,6 +51,7 @@ public class ProductImageService {
         repo.save(productImage);
         return true;
     }
+
 
     public ProductImageResponse detail(Integer id) {
         ProductImage productImage = repo.findById(id)
@@ -91,11 +86,14 @@ public class ProductImageService {
         ProductImage productImage = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_UPDATE_EXISTED));
 
-        mapper.update(productImage, request);
+        mapper.update(productImage, request); // ✅ Ánh xạ các trường cơ bản
         productImage.setUpdatedAt(LocalDateTime.now());
 
         return mapper.toResponse(repo.save(productImage));
     }
+
+
+
 
     public void delete(Integer id) {
         ProductImage productImage = repo.findById(id)

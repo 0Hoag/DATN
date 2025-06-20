@@ -26,6 +26,7 @@ public class ProductRequest {
     @NotBlank(message = "Thương hiệu không được để trống")
     String brand;
 
+    @NotBlank(message = "thumbnail không được để trống")
     String thumbnail;
 
     @NotBlank(message = "Nội dung không được để trống")

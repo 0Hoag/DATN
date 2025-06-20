@@ -1,5 +1,6 @@
 package com.fpl.datn.service.Product;
 
+import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fpl.datn.models.*;
+import com.fpl.datn.repository.*;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
@@ -20,14 +23,6 @@ import com.fpl.datn.dto.response.Product.ProductVariantResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductVariantMapper;
-import com.fpl.datn.models.Product;
-import com.fpl.datn.models.ProductVariant;
-import com.fpl.datn.models.ProductVariantAttributeValue;
-import com.fpl.datn.models.VariantAttributeValue;
-import com.fpl.datn.repository.ProductRepository;
-import com.fpl.datn.repository.ProductVariantAttributeValueRepository;
-import com.fpl.datn.repository.ProductVariantRepository;
-import com.fpl.datn.repository.VariantAttributeValueRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -44,19 +39,21 @@ public class ProductVariantService {
     ProductRepository productRepo;
     VariantAttributeValueRepository attributeValueRepo;
     ProductVariantAttributeValueRepository pvaRepo;
+    UploadImageRepository uploadImageRepo;
+    ProductImageRepository imageRepo;
 
     @Transactional
     public Boolean create(ProductVariantRequest request) {
-        // 1. Tìm sản phẩm
+        // 1. Tìm sản phẩm cha
         Product product = productRepo.findById(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_ID_NOT_EXISTED));
-        // 2. Map request → entity
+        // 2. Map request → entity variant
         ProductVariant variant = mapper.toEntity(request);
+        variant.setProduct(product);
         variant.setCreatedAt(LocalDateTime.now());
         variant.setUpdatedAt(LocalDateTime.now());
-        // 3. Xử lý thuộc tính & tạo liên kết
+        // 3. Xử lý thuộc tính
         List<VariantAttributeValue> attributeValues = new ArrayList<>();
-        List<String> attributeValueTexts = new ArrayList<>();
         List<ProductVariantAttributeValue> attributeLinks = new ArrayList<>();
         if (request.getAttributeValueIds() != null && !request.getAttributeValueIds().isEmpty()) {
             attributeValues = request.getAttributeValueIds().stream()
@@ -66,9 +63,7 @@ public class ProductVariantService {
                                 return new AppException(ErrorCode.VARIANT_VALUEID_NOT_FOUND);
                             }))
                     .toList();
-            attributeValueTexts = attributeValues.stream()
-                    .map(val -> normalize(val.getValue()))
-                    .toList();
+
             attributeLinks = attributeValues.stream()
                     .map(val -> ProductVariantAttributeValue.builder()
                             .productVariant(variant)
@@ -76,53 +71,72 @@ public class ProductVariantService {
                             .build())
                     .toList();
         }
-        // 4. Tạo SKU
-        String generatedSku = generateSku(product.getName(), attributeValueTexts);
+        // 4. Tạo SKU từ tên và thuộc tính
+        String generatedSku = generateSkuFromVariantAndAttributes(request.getVariantName(), attributeValues);
         if (repo.existsBySku(generatedSku)) {
             throw new AppException(ErrorCode.PRODUCT_VARIANT_SKU_EXISTED);
         }
         variant.setSku(generatedSku);
-        // 5. Lưu Variant
+        // 5. Lưu variant
         ProductVariant savedVariant = repo.saveAndFlush(variant);
         // 6. Lưu liên kết thuộc tính
         if (!attributeLinks.isEmpty()) {
             pvaRepo.saveAll(attributeLinks);
         }
+        // 7. Lưu ảnh nếu có (dùng imageUrl trực tiếp)
+        if (request.getImages() != null && !request.getImages().isEmpty()) {
+            List<ProductImage> images = request.getImages().stream()
+                    .map(img -> ProductImage.builder()
+                            .altText(img.getAltText())
+                            .specDescription(img.getSpecDescription())
+                            .isThumbnail(img.getIsThumbnail())
+                            .sortOrder(img.getSortOrder())
+                            .imageUrl(img.getImageUrl())
+                            .productVariant(savedVariant)
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .build())
+                    .toList();
+            imageRepo.saveAll(images);
+        }
         return true;
     }
     //Hàm helper chuẩn hoá text
-    private String normalize(String value) {
-        return value.toLowerCase()
-                .replaceAll("[^a-z0-9\\s]", "")
-                .replaceAll("\\s+", "-");
+    private String normalize(String input) {
+        return Normalizer.normalize(input, Normalizer.Form.NFD)
+                .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("-{2,}", "-")
+                .replaceAll("^-|-$", "");
     }
-    //Hàm helper tạo SKU
-    private String generateSku(String productName, List<String> attributes) {
-        String base = normalize(productName);
-        return attributes.isEmpty() ? base : base + "-" + String.join("-", attributes);
-    }
+    private String generateSkuFromVariantAndAttributes(String variantName, List<VariantAttributeValue> attributeValues) {
+        // Normalize tên biến thể (variant name)
+        String base = normalize(variantName);
 
-    public List<ProductVariant> findByProductId(Integer productId) {
-        return repo.findAllByProduct_Id(productId);
+        // Tạo phần thuộc tính: "mau-trang", "dung-luong-128gb", ...
+        List<String> attributeParts = attributeValues.stream()
+                .map(val -> normalize(val.getAttribute().getName()) + "-" + normalize(val.getValue()))
+                .distinct()
+                .sorted() // giữ thứ tự ổn định cho cùng một tập thuộc tính
+                .toList();
+        return base + (attributeParts.isEmpty() ? "" : "-" + String.join("-", attributeParts));
     }
-
     public ProductVariantResponse detail(Integer id) {
-        ProductVariant productVariant =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_ID_NOT_EXISTED));
+        ProductVariant productVariant = repo.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_ID_NOT_EXISTED));
+
         return mapper.toResponse(productVariant);
     }
-
     public List<ProductVariantResponse> list() {
         return repo.findAll()
                 .stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
-
     public PageResponse<ProductVariantResponse> get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repo.findAll(pageable);
-
         var data = pageData.getContent().stream()
                 .map(product -> {
                     var cat = repo.findById(product.getId())
@@ -130,7 +144,6 @@ public class ProductVariantService {
                     return mapper.toResponse(cat);
                 })
                 .collect(Collectors.toList());
-
         return PageResponse.<ProductVariantResponse>builder()
                 .currentPage(page)
                 .totalPages(pageData.getTotalPages())
@@ -147,50 +160,45 @@ public class ProductVariantService {
         // 2. Cập nhật thông tin cơ bản
         mapper.toUpdate(variant, request);
         variant.setUpdatedAt(LocalDateTime.now());
-        // 3. Xử lý attributeValueIds (nếu có)
-        List<Integer> newAttrIds = request.getAttributeValueIds();
-        if (newAttrIds != null && !newAttrIds.isEmpty()) {
-            // Lấy danh sách liên kết hiện tại
-            List<ProductVariantAttributeValue> existingLinks = pvaRepo.findAllByProductVariantId(id);
-            Set<Integer> existingAttrIds = existingLinks.stream()
-                    .map(link -> link.getAttributeValue().getId())
-                    .collect(Collectors.toSet());
-            // Tìm các attribute mới cần thêm
-            List<VariantAttributeValue> newAttrValues = newAttrIds.stream()
-                    .filter(attrId -> !existingAttrIds.contains(attrId)) // chưa có thì thêm
-                    .map(attrId -> attributeValueRepo.findById(attrId)
-                            .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUEID_NOT_FOUND)))
-                    .toList();
-            // Tạo liên kết mới
-            List<ProductVariantAttributeValue> newLinks = newAttrValues.stream()
-                    .map(attr -> ProductVariantAttributeValue.builder()
+        // 3. Cập nhật ảnh nếu có
+        if (request.getImages() != null) {
+            for (var imgRequest : request.getImages()) {
+                if (imgRequest.getId() != null) {
+                    // Cập nhật ảnh đã có
+                    ProductImage existingImage = imageRepo.findById(imgRequest.getId())
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_DETAIL_EXISTED));
+                    existingImage.setAltText(imgRequest.getAltText());
+                    existingImage.setSpecDescription(imgRequest.getSpecDescription());
+                    existingImage.setIsThumbnail(imgRequest.getIsThumbnail());
+                    existingImage.setSortOrder(imgRequest.getSortOrder());
+                    existingImage.setImageUrl(imgRequest.getImageUrl());
+                    existingImage.setUpdatedAt(LocalDateTime.now());
+                } else {
+                    // Thêm ảnh mới
+                    ProductImage newImage = ProductImage.builder()
+                            .altText(imgRequest.getAltText())
+                            .specDescription(imgRequest.getSpecDescription())
+                            .isThumbnail(imgRequest.getIsThumbnail())
+                            .sortOrder(imgRequest.getSortOrder())
+                            .imageUrl(imgRequest.getImageUrl())
                             .productVariant(variant)
-                            .attributeValue(attr)
-                            .build())
-                    .toList();
-            if (!newLinks.isEmpty()) {
-                pvaRepo.saveAll(newLinks);
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .build();
+                    imageRepo.save(newImage);
+                }
             }
-            // Cập nhật lại SKU nếu có thuộc tính mới
-            String base = normalize(variant.getProduct().getName());
-            List<String> allAttributeTexts = Stream.concat(
-                            existingLinks.stream().map(link -> normalize(link.getAttributeValue().getValue())),
-                            newAttrValues.stream().map(val -> normalize(val.getValue()))
-                    )
-                    .distinct() // tránh trùng
-                    .toList();
-            String newSku = base + "-" + String.join("-", allAttributeTexts);
-            if (!newSku.equals(variant.getSku()) && repo.existsBySku(newSku)) {
-                throw new AppException(ErrorCode.PRODUCT_VARIANT_SKU_EXISTED);
-            }
-            variant.setSku(newSku);
         }
-        // 4. Lưu và trả về
         return mapper.toResponse(repo.save(variant));
     }
+
+
+
+
     public void delete(Integer id) {
         ProductVariant productVariant =
                 repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_VARIANT_EXISTED));
         repo.delete(productVariant);
     }
-}
+
+   }

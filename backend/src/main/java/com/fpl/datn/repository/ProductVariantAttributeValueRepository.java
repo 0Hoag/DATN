@@ -11,5 +11,5 @@ import com.fpl.datn.models.ProductVariantAttributeValue;
 public interface ProductVariantAttributeValueRepository extends JpaRepository<ProductVariantAttributeValue, Integer> {
     boolean existsByProductVariantIdAndAttributeValueId(Integer variantId, Integer valueId);
 
-    List<ProductVariantAttributeValue> findAllByProductVariantId(Integer productVariantId);
+    List<ProductVariantAttributeValue> findAllByProductVariant_Id(Integer productVariantId);
 }

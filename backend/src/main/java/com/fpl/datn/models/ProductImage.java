@@ -24,6 +24,9 @@ public class ProductImage {
     @Column(name = "spec_description", columnDefinition = "TEXT")
     private String specDescription;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "is_thumbnail")
     private Boolean isThumbnail;
 
@@ -41,8 +44,5 @@ public class ProductImage {
     @JoinColumn(name = "product_variant_id")
     private ProductVariant productVariant;
 
-    // ✅ Quan hệ với bảng upload_images (chứa URL ảnh)
-    @ManyToOne
-    @JoinColumn(name = "upload_image_id")
-    private UploadImage uploadImage;
+
 }

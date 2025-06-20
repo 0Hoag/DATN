@@ -2,6 +2,7 @@ package com.fpl.datn.dto.request.Product;
 
 import java.util.List;
 
+import com.fpl.datn.dto.response.CategoryResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -23,6 +24,4 @@ public class UpdateProductRequest {
     Boolean isHome;
     Boolean isActive;
     Integer category;
-
-    List<UpdateProductVariantRequest> productVariants;
 }

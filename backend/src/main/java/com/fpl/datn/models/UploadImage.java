@@ -16,7 +16,7 @@ public class UploadImage {
     private Integer id;
 
     @Column(nullable = false)
-    private String url;
+    private String url; // Đường dẫn tuyệt đối đến ảnh (VD: https://cdn.example.com/...)
 
-    private String fileName;
+    private String fileName; // Tên file gốc (dùng hiển thị, debug, tìm kiếm,...)
 }
