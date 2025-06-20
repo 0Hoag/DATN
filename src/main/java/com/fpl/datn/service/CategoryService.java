@@ -9,6 +9,7 @@ import com.fpl.datn.service.build.CategoryBuilder;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -34,6 +35,7 @@ public class CategoryService {
     CategoryRepository repo;
     CategoryBuilder builder;
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public Boolean createCategory(CategoryRequest request) {
         if (request.getName() == null || request.getName().isEmpty()) {
             throw new AppException(ErrorCode.MISSING_INPUT);
@@ -102,6 +104,7 @@ public class CategoryService {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public CategoryResponse update(Integer id, UpdateCategoryRequest request) {
         Category category = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
@@ -127,6 +130,7 @@ public class CategoryService {
         return mapper.toCategoryResponse(repo.save(category));
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public void delete(Integer id) {
         Category category = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));

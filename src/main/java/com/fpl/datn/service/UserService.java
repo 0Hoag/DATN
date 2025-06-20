@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +71,7 @@ public class UserService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserResponse Create(UserRequest request) {
             HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
 
@@ -91,6 +93,7 @@ public class UserService {
             return userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserResponse Update(int id, UpdateUserRequest request) {
         var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -114,11 +117,13 @@ public class UserService {
         return userMapper.toUserResponse(userRepositories.save(user));
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserResponse Detail(int id) {
             User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
             return userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public void Delete(int id) {
         if (!userRepositories.existsById(id)) {
             throw new AppException(ErrorCode.USER_NOT_FOUND);
@@ -131,12 +136,14 @@ public class UserService {
         }
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public List<UserResponse> List() {
         return userRepositories.findAll().stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public PageResponse<UserResponse> Get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = userRepositories.findAll(pageable);

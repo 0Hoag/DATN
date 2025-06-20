@@ -33,4 +33,10 @@ public class UserResponse {
     private List<OrderReturnResponse> orderReturns;
     private List<ZUserVoucherResponse> ZUserVouchers;
     private List<ActivityLogResponse> activityLogs;
+
+    public boolean hasRole(String roleName) {
+        if (roles == null) return false;
+        return roles.stream()
+                .anyMatch(role -> roleName.equals(role.getName()));
+    }
 }

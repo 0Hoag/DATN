@@ -3,6 +3,7 @@ package com.fpl.datn.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.request.PermissionRequest;
@@ -26,6 +27,7 @@ public class PermissionService {
     PermissionRepository permissionRepository;
     PermissionMapper permissionMapper;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse create(PermissionRequest request) {
         Permission permission = permissionMapper.toPermission(request);
         permission.setCreatedAt(LocalDateTime.now());
@@ -35,17 +37,20 @@ public class PermissionService {
         return permissionMapper.toPermissionResponse(permission);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public PermissionResponse getPermission(String permission) {
         return permissionMapper.toPermissionResponse(permissionRepository
                 .findById(permission)
                 .orElseThrow(() -> new AppException(ErrorCode.PERMISSION_NOT_FOUND)));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getALL() {
         var permissions = permissionRepository.findAll();
         return permissions.stream().map(permissionMapper::toPermissionResponse).toList();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public void delete(String permission) {
         permissionRepository.deleteById(permission);
     }
