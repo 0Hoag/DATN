@@ -3,7 +3,6 @@ package com.fpl.datn.mapper;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.fpl.datn.models.PaymentMethod;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
@@ -13,6 +12,7 @@ import com.fpl.datn.dto.request.UpdateProfileRequest;
 import com.fpl.datn.dto.request.UpdateUserRequest;
 import com.fpl.datn.dto.request.UserRequest;
 import com.fpl.datn.dto.response.UserResponse;
+import com.fpl.datn.models.PaymentMethod;
 import com.fpl.datn.models.Permission;
 import com.fpl.datn.models.Role;
 import com.fpl.datn.models.User;

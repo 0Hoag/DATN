@@ -1,4 +1,5 @@
 package com.fpl.datn.controller;
+
 import java.util.List;
 
 import jakarta.validation.Valid;
@@ -24,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CategoryController {
     CategoryService categoryService;
-
 
     @PostMapping("/")
     public ApiResponse<Boolean> Create(@RequestBody @Valid CategoryRequest request) {

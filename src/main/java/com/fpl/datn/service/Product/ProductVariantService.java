@@ -1,10 +1,19 @@
 package com.fpl.datn.service.Product;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.fpl.datn.dto.PageResponse;
-import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.ProductVariantRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductVariantRequest;
-import com.fpl.datn.dto.response.Product.ProductResponse;
 import com.fpl.datn.dto.response.Product.ProductVariantResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
@@ -17,20 +26,11 @@ import com.fpl.datn.repository.ProductRepository;
 import com.fpl.datn.repository.ProductVariantAttributeValueRepository;
 import com.fpl.datn.repository.ProductVariantRepository;
 import com.fpl.datn.repository.VariantAttributeValueRepository;
-import jakarta.transaction.Transactional;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,7 +46,8 @@ public class ProductVariantService {
     @Transactional
     public Boolean create(ProductVariantRequest request) {
         // 1. Kiểm tra Product có tồn tại
-        Product product = productRepo.findById(request.getProductId())
+        Product product = productRepo
+                .findById(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 2. Tạo ProductVariant (chưa gán SKU)
@@ -59,18 +60,22 @@ public class ProductVariantService {
         List<String> attributeValueTexts = new ArrayList<>();
         List<ProductVariantAttributeValue> attributeLinks = new ArrayList<>();
 
-        if (request.getAttributeValueIds() != null && !request.getAttributeValueIds().isEmpty()) {
+        if (request.getAttributeValueIds() != null
+                && !request.getAttributeValueIds().isEmpty()) {
             for (Integer valueId : request.getAttributeValueIds()) {
-                VariantAttributeValue attrValue = attributeValueRepo.findById(valueId)
+                VariantAttributeValue attrValue = attributeValueRepo
+                        .findById(valueId)
                         .orElseThrow(() -> {
                             log.error("❌ Không tìm thấy attributeValueId = {}", valueId);
                             return new AppException(ErrorCode.VARIANT_DETAIL_EXISTED);
                         });
 
                 // Normalize giá trị thuộc tính để tạo SKU
-                String normalizedValue = attrValue.getValue().toLowerCase()
+                String normalizedValue = attrValue
+                        .getValue()
+                        .toLowerCase()
                         .replaceAll("[^a-z0-9\\s]", "") // bỏ ký tự đặc biệt
-                        .replaceAll("\\s+", "-");       // thay khoảng trắng bằng gạch
+                        .replaceAll("\\s+", "-"); // thay khoảng trắng bằng gạch
 
                 attributeValueTexts.add(normalizedValue);
 
@@ -83,9 +88,8 @@ public class ProductVariantService {
         }
 
         // 4. Tạo SKU tự động
-        String normalizedProductName = product.getName().toLowerCase()
-                .replaceAll("[^a-z0-9\\s]", "")
-                .replaceAll("\\s+", "-");
+        String normalizedProductName =
+                product.getName().toLowerCase().replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", "-");
 
         String generatedSku = normalizedProductName;
         if (!attributeValueTexts.isEmpty()) {
@@ -117,17 +121,14 @@ public class ProductVariantService {
         return repo.findAllByProduct_Id(productId);
     }
 
-
     public ProductVariantResponse detail(Integer id) {
-        ProductVariant productVariant = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
+        ProductVariant productVariant =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
         return mapper.toResponse(productVariant);
     }
 
     public List<ProductVariantResponse> list() {
-        return repo.findAll().stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+        return repo.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
 
     public PageResponse<ProductVariantResponse> get(int page, int size) {
@@ -152,16 +153,16 @@ public class ProductVariantService {
     }
 
     public ProductVariantResponse update(Integer id, UpdateProductVariantRequest request) {
-        ProductVariant productVariant = repo.findById(id)
-                .orElseThrow(()
-                        -> new AppException(ErrorCode.PRODUCT_UPDATE_NOT_EXISTED));
-            mapper.toUpdate(productVariant, request);
-            productVariant.setUpdatedAt(LocalDateTime.now());
+        ProductVariant productVariant =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_UPDATE_NOT_EXISTED));
+        mapper.toUpdate(productVariant, request);
+        productVariant.setUpdatedAt(LocalDateTime.now());
         return mapper.toResponse(repo.save(productVariant));
     }
+
     public void delete(Integer id) {
-        ProductVariant productVariant = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED));
+        ProductVariant productVariant =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED));
         repo.delete(productVariant);
     }
 }

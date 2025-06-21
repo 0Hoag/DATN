@@ -1,5 +1,12 @@
 package com.fpl.datn.service.Product;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.Product.UpdateVariantAttributeRequest;
 import com.fpl.datn.dto.request.Product.VariantAttributeRequest;
@@ -9,16 +16,11 @@ import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.VariantAttributeMapper;
 import com.fpl.datn.models.VariantAttribute;
 import com.fpl.datn.repository.VariantAttributesRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,15 +59,13 @@ public class VariantAttributeService {
     }
 
     public VariantAttributeResponse detail(Integer id) {
-        VariantAttribute variantAttribute = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+        VariantAttribute variantAttribute =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
         return mapper.toResponse(variantAttribute);
     }
 
-    public List<VariantAttributeResponse> list(){
-        return repo.findAll().stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+    public List<VariantAttributeResponse> list() {
+        return repo.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
 
     public PageResponse<VariantAttributeResponse> get(int page, int size) {
@@ -90,14 +90,15 @@ public class VariantAttributeService {
     }
 
     public VariantAttributeResponse update(Integer id, UpdateVariantAttributeRequest request) {
-        VariantAttribute variantAttribute = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_UPDATE_EXISTED));
+        VariantAttribute variantAttribute =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_UPDATE_EXISTED));
         mapper.update(variantAttribute, request);
         return mapper.toResponse(repo.save(variantAttribute));
     }
+
     public void delete(Integer id) {
-        VariantAttribute variantAttribute = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DELETE_EXISTED));
+        VariantAttribute variantAttribute =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_DELETE_EXISTED));
         repo.delete(variantAttribute);
     }
 }

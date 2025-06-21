@@ -36,7 +36,6 @@ public class UserResponse {
 
     public boolean hasRole(String roleName) {
         if (roles == null) return false;
-        return roles.stream()
-                .anyMatch(role -> roleName.equals(role.getName()));
+        return roles.stream().anyMatch(role -> roleName.equals(role.getName()));
     }
 }

@@ -1,14 +1,13 @@
 package com.fpl.datn.mapper.Product;
 
+import org.mapstruct.*;
+
 import com.fpl.datn.dto.request.Product.ProductImageRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductImageRequest;
 import com.fpl.datn.dto.response.Product.ProductImageResponse;
 import com.fpl.datn.mapper.DateMapper;
 import com.fpl.datn.models.ProductImage;
 import com.fpl.datn.models.ProductVariant;
-
-import org.mapstruct.*;
-
 
 @Mapper(componentModel = "spring", uses = DateMapper.class)
 public interface ProductImageMapper {
@@ -23,7 +22,7 @@ public interface ProductImageMapper {
 
     // Update existing entity
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt",ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "productVariant", ignore = true)
     void update(@MappingTarget ProductImage productImage, UpdateProductImageRequest request);
 
