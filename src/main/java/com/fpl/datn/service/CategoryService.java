@@ -66,7 +66,7 @@ public class CategoryService {
         try {
             repo.save(category);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
+            throw new AppException(ErrorCode.UNKNOWN_ERROR);
         }
 
         return true;

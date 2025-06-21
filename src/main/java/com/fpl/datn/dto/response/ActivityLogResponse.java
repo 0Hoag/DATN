@@ -17,6 +17,4 @@ public class ActivityLogResponse {
     private String module;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
-    private Integer userActionId;
 }

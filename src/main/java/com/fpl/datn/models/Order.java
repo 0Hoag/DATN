@@ -37,6 +37,9 @@ public class Order {
     @Column(name = "is_return")
     private Boolean isReturn;
 
+    @Column(name = "is_delete")
+    private Boolean isDelete;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -60,7 +63,7 @@ public class Order {
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "order")

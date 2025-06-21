@@ -105,7 +105,7 @@ public class UserService {
         try {
             userRepositories.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
     }
 

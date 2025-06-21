@@ -14,6 +14,4 @@ public class CartResponse {
     private Integer id;
     private String sessionId;
     private LocalDateTime createdAt;
-
-    private Integer userId;
 }

@@ -7,11 +7,13 @@ import java.util.List;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "order_returns")
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

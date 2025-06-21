@@ -1,35 +1,18 @@
 package com.fpl.datn.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import com.fpl.datn.dto.response.UserVoucherResponse;
 import com.fpl.datn.models.ZUserVoucher;
 
-@Component
-public class UserVoucherMapper {
-
-    public UserVoucherResponse toUserVoucherResponse(ZUserVoucher userVoucher) {
-        if (userVoucher == null) {
-            return null;
-        }
-
-        UserVoucherResponse response = new UserVoucherResponse();
-        response.setId(userVoucher.getId());
-
-        // Thông tin user
-        if (userVoucher.getUser() != null) {
-            response.setUserId(userVoucher.getUser().getId());
-            response.setUserFullName(userVoucher.getUser().getFullName());
-            response.setUserEmail(userVoucher.getUser().getEmail());
-        }
-
-        // Thông tin voucher
-        if (userVoucher.getVoucher() != null) {
-            response.setVoucherId(userVoucher.getVoucher().getId());
-            response.setVoucherCode(userVoucher.getVoucher().getCode());
-            response.setVoucherDescription(userVoucher.getVoucher().getDescription());
-        }
-
-        return response;
-    }
+@Mapper(componentModel = "spring")
+public interface UserVoucherMapper {
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userFullName", source = "user.fullName")
+    @Mapping(target = "userEmail", source = "user.email")
+    @Mapping(target = "voucherId", source = "voucher.id")
+    @Mapping(target = "voucherCode", source = "voucher.code")
+    @Mapping(target = "voucherDescription", source = "voucher.description")
+    UserVoucherResponse toVoucherResponse(ZUserVoucher userVoucher);
 }
