@@ -12,4 +12,3 @@ public class TopProductResponse {
     String productName;
     Long quantitySold;
 }
-

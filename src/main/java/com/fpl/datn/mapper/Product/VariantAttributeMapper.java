@@ -1,17 +1,19 @@
 package com.fpl.datn.mapper.Product;
 
-import com.fpl.datn.dto.request.Product.UpdateVariantAttributeRequest;
-import com.fpl.datn.dto.request.Product.VariantAttributeRequest;
-import com.fpl.datn.dto.response.Product.VariantAttributeResponse;
-import com.fpl.datn.dto.response.Product.VariantAttributeValueResponse;
-import com.fpl.datn.models.VariantAttribute;
-import com.fpl.datn.models.VariantAttributeValue;
-import org.mapstruct.*;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {VariantAttributeValueMapper.class})
+import org.mapstruct.*;
+
+import com.fpl.datn.dto.request.Product.UpdateVariantAttributeRequest;
+import com.fpl.datn.dto.request.Product.VariantAttributeRequest;
+import com.fpl.datn.dto.response.Product.VariantAttributeResponse;
+import com.fpl.datn.models.VariantAttribute;
+import com.fpl.datn.models.VariantAttributeValue;
+
+@Mapper(
+        componentModel = "spring",
+        uses = {VariantAttributeValueMapper.class})
 public interface VariantAttributeMapper {
 
     // Entity -> Response

@@ -1,14 +1,17 @@
 package com.fpl.datn.mapper.Product;
 
+import org.mapstruct.*;
+
 import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
 import com.fpl.datn.mapper.DateMapper;
 import com.fpl.datn.models.Category;
 import com.fpl.datn.models.Product;
-import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", uses = {DateMapper.class , ProductVariantMapper.class})
+@Mapper(
+        componentModel = "spring",
+        uses = {DateMapper.class, ProductVariantMapper.class})
 public interface ProductMapper {
 
     // Entity -> Response

@@ -1,17 +1,18 @@
 package com.fpl.datn.mapper.Product;
 
-import com.fpl.datn.dto.request.Product.ProductVariantRequest;
-
-import com.fpl.datn.dto.request.Product.UpdateProductVariantRequest;
-import com.fpl.datn.dto.response.Product.ProductVariantResponse;
-
-import com.fpl.datn.models.*;
-
-import org.mapstruct.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {ProductImageMapper.class, ProductVariantAttributeValueMapper.class})
+import org.mapstruct.*;
+
+import com.fpl.datn.dto.request.Product.ProductVariantRequest;
+import com.fpl.datn.dto.request.Product.UpdateProductVariantRequest;
+import com.fpl.datn.dto.response.Product.ProductVariantResponse;
+import com.fpl.datn.models.*;
+
+@Mapper(
+        componentModel = "spring",
+        uses = {ProductImageMapper.class, ProductVariantAttributeValueMapper.class})
 public interface ProductVariantMapper {
 
     // Request → Entity

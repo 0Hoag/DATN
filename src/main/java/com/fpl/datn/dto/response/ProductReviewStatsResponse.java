@@ -1,4 +1,4 @@
-package com.fpl.datn.dtos.response;
+package com.fpl.datn.dto.response;
 
 import java.util.Map;
 

@@ -20,6 +20,7 @@ public class Voucher {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "code", unique = true)
     private String code;
 
     private String description;

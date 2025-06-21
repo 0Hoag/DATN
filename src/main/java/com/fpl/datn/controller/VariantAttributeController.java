@@ -1,22 +1,22 @@
 package com.fpl.datn.controller;
 
+import java.util.List;
+
+import jakarta.validation.Valid;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
-import com.fpl.datn.dto.request.Product.ProductRequest;
-import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.request.Product.UpdateVariantAttributeRequest;
 import com.fpl.datn.dto.request.Product.VariantAttributeRequest;
-import com.fpl.datn.dto.response.Product.ProductResponse;
 import com.fpl.datn.dto.response.Product.VariantAttributeResponse;
 import com.fpl.datn.service.Product.VariantAttributeService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/variantattribute")
@@ -65,15 +65,13 @@ public class VariantAttributeController {
             @PathVariable("id") int id, @RequestBody UpdateVariantAttributeRequest request) {
         return ApiResponse.<VariantAttributeResponse>builder()
                 .code(1000)
-                .result(variantAttributeService.update(id,request))
+                .result(variantAttributeService.update(id, request))
                 .build();
     }
+
     @DeleteMapping("/{id}")
     public ApiResponse<Void> Delete(@PathVariable("id") int id) {
         variantAttributeService.delete(id);
-        return ApiResponse.<Void>builder()
-                .code(1000)
-                .message("Delete Success!")
-                .build();
+        return ApiResponse.<Void>builder().code(1000).message("Delete Success!").build();
     }
 }

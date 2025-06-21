@@ -5,15 +5,8 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.Set;
-
-import org.springframework.stereotype.Service;
-
-import com.fpl.datn.exception.AppException;
-import com.fpl.datn.exception.ErrorCode;
-import com.fpl.datn.repository.CategoryRepository;
 import com.fpl.datn.models.Category;
+import com.fpl.datn.repository.CategoryRepository;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

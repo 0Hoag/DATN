@@ -11,5 +11,5 @@ public class ProductVariantAttributeValueResponse {
     private Integer productVariantId;
     private Integer attributeValueId;
     private String attributeValue; // VD: "Xanh"
-    private String attributeName;  // VD: "Màu sắc"
+    private String attributeName; // VD: "Màu sắc"
 }

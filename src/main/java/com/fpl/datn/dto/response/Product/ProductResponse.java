@@ -1,10 +1,10 @@
 package com.fpl.datn.dto.response.Product;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.sql.Timestamp;
 import java.util.List;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @AllArgsConstructor
@@ -26,5 +26,4 @@ public class ProductResponse {
     List<ProductVariantResponse> productVariants;
     List<String> productReviews;
     List<String> orderDetails;
-
 }

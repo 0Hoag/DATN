@@ -1,4 +1,4 @@
-package com.fpl.datn.dtos.response;
+package com.fpl.datn.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -23,6 +23,17 @@ public class GlobalException {
     UserMapper userMapper;
 
     @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse<Void>> handException(Exception exception) {
+        ErrorCode errorCode = ErrorCode.UNKNOWN_ERROR;
+        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
+
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse<Void>> handRuntimeException(RuntimeException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
         ApiResponse<Void> apiResponse = new ApiResponse<Void>();

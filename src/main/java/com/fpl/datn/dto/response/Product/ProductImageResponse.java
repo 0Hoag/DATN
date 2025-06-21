@@ -1,11 +1,9 @@
 package com.fpl.datn.dto.response.Product;
 
+import java.sql.Timestamp;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.cglib.core.Local;
-
-import java.sql.Timestamp;
-import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor

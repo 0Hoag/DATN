@@ -1,9 +1,9 @@
 package com.fpl.datn.dto.response;
 
+import java.time.LocalDateTime;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -14,6 +14,4 @@ public class CartResponse {
     private Integer id;
     private String sessionId;
     private LocalDateTime createdAt;
-
-    private Integer userId;
 }

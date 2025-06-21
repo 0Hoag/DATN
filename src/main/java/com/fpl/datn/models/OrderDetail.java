@@ -2,10 +2,7 @@ package com.fpl.datn.models;
 
 import java.math.BigDecimal;
 
-import java.math.BigDecimal;
-
 import jakarta.persistence.*;
-
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,4 +41,3 @@ public class OrderDetail {
     @JoinColumn(name = "product_variant_id")
     private ProductVariant productVariant;
 }
-
