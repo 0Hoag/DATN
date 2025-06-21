@@ -15,9 +15,13 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderRequest {
-    int userId;
-    int addressId;
-    int paymentMethodId;
+    Integer userId;
+    Integer addressId;
+    String inputAddress;
+    Integer paymentMethodId;
+    String orderStatus;
+    String paymentStatus;
+    Integer voucherId;
     String note;
     List<OrderItemResponse> items;
 }

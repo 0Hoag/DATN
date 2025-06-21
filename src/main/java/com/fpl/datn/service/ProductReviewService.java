@@ -52,7 +52,7 @@ public class ProductReviewService {
         if (!user.getId().equals(review.getUser().getId())
                 && !user.hasRole(PredefinedRole.ROLE_ADMIN)
                 && !user.hasRole(PredefinedRole.ROLE_MANAGER)) {
-            throw new AppException(ErrorCode.UNAUTHORIZE);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         repository.deleteById(id);

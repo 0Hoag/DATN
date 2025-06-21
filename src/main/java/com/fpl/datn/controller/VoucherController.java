@@ -32,9 +32,9 @@ public class VoucherController {
     ApiResponse<PageResponse<VoucherResponse>> getAll(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
-            @RequestParam(required = false, defaultValue = "false") boolean sort) {
+            @RequestParam(required = false, defaultValue = "true") boolean desc) {
         return ApiResponse.<PageResponse<VoucherResponse>>builder()
-                .result(voucherService.getAll(page, size, sort))
+                .result(voucherService.getAll(page, size, desc))
                 .build();
     }
 
@@ -63,5 +63,16 @@ public class VoucherController {
     ApiResponse<Void> deleteVoucher(@PathVariable int id) {
         voucherService.delete(id);
         return ApiResponse.<Void>builder().message("Delete Success!").build();
+    }
+
+    @GetMapping("/search")
+    ApiResponse<PageResponse<VoucherResponse>> searchVoucher(
+            @RequestParam String keyword,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean desc) {
+        return ApiResponse.<PageResponse<VoucherResponse>>builder()
+                .result(voucherService.search(keyword, page, size, desc))
+                .build();
     }
 }
