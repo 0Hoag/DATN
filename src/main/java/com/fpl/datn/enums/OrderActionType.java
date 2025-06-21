@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 public enum OrderActionType {
     CREATE("Create"),
     UPDATE("Update"),
+    DELETE("Delete"),
     UPDATESTATUS("Update status");
 
     String type;

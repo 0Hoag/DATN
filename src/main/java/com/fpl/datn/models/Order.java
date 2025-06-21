@@ -37,6 +37,9 @@ public class Order {
     @Column(name = "is_return")
     private Boolean isReturn;
 
+    @Column(name = "is_delete")
+    private Boolean isDelete;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

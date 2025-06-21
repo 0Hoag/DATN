@@ -17,7 +17,10 @@ import lombok.experimental.FieldDefaults;
 public class OrderRequest {
     Integer userId;
     Integer addressId;
+    String inputAddress;
     Integer paymentMethodId;
+    String orderStatus;
+    String paymentStatus;
     Integer voucherId;
     String note;
     List<OrderItemResponse> items;

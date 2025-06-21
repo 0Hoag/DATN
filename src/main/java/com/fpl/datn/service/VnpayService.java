@@ -19,7 +19,12 @@ import jakarta.xml.bind.DatatypeConverter;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.configuration.VnpayConfig;
+import com.fpl.datn.enums.OrderActionType;
+import com.fpl.datn.enums.PaymentStatus;
+import com.fpl.datn.exception.AppException;
+import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.models.Order;
+import com.fpl.datn.repository.OrderRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +34,8 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class VnpayService {
+    TransactionLogService logService;
+    OrderRepository orderRepository;
     VnpayConfig config;
 
     public String createPaymentUrl(Order order, HttpServletRequest request) {
@@ -101,5 +108,22 @@ public class VnpayService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public String handleVnpayReturn(Map<String, String> params) {
+        String responseCode = params.get("vnp_ResponseCode");
+        String orderInfo = params.get("vnp_OrderInfo");
+        int orderId = Integer.parseInt(orderInfo.replace("Order:", ""));
+
+        var order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        if ("00".equals(responseCode)) {
+            order.setPaymentStatus(PaymentStatus.PAID.getDescription());
+            orderRepository.save(order);
+            logService.logPayment(order, OrderActionType.UPDATESTATUS.getType(), null);
+            return "Thanh toán thành công cho đơn hàng #" + orderId;
+        } else {
+            return "Thanh toán thất bại cho đơn hàng #" + orderId;
+        }
     }
 }
