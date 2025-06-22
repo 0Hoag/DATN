@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import jakarta.validation.ConstraintViolation;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -98,6 +99,16 @@ public class GlobalException {
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse<Void>> responseEntity(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(ApiResponse.<Void>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(value = InvalidDataAccessApiUsageException.class)
+    ResponseEntity<ApiResponse<Void>> responseEntity(InvalidDataAccessApiUsageException exception) {
+        ErrorCode errorCode = ErrorCode.MISSING_INPUT;
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())

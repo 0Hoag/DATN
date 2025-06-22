@@ -29,7 +29,7 @@ public class TransactionLog {
 
     private String status;
 
-    @Column(name = "transaction_ref")
+    @Column(name = "transaction_ref", columnDefinition = "TEXT")
     private String transactionRef;
 
     @Column(columnDefinition = "TEXT")

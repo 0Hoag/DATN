@@ -41,10 +41,10 @@ public class CategoryService {
             throw new AppException(ErrorCode.MISSING_INPUT);
         }
         if (repo.existsByName(request.getName())) {
-            throw new AppException(ErrorCode.CATEGORIES_NAME_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_NAME_EXISTED);
         }
         if (repo.existsBySlug(request.getSlug())) {
-            throw new AppException(ErrorCode.CATEGORIES_SLUG_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_SLUG_EXISTED);
         }
 
         Category category = mapper.toCategory(request);

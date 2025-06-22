@@ -44,7 +44,7 @@ public class UserService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public UserResponse Create(UserRequest request) {
         HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
 
@@ -109,14 +109,14 @@ public class UserService {
         }
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public List<UserResponse> List() {
         return userRepositories.findAll().stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public PageResponse<UserResponse> Get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = userRepositories.findAll(pageable);

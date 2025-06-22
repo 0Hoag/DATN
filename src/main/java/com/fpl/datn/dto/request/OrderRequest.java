@@ -2,6 +2,8 @@ package com.fpl.datn.dto.request;
 
 import java.util.List;
 
+import jakarta.validation.constraints.NotNull;
+
 import com.fpl.datn.dto.response.OrderItemResponse;
 
 import lombok.AccessLevel;
@@ -15,7 +17,9 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderRequest {
+    @NotNull(message = "USERID_NOT_NULL")
     Integer userId;
+
     Integer addressId;
     String inputAddress;
     Integer paymentMethodId;

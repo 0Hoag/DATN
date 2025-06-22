@@ -3,6 +3,7 @@ package com.fpl.datn.controller;
 import java.time.LocalDate;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -69,7 +70,7 @@ public class OrderController {
     }
 
     @PostMapping
-    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request, HttpServletRequest httpRequest) {
+    ApiResponse<OrderResponse> createOrder(@RequestBody @Valid OrderRequest request, HttpServletRequest httpRequest) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.create(request, httpRequest))
                 .build();

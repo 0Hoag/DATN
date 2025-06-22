@@ -53,7 +53,7 @@ public class VoucherService {
     public VoucherResponse create(VoucherRequest request) {
         // Chỉ check trùng code thôi
         if (repository.existsByCode(request.getCode())) {
-            throw new AppException(ErrorCode.CATEGORIES_NAME_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_NAME_EXISTED);
         }
 
         // Validate cơ bản
@@ -74,7 +74,7 @@ public class VoucherService {
         // Check trùng code nếu có thay đổi
         if (request.getCode() != null && !request.getCode().equals(voucher.getCode())) {
             if (repository.existsByCode(request.getCode())) {
-                throw new AppException(ErrorCode.CATEGORIES_NAME_EXISTED);
+                throw new AppException(ErrorCode.CATEGORY_NAME_EXISTED);
             }
         }
 

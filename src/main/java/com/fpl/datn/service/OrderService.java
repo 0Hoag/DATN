@@ -370,7 +370,7 @@ public class OrderService {
             throw new AppException(ErrorCode.VOUCHER_EXPIRED);
         }
         if (isOverused) {
-            throw new AppException(ErrorCode.VOUCHER_ORVERUSED);
+            throw new AppException(ErrorCode.VOUCHER_OVERUSED);
         }
         if (notEnoughMinOrder) {
             throw new AppException(ErrorCode.VOUCHER_MIN_ORDER_NOT_MET);
