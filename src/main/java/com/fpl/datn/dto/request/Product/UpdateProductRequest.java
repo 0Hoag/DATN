@@ -1,10 +1,7 @@
 package com.fpl.datn.dto.request.Product;
 
-import com.fpl.datn.dto.response.Product.ProductVariantResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
 
 @Data
 @NoArgsConstructor

@@ -1,13 +1,15 @@
 package com.fpl.datn.controller;
 
-import com.fpl.datn.models.UploadImage;
-import com.fpl.datn.service.Product.UploadImageService;
-import lombok.RequiredArgsConstructor;
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
+import com.fpl.datn.models.UploadImage;
+import com.fpl.datn.service.Product.UploadImageService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/upload-image")

@@ -40,7 +40,7 @@ public enum ErrorCode {
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
 
     // Category
-    CATEGORY_NOT_EXISTED(1019,"Category not existed", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_EXISTED(1019, "Category not existed", HttpStatus.BAD_REQUEST),
     CATEGORIES_NAME_EXISTED(1020, "Categories name existed", HttpStatus.CONFLICT),
     CATEGORIES_SLUG_EXISTED(1021, "Categories slug existed", HttpStatus.CONFLICT),
     CATEGORY_HAS_CHILDREN(1022, "Category has child categories", HttpStatus.BAD_REQUEST),
@@ -89,7 +89,7 @@ public enum ErrorCode {
     INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
     INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
     CATEGORY_CHILD_CANNOT_HAVE_PARENT(1024, "Category child cannot have parent", HttpStatus.BAD_REQUEST),
-    
+
     // Voucher
     VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
     DASHBOARD_ERROR(1044, "Dashboard statistics retrieval error", HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,12 +1,9 @@
 package com.fpl.datn.dto.response.Product;
 
-import com.fpl.datn.mapper.Product.ProductImageMapper;
+import java.util.List;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor

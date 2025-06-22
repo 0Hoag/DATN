@@ -1,11 +1,10 @@
 package com.fpl.datn.dto.request.Product;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -21,6 +20,6 @@ public class ProductVariantRequest {
     private Boolean isActive;
     private Integer productId; // ID sản phẩm cha
 
-    private List<Integer> attributeValueIds;   // 🆕 danh sách ID thuộc tính
+    private List<Integer> attributeValueIds; // 🆕 danh sách ID thuộc tính
     List<ProductImageRequest> images;
 }

@@ -1,9 +1,9 @@
 package com.fpl.datn.dto.request.Product;
 
 import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
 
 @Data
 @NoArgsConstructor

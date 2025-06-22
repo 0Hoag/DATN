@@ -1,8 +1,5 @@
 package com.fpl.datn.models;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -28,5 +25,4 @@ public class UploadImage {
     private String fileName; // Tên file gốc (dùng hiển thị, debug, tìm kiếm,...)
 
     private String publicId; // để xoá ảnh trên Cloudinary
-
 }

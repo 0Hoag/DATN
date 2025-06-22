@@ -1,8 +1,5 @@
 package com.fpl.datn.mapper.Product;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.mapstruct.*;
 
 import com.fpl.datn.dto.request.Product.ProductVariantRequest;
@@ -11,8 +8,8 @@ import com.fpl.datn.dto.response.Product.ProductVariantResponse;
 import com.fpl.datn.models.*;
 
 @Mapper(
-        componentModel = "spring", uses = {ProductImageMapper.class, ProductVariantAttributeValueMapper.class}
-)
+        componentModel = "spring",
+        uses = {ProductImageMapper.class, ProductVariantAttributeValueMapper.class})
 public interface ProductVariantMapper {
 
     // Request → Entity
@@ -38,7 +35,6 @@ public interface ProductVariantMapper {
     @Mapping(target = "orderDetails", ignore = true)
     @Mapping(target = "cartItems", ignore = true)
     void toUpdate(@MappingTarget ProductVariant productVariant, UpdateProductVariantRequest request);
-
 
     @Named("mapProductIdToProduct")
     default Product mapProductIdToProduct(Integer productId) {

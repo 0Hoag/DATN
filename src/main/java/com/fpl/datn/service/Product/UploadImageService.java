@@ -1,16 +1,18 @@
 package com.fpl.datn.service.Product;
 
+import java.io.IOException;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.fpl.datn.models.UploadImage;
 import com.fpl.datn.repository.UploadImageRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,10 +24,8 @@ public class UploadImageService {
 
     public UploadImage upload(MultipartFile file) {
         try {
-            Map<?, ?> result = cloudinary.uploader().upload(
-                    file.getBytes(),
-                    ObjectUtils.asMap("folder", "product-images")
-            );
+            Map<?, ?> result =
+                    cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", "product-images"));
 
             UploadImage image = UploadImage.builder()
                     .url((String) result.get("secure_url"))
@@ -41,8 +41,7 @@ public class UploadImageService {
     }
 
     public UploadImage getById(Integer id) {
-        return uploadImageRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Image not found"));
+        return uploadImageRepo.findById(id).orElseThrow(() -> new RuntimeException("Image not found"));
     }
 
     public void delete(Integer id) {

@@ -4,12 +4,8 @@ import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import com.fpl.datn.models.*;
-import com.fpl.datn.repository.*;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
@@ -23,6 +19,8 @@ import com.fpl.datn.dto.response.Product.ProductVariantResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductVariantMapper;
+import com.fpl.datn.models.*;
+import com.fpl.datn.repository.*;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +43,8 @@ public class ProductVariantService {
     @Transactional
     public Boolean create(ProductVariantRequest request) {
         // 1. Tìm sản phẩm cha
-        Product product = productRepo.findById(request.getProductId())
+        Product product = productRepo
+                .findById(request.getProductId())
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         // 2. Map request → entity variant
         ProductVariant variant = mapper.toEntity(request);
@@ -55,13 +54,13 @@ public class ProductVariantService {
         // 3. Xử lý thuộc tính
         List<VariantAttributeValue> attributeValues = new ArrayList<>();
         List<ProductVariantAttributeValue> attributeLinks = new ArrayList<>();
-        if (request.getAttributeValueIds() != null && !request.getAttributeValueIds().isEmpty()) {
+        if (request.getAttributeValueIds() != null
+                && !request.getAttributeValueIds().isEmpty()) {
             attributeValues = request.getAttributeValueIds().stream()
-                    .map(id -> attributeValueRepo.findById(id)
-                            .orElseThrow(() -> {
-                                log.error("Không tìm thấy attributeValueId = {}", id);
-                                return new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND);
-                            }))
+                    .map(id -> attributeValueRepo.findById(id).orElseThrow(() -> {
+                        log.error("Không tìm thấy attributeValueId = {}", id);
+                        return new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND);
+                    }))
                     .toList();
 
             attributeLinks = attributeValues.stream()
@@ -101,7 +100,7 @@ public class ProductVariantService {
         }
         return true;
     }
-    //Hàm helper chuẩn hoá text
+    // Hàm helper chuẩn hoá text
     private String normalize(String input) {
         return Normalizer.normalize(input, Normalizer.Form.NFD)
                 .replaceAll("[\\p{InCombiningDiacriticalMarks}]", "")
@@ -110,7 +109,9 @@ public class ProductVariantService {
                 .replaceAll("-{2,}", "-")
                 .replaceAll("^-|-$", "");
     }
-    private String generateSkuFromVariantAndAttributes(String variantName, List<VariantAttributeValue> attributeValues) {
+
+    private String generateSkuFromVariantAndAttributes(
+            String variantName, List<VariantAttributeValue> attributeValues) {
         // Normalize tên biến thể (variant name)
         String base = normalize(variantName);
 
@@ -122,18 +123,18 @@ public class ProductVariantService {
                 .toList();
         return base + (attributeParts.isEmpty() ? "" : "-" + String.join("-", attributeParts));
     }
+
     public ProductVariantResponse detail(Integer id) {
-        ProductVariant productVariant = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        ProductVariant productVariant =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
         return mapper.toResponse(productVariant);
     }
+
     public List<ProductVariantResponse> list() {
-        return repo.findAll()
-                .stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+        return repo.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
+
     public PageResponse<ProductVariantResponse> get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repo.findAll(pageable);
@@ -152,11 +153,12 @@ public class ProductVariantService {
                 .data(data)
                 .build();
     }
+
     @Transactional
     public ProductVariantResponse update(Integer id, UpdateProductVariantRequest request) {
         // 1. Tìm variant
-        ProductVariant variant = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        ProductVariant variant =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
         // 2. Cập nhật thông tin cơ bản
         mapper.toUpdate(variant, request);
         variant.setUpdatedAt(LocalDateTime.now());
@@ -165,7 +167,8 @@ public class ProductVariantService {
             for (var imgRequest : request.getImages()) {
                 if (imgRequest.getId() != null) {
                     // Cập nhật ảnh đã có
-                    ProductImage existingImage = imageRepo.findById(imgRequest.getId())
+                    ProductImage existingImage = imageRepo
+                            .findById(imgRequest.getId())
                             .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_DETAIL_EXISTED));
                     existingImage.setAltText(imgRequest.getAltText());
                     existingImage.setSpecDescription(imgRequest.getSpecDescription());
@@ -192,19 +195,15 @@ public class ProductVariantService {
         return mapper.toResponse(repo.save(variant));
     }
 
-
-
-
     public void delete(Integer id) {
-        ProductVariant productVariant = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
+        ProductVariant productVariant =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
-        if (productVariant.getOrderDetails() != null && !productVariant.getOrderDetails().isEmpty()) {
+        if (productVariant.getOrderDetails() != null
+                && !productVariant.getOrderDetails().isEmpty()) {
             throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
         }
 
         repo.delete(productVariant);
     }
-
-
 }

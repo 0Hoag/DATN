@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.fpl.datn.repository.*;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
@@ -15,12 +14,12 @@ import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.ProductVariantRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
-import com.fpl.datn.dto.request.Product.UpdateProductVariantRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductMapper;
 import com.fpl.datn.models.*;
+import com.fpl.datn.repository.*;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +45,7 @@ public class ProductService {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
         // Kiểm tra name
-        if(repo.existsByName(request.getName())) {
+        if (repo.existsByName(request.getName())) {
             throw new AppException(ErrorCode.PRODUCT_NAME_EXISTED);
         }
         // 2. Kiểm tra slug
@@ -75,8 +74,7 @@ public class ProductService {
     @Transactional
     public ProductResponse update(Integer id, UpdateProductRequest request) {
         // 1. Kiểm tra tồn tại Product
-        Product product = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 2. Validate slug (bỏ qua chính nó)
         if (repo.existsBySlugAndIdNot(request.getSlug(), id)) {
@@ -92,21 +90,18 @@ public class ProductService {
         mapper.updateProduct(product, request);
         product.setUpdatedAt(LocalDateTime.now());
         repo.save(product);
-        Product productWithCategory = repo.findByIdWithCategory(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product productWithCategory =
+                repo.findByIdWithCategory(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         return mapper.toProductResponse(productWithCategory);
-
     }
 
     // xem chi tiết sản phẩm
     public ProductResponse detail(Integer id) {
-        Product product = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         return mapper.toProductResponse(product);
     }
-
 
     // xem danh sách sản phẩm
     public List<ProductResponse> list() {
@@ -135,15 +130,15 @@ public class ProductService {
     }
 
     public void delete(Integer id) {
-        Product product = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         if (product.getOrderDetails() != null && !product.getOrderDetails().isEmpty()) {
             throw new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED);
         }
         // Kiểm tra các variant của product
         if (product.getProductVariants() != null) {
             for (ProductVariant variant : product.getProductVariants()) {
-                if (variant.getOrderDetails() != null && !variant.getOrderDetails().isEmpty()) {
+                if (variant.getOrderDetails() != null
+                        && !variant.getOrderDetails().isEmpty()) {
                     throw new AppException(ErrorCode.PRODUCT_DELETE_NOT_EXISTED);
                 }
             }
