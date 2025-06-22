@@ -26,4 +26,7 @@ public class UploadImage {
     private String url; // Đường dẫn tuyệt đối đến ảnh (VD: https://cdn.example.com/...)
 
     private String fileName; // Tên file gốc (dùng hiển thị, debug, tìm kiếm,...)
+
+    private String publicId; // để xoá ảnh trên Cloudinary
+
 }

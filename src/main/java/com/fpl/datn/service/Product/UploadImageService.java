@@ -22,32 +22,36 @@ public class UploadImageService {
 
     public UploadImage upload(MultipartFile file) {
         try {
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(
+            Map<?, ?> result = cloudinary.uploader().upload(
                     file.getBytes(),
                     ObjectUtils.asMap("folder", "product-images")
             );
 
-            String url = (String) uploadResult.get("secure_url");
-
             UploadImage image = UploadImage.builder()
-                    .url(url)
+                    .url((String) result.get("secure_url"))
+                    .publicId((String) result.get("public_id"))
                     .fileName(file.getOriginalFilename())
                     .build();
 
             return uploadImageRepo.save(image);
         } catch (IOException e) {
-            log.error("Upload image failed: {}", e.getMessage());
-            throw new RuntimeException("Failed to upload image to Cloudinary");
+            log.error("Upload failed", e);
+            throw new RuntimeException("Upload to Cloudinary failed");
         }
     }
 
     public UploadImage getById(Integer id) {
         return uploadImageRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("UploadImage not found"));
+                .orElseThrow(() -> new RuntimeException("Image not found"));
     }
 
     public void delete(Integer id) {
         UploadImage image = getById(id);
+        try {
+            cloudinary.uploader().destroy(image.getPublicId(), ObjectUtils.emptyMap());
+        } catch (IOException e) {
+            log.error("Cloudinary deletion failed", e);
+        }
         uploadImageRepo.delete(image);
     }
 }

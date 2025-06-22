@@ -19,16 +19,12 @@ public class UploadImageController {
     @PostMapping("/")
     public ResponseEntity<?> upload(@RequestParam("url") MultipartFile file) {
         UploadImage image = uploadImageService.upload(file);
-        return ResponseEntity.ok(Map.of(
-                "id", image.getId(),
-                "url", image.getUrl()
-        ));
+        return ResponseEntity.ok(Map.of("id", image.getId(), "url", image.getUrl()));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Integer id) {
-        UploadImage image = uploadImageService.getById(id);
-        return ResponseEntity.ok(image);
+        return ResponseEntity.ok(uploadImageService.getById(id));
     }
 
     @DeleteMapping("/{id}")
