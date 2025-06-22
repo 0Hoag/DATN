@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderUserResponse {
+    Integer id;
     String fullName;
     String email;
     String phone;

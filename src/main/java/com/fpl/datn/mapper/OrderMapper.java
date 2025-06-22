@@ -19,6 +19,7 @@ public interface OrderMapper {
     @Mapping(target = "paymentMethod", source = "paymentMethod.name")
     @Mapping(target = "address", source = "address.addressLine")
     @Mapping(target = "PaymentUrl", ignore = true)
+    @Mapping(target = "user.id", source = "user.id")
     OrderResponse toOrderResponse(Order order);
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
