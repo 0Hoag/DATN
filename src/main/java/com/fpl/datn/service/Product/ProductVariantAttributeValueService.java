@@ -1,5 +1,12 @@
 package com.fpl.datn.service.Product;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.Product.ProductVariantAttributeValueRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductVariantAttributeValueRequest;
@@ -13,16 +20,11 @@ import com.fpl.datn.models.VariantAttributeValue;
 import com.fpl.datn.repository.ProductVariantAttributeValueRepository;
 import com.fpl.datn.repository.ProductVariantRepository;
 import com.fpl.datn.repository.VariantAttributeValueRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,11 +39,13 @@ public class ProductVariantAttributeValueService {
 
     // CREATE
     public Boolean create(ProductVariantAttributeValueRequest request) {
-        ProductVariant variant = productVariantRepo.findById(request.getProductVariantId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
+        ProductVariant variant = productVariantRepo
+                .findById(request.getProductVariantId())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
-        VariantAttributeValue value = variantAttributeValueRepo.findById(request.getAttributeValueId())
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+        VariantAttributeValue value = variantAttributeValueRepo
+                .findById(request.getAttributeValueId())
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND));
 
         boolean exists = repo.existsByProductVariantIdAndAttributeValueId(
                 request.getProductVariantId(), request.getAttributeValueId());
@@ -58,25 +62,24 @@ public class ProductVariantAttributeValueService {
 
     // UPDATE
     public ProductVariantAttributeValueResponse update(Integer id, UpdateProductVariantAttributeValueRequest request) {
-        ProductVariantAttributeValue entity = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_VALUE_EXISTED));
+        ProductVariantAttributeValue entity =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_VALUE_EXISTED));
 
-        ProductVariant variant = productVariantRepo.findById(request.getProductVariantId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
+        ProductVariant variant = productVariantRepo
+                .findById(request.getProductVariantId())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
-        VariantAttributeValue attributeValue = variantAttributeValueRepo.findById(request.getAttributeValueId())
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+        VariantAttributeValue attributeValue = variantAttributeValueRepo
+                .findById(request.getAttributeValueId())
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND));
 
-        // Giả sử mapper.update(...) có tồn tại, như ProductImageService
-        mapper.update(entity, request); // Nếu bạn có phương thức này trong mapper
+        mapper.update(entity, request);
 
         entity.setProductVariant(variant);
         entity.setAttributeValue(attributeValue);
 
         return mapper.toResponse(repo.save(entity));
     }
-
-
 
     // DELETE
     public Boolean delete(Integer id) {
@@ -86,22 +89,23 @@ public class ProductVariantAttributeValueService {
         repo.deleteById(id);
         return true;
     }
+
     public ProductVariantAttributeValueResponse detail(Integer id) {
-        ProductVariantAttributeValue entity = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_VALUE_EXISTED));
+        ProductVariantAttributeValue entity =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_VALUE_EXISTED));
         return mapper.toResponse(entity);
     }
+
     public List<ProductVariantAttributeValueResponse> list() {
-        return repo.findAll().stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+        return repo.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
+
     public PageResponse<ProductVariantAttributeValueResponse> get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repo.findAll(pageable);
 
         var data = pageData.getContent().stream()
-                .map(product-> {
+                .map(product -> {
                     var cat = repo.findById(product.getId())
                             .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_DETAIL_EXISTED));
                     return mapper.toResponse(cat);
@@ -117,4 +121,3 @@ public class ProductVariantAttributeValueService {
                 .build();
     }
 }
-

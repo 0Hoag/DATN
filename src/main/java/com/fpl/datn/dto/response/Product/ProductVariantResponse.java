@@ -15,16 +15,12 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantResponse {
     private Integer id;
-    private String sku;
     private String variantName;
-    private BigDecimal price;
+    private Long price;
     private Integer quantity;
     private Integer sold;
     private Boolean isActive;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
-    private Integer productId;
-    private List<ProductImageResponse> productImages;
     private List<ProductVariantAttributeValueResponse> attributeValues;
+    private List<ProductImageResponse> images;
+    private Integer productId;
 }

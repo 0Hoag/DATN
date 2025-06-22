@@ -13,6 +13,7 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantRequest {
+    private Integer id;
     private String variantName;
     private BigDecimal price;
     private Integer quantity;
@@ -20,6 +21,6 @@ public class ProductVariantRequest {
     private Boolean isActive;
     private Integer productId; // ID sản phẩm cha
 
-    private List<Integer> attributeValueIds; // 🆕 danh sách ID thuộc tính
+    private List<Integer> attributeValueIds;   // 🆕 danh sách ID thuộc tính
     List<ProductImageRequest> images;
 }

@@ -1,10 +1,9 @@
 package com.fpl.datn.dto.request.Product;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
 
 @Data
 @NoArgsConstructor
@@ -12,10 +11,19 @@ import java.sql.Timestamp;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProductImageRequest {
-    String imageUrl;
+    @NotNull(message = "ID ảnh không được để trống")
+    Integer id;
+
     String altText;
+
     String specDescription;
+
+    @NotNull(message = "Trạng thái ảnh đại diện không được để trống")
     Boolean isThumbnail;
-    int sortOrder;
-    Integer productVariantId;
+
+    @NotNull(message = "Thứ tự ảnh không được để trống")
+    Integer sortOrder;
+
+    @NotNull(message = "ID ảnh upload không được để trống")
+    Integer imageUrl;
 }

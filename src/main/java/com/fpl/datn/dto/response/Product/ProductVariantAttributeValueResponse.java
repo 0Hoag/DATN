@@ -8,8 +8,6 @@ import lombok.*;
 @Builder
 public class ProductVariantAttributeValueResponse {
     private Integer id;
-    private Integer productVariantId;
-    private Integer attributeValueId;
+    private String attributeName; // VD: "Màu sắc"
     private String attributeValue; // VD: "Xanh"
-    private String attributeName;  // VD: "Màu sắc"
 }

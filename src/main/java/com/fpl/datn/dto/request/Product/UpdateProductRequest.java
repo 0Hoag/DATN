@@ -20,7 +20,5 @@ public class UpdateProductRequest {
     String content;
     Boolean isHome;
     Boolean isActive;
-    Integer category; // id để gán cho category
-    // default null
-    List<UpdateProductVariantRequest> productVariants;
+    Integer category;
 }
