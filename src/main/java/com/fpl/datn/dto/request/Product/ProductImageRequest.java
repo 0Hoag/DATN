@@ -1,10 +1,9 @@
 package com.fpl.datn.dto.request.Product;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.sql.Timestamp;
 
 @Data
 @NoArgsConstructor
@@ -12,11 +11,23 @@ import java.sql.Timestamp;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductImageRequest {
-    String imageUrl;
+    Integer id;
+
+    @NotBlank(message = "Văn bản thay thế không được để trống")
     String altText;
+
+    @NotBlank(message = "Mô tả chi tiết không được để trống")
     String specDescription;
+
+    @NotNull(message = "Trạng thái ảnh đại diện không được để trống")
     Boolean isThumbnail;
-    int sortOrder;
+
+    @NotNull(message = "Thứ tự ảnh không được để trống")
+    Integer sortOrder;
+
+    @NotNull(message = "ID biến thể không được để trống")
     Integer productVariantId;
-    MultipartFile image;
+
+    @NotNull(message = "URL Ảnh upload không được để trống")
+    String imageUrl;
 }

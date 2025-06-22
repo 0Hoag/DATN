@@ -49,7 +49,7 @@ public class ProductVariant {
     @OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL)
     private List<ProductImage> productImages;
 
-    @OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "productVariant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ProductVariantAttributeValue> attributeValues;
 
     @OneToMany(mappedBy = "productVariant")

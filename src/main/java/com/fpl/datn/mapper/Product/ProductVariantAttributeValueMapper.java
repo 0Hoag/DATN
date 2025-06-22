@@ -1,12 +1,13 @@
 package com.fpl.datn.mapper.Product;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+
 import com.fpl.datn.dto.request.Product.ProductVariantAttributeValueRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductVariantAttributeValueRequest;
 import com.fpl.datn.dto.response.Product.ProductVariantAttributeValueResponse;
 import com.fpl.datn.models.ProductVariantAttributeValue;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ProductVariantAttributeValueMapper {
@@ -18,8 +19,6 @@ public interface ProductVariantAttributeValueMapper {
     ProductVariantAttributeValue toEntity(ProductVariantAttributeValueRequest request);
 
     // Response
-    @Mapping(source = "productVariant.id", target = "productVariantId")
-    @Mapping(source = "attributeValue.id", target = "attributeValueId")
     @Mapping(source = "attributeValue.value", target = "attributeValue")
     @Mapping(source = "attributeValue.attribute.name", target = "attributeName")
     ProductVariantAttributeValueResponse toResponse(ProductVariantAttributeValue entity);

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,19 +14,20 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
-    @Column(name = "image_url")
-    private String imageUrl;
 
     @Column(name = "alt_text")
     private String altText;
 
     @Column(name = "spec_description", columnDefinition = "TEXT")
     private String specDescription;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @Column(name = "is_thumbnail")
     private Boolean isThumbnail;
@@ -39,7 +41,7 @@ public class ProductImage {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    // Relationships
+    // ✅ Quan hệ với biến thể sản phẩm
     @ManyToOne
     @JoinColumn(name = "product_variant_id")
     private ProductVariant productVariant;

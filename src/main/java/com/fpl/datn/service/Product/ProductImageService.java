@@ -1,7 +1,14 @@
 package com.fpl.datn.service.Product;
 
-import com.cloudinary.Cloudinary;
-import com.cloudinary.utils.ObjectUtils;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.Product.ProductImageRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductImageRequest;
@@ -11,22 +18,15 @@ import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductImageMapper;
 import com.fpl.datn.models.ProductImage;
 import com.fpl.datn.models.ProductVariant;
+import com.fpl.datn.models.UploadImage;
 import com.fpl.datn.repository.ProductImageRepository;
 import com.fpl.datn.repository.ProductVariantRepository;
+import com.fpl.datn.repository.UploadImageRepository;
+
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.AccessLevel;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -37,40 +37,21 @@ public class ProductImageService {
     ProductImageRepository repo;
     ProductImageMapper mapper;
     ProductVariantRepository repoPRV;
-    Cloudinary cloudinary;
+    UploadImageRepository uploadImageRepo; // ✅ repo ảnh đã upload trước
 
-
-    // Create with Cloudinary upload
     public Boolean create(ProductImageRequest request) {
         ProductVariant variant = repoPRV.findById(request.getProductVariantId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
-
-        String imageUrl = uploadToCloudinary(request.getImage());
-        if (imageUrl == null) {
-            throw new AppException(ErrorCode.UPLOAD_IMAGE_FAILED);
-        }
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
         ProductImage productImage = mapper.toEntity(request);
-        productImage.setImageUrl(imageUrl);
+        productImage.setProductVariant(variant);
         productImage.setCreatedAt(LocalDateTime.now());
         productImage.setUpdatedAt(LocalDateTime.now());
-        productImage.setProductVariant(variant);
 
         repo.save(productImage);
         return true;
     }
 
-    private String uploadToCloudinary(MultipartFile file) {
-        try {
-            Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
-                    "folder", "product-images"
-            ));
-            return (String) uploadResult.get("secure_url");
-        } catch (IOException e) {
-            log.error("Cloudinary upload failed: {}", e.getMessage());
-            return null;
-        }
-    }
 
     public ProductImageResponse detail(Integer id) {
         ProductImage productImage = repo.findById(id)
@@ -79,8 +60,7 @@ public class ProductImageService {
     }
 
     public List<ProductImageResponse> list() {
-        return repo.findAll()
-                .stream()
+        return repo.findAll().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -89,8 +69,7 @@ public class ProductImageService {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repo.findAll(pageable);
 
-        List<ProductImageResponse> data = pageData.getContent()
-                .stream()
+        List<ProductImageResponse> data = pageData.getContent().stream()
                 .map(mapper::toResponse)
                 .collect(Collectors.toList());
 
@@ -106,10 +85,15 @@ public class ProductImageService {
     public ProductImageResponse update(Integer id, UpdateProductImageRequest request) {
         ProductImage productImage = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_UPDATE_EXISTED));
-        mapper.update(productImage, request);
+
+        mapper.update(productImage, request); // ✅ Ánh xạ các trường cơ bản
         productImage.setUpdatedAt(LocalDateTime.now());
+
         return mapper.toResponse(repo.save(productImage));
     }
+
+
+
 
     public void delete(Integer id) {
         ProductImage productImage = repo.findById(id)
