@@ -4,7 +4,6 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
@@ -77,8 +76,10 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchProducts(@RequestParam String keyword) {
-        List<ProductResponse> results = productService.search(keyword);
-        return ResponseEntity.ok(results);
+    public ApiResponse<List<ProductResponse>> searchProducts(@RequestParam String keyword) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .code(1000)
+                .result(productService.search(keyword))
+                .build();
     }
 }

@@ -6,4 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.fpl.datn.models.VariantAttributeValue;
 
 @Repository
-public interface VariantAttributeValueRepository extends JpaRepository<VariantAttributeValue, Integer> {}
+public interface VariantAttributeValueRepository extends JpaRepository<VariantAttributeValue, Integer> {
+    boolean existsByValueIgnoreCaseAndAttribute_Id(String value, Integer attributeId);
+}

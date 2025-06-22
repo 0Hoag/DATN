@@ -75,7 +75,17 @@ public enum ErrorCode {
     PRODUCT_REVIEW_NOT_FOUND(1519, "Product review not found", HttpStatus.BAD_REQUEST),
     VARIANT_VALUE_NOT_FOUND(1520, "Variant attribute not found", HttpStatus.CONFLICT),
     VARIANT_NOT_EXISTED(1521, "Variant not found", HttpStatus.BAD_REQUEST),
-    ORDER_STATUS_CANNOT_BE_MODIFIED(1204, "Order status cannot be modified", HttpStatus.BAD_REQUEST),
+    ORDER_STATUS_CANNOT_BE_MODIFIED(1522, "Order status cannot be modified", HttpStatus.BAD_REQUEST),
+    DUPLICATE_ATTRIBUTE_VALUE(1523, "Duplicate attribute value", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_VALUE_ALREADY_EXISTS(1524, "Attribute Value EXISTED", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_UPLOAD_ID_REQUIRED(1525, "Upload image ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_ID_REQUIRED(1526, "Image ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_ALT_TEXT_REQUIRED(1071, "Alt text must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_DESCRIPTION_REQUIRED(1072, "Specification description must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_IS_THUMBNAIL_REQUIRED(1073, "Thumbnail status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_SORT_ORDER_REQUIRED(1074, "Image sort order must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_VARIANT_ID_REQUIRED(1075, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_URL_REQUIRED(1076, "Image URL must not be null", HttpStatus.BAD_REQUEST),
 
     // Cart (1600–1699)
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),

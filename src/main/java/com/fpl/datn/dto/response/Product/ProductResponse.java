@@ -18,8 +18,11 @@ public class ProductResponse {
     String name;
     String description;
     String brand;
+    String content;
     String thumbnail;
     Timestamp createdAt;
+    Boolean isHome;
+    Boolean isActive;
     List<ProductVariantResponse> productVariants;
     CategoryResponse category;
 }

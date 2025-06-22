@@ -40,30 +40,23 @@ public class ProductService {
     // thêm sản phẩ
     @Transactional
     public Boolean create(ProductRequest request) {
-        // 1. Kiểm tra danh mục
         if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
-        // Kiểm tra name
         if (repo.existsByName(request.getName())) {
             throw new AppException(ErrorCode.PRODUCT_NAME_EXISTED);
         }
-        // 2. Kiểm tra slug
         if (repo.existsBySlug(request.getSlug())) {
             throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
         }
-        // 3. Map và lưu Product (chưa gắn biến thể)
         Product product = mapper.toProduct(request);
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
-        // Gắn danh mục
         Category category = cateRepo.findById(request.getCategory())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
         product.setCategory(category);
-        // 4. Lưu product trước để có ID
         Product savedProduct = repo.save(product);
         repo.flush(); // Quan trọng để lấy productId khi sinh SKU
-        // 5. Gọi ProductVariantService để tạo từng biến thể
         for (ProductVariantRequest variantRequest : request.getProductVariants()) {
             variantRequest.setProductId(savedProduct.getId()); // cần ID cha
             productVariantService.create(variantRequest); // gọi đúng logic sinh SKU
@@ -73,15 +66,13 @@ public class ProductService {
 
     @Transactional
     public ProductResponse update(Integer id, UpdateProductRequest request) {
-        // 1. Kiểm tra tồn tại Product
         Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        // 2. Validate slug (bỏ qua chính nó)
+        if (repo.existsByNameAndIdNot(request.getName(), id)) {
+            throw new AppException(ErrorCode.PRODUCT_NAME_EXISTED);
+        }
         if (repo.existsBySlugAndIdNot(request.getSlug(), id)) {
             throw new AppException(ErrorCode.PRODUCT_SLUG_EXISTED);
         }
-
-        // 3. Validate category
         if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
@@ -99,7 +90,6 @@ public class ProductService {
     // xem chi tiết sản phẩm
     public ProductResponse detail(Integer id) {
         Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
         return mapper.toProductResponse(product);
     }
 
@@ -107,18 +97,12 @@ public class ProductService {
     public List<ProductResponse> list() {
         return repo.findAll().stream().map(mapper::toProductResponse).collect(Collectors.toList());
     }
+
     // phân trang sản phẩm
     public PageResponse<ProductResponse> get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repo.findAll(pageable);
-
-        var data = pageData.getContent().stream()
-                .map(product -> {
-                    var cat = repo.findById(product.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-                    return mapper.toProductResponse(cat);
-                })
-                .collect(Collectors.toList());
+        var data = pageData.getContent().stream().map(mapper::toProductResponse).collect(Collectors.toList());
 
         return PageResponse.<ProductResponse>builder()
                 .currentPage(page)

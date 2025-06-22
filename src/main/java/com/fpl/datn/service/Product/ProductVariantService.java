@@ -169,7 +169,7 @@ public class ProductVariantService {
                     // Cập nhật ảnh đã có
                     ProductImage existingImage = imageRepo
                             .findById(imgRequest.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_DETAIL_EXISTED));
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_ID_REQUIRED));
                     existingImage.setAltText(imgRequest.getAltText());
                     existingImage.setSpecDescription(imgRequest.getSpecDescription());
                     existingImage.setIsThumbnail(imgRequest.getIsThumbnail());
@@ -201,7 +201,7 @@ public class ProductVariantService {
 
         if (productVariant.getOrderDetails() != null
                 && !productVariant.getOrderDetails().isEmpty()) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
         repo.delete(productVariant);

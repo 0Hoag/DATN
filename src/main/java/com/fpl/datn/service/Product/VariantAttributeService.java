@@ -1,6 +1,8 @@
 package com.fpl.datn.service.Product;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +17,9 @@ import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.VariantAttributeMapper;
 import com.fpl.datn.models.VariantAttribute;
-import com.fpl.datn.repository.VariantAttributesRepository;
+import com.fpl.datn.models.VariantAttributeValue;
+import com.fpl.datn.repository.VariantAttributeRepository;
+import com.fpl.datn.repository.VariantAttributeValueRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,32 +32,31 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VariantAttributeService {
     VariantAttributeMapper mapper;
-    VariantAttributesRepository repo;
+    VariantAttributeRepository repo;
+    VariantAttributeValueRepository valueRepo;
 
     public Boolean create(VariantAttributeRequest request) {
-        // 1. Kiểm tra tồn tại theo name
         VariantAttribute existing = repo.findByName(request.getName()).orElse(null);
-
         VariantAttribute entity = mapper.toEntity(request);
-
         if (existing != null) {
-            // 2. Gán ID của entity mới bằng ID của cái cũ để Hibernate hiểu là update
             entity.setId(existing.getId());
-
-            // 3. Gán attribute cha cho các value con
-            if (entity.getValues() != null) {
-                entity.getValues().forEach(val -> val.setAttribute(entity));
-            }
-
-            // 4. Xoá các value cũ nếu muốn (tuỳ ý)
-            // existing.getValues().clear(); // nếu bạn muốn xoá hết các giá trị cũ
-        } else {
-            // 5. Trường hợp thêm mới
-            if (entity.getValues() != null) {
-                entity.getValues().forEach(val -> val.setAttribute(entity));
+        }
+        if (entity.getValues() != null && !entity.getValues().isEmpty()) {
+            Set<String> seen = new HashSet<>();
+            for (VariantAttributeValue val : entity.getValues()) {
+                String normalized = val.getValue().trim();
+                // Kiểm tra trùng trong request
+                if (!seen.add(normalized.toLowerCase())) {
+                    throw new AppException(ErrorCode.DUPLICATE_ATTRIBUTE_VALUE);
+                }
+                // Kiểm tra trùng trong DB nếu đang update
+                if (existing != null
+                        && valueRepo.existsByValueIgnoreCaseAndAttribute_Id(normalized, existing.getId())) {
+                    throw new AppException(ErrorCode.ATTRIBUTE_VALUE_ALREADY_EXISTS);
+                }
+                val.setAttribute(entity);
             }
         }
-
         repo.save(entity);
         return true;
     }

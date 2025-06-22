@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.fpl.datn.models.VariantAttribute;
 
 @Repository
-public interface VariantAttributesRepository extends JpaRepository<VariantAttribute, Integer> {
+public interface VariantAttributeRepository extends JpaRepository<VariantAttribute, Integer> {
     Optional<VariantAttribute> findByName(String name);
 }
