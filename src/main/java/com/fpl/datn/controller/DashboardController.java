@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.AccessLevel;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
 
 @RestController
 @RequestMapping("/dashboard")
@@ -18,27 +18,12 @@ public class DashboardController {
 
     DashboardService dashboardService;
 
-    @GetMapping("/summary")
-    public ApiResponse<DashboardSummaryResponse> getSummary() {
-        return ApiResponse.<DashboardSummaryResponse>builder()
+    @GetMapping("/List")
+    public ApiResponse<DashboardResponse> getSummary() {
+        return ApiResponse.<DashboardResponse>builder()
                 .code(1000)
-                .result(dashboardService.getSummary())
+                .result(dashboardService.getShow())
                 .build();
     }
 
-    @GetMapping("/top-products")
-    public ApiResponse<List<TopProductResponse>> getTopProducts() {
-        return ApiResponse.<List<TopProductResponse>>builder()
-                .code(1000)
-                .result(dashboardService.getTopProducts())
-                .build();
-    }
-
-    @GetMapping("/revenue-chart")
-    public ApiResponse<List<RevenueChartResponse>> getChart() {
-        return ApiResponse.<List<RevenueChartResponse>>builder()
-                .code(1000)
-                .result(dashboardService.getRevenueChart())
-                .build();
-    }
 }

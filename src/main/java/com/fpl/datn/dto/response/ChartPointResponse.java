@@ -8,9 +8,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class RevenueChartResponse {
-    String date;
-    long orderCount;
-    long productsSold;
-    BigDecimal totalRevenue;
+public class ChartPointResponse {
+    String date; // YYYY-MM
+    String name;
+    BigDecimal value;
 }

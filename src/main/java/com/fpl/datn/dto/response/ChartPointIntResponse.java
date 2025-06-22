@@ -1,19 +1,15 @@
 package com.fpl.datn.dto.response;
 
-import java.math.BigDecimal;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
+import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TopProductResponse {
-    String productName;
-    String thumbnail;
-    long quantitySold;
-    Integer soldMonth;
-    Integer soldYear;
+public class ChartPointIntResponse {
+    String date; // YYYY-MM
+    String name;
+    long value;
 }
-

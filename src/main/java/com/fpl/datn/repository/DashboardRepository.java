@@ -1,19 +1,20 @@
 package com.fpl.datn.repository;
 
 import com.fpl.datn.dto.response.TopProductResponse;
-import com.fpl.datn.dto.response.RevenueChartResponse;
+import com.fpl.datn.dto.response.ChartPointResponse;
+import com.fpl.datn.dto.response.ChartPointIntResponse;
 import com.fpl.datn.models.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-
+import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
 public interface DashboardRepository extends JpaRepository<Order, Integer> {
-    @Query("SELECT COUNT(u) FROM User u")
+    @Query("SELECT COUNT(u.id) FROM User u")
     long countTotalUsers();
 
     @Query("SELECT COUNT(o) FROM Order o")
@@ -22,64 +23,77 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM TransactionLog t WHERE t.order.paymentStatus = 'PAID'")
     BigDecimal sumTotalRevenue();
 
-    @Query("SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID'")
+    @Query("SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID' AND MONTH(od.order.createdAt) = MONTH(CURRENT_DATE()) AND YEAR(od.order.createdAt) = YEAR(CURRENT_DATE())")
     long countTotalProductsSold();
 
-    @Query(value = "SELECT " +
-            " CONCAT(p.name, ' - ', pv.variant_name) as productName, " +
-            " p.thumbnail, " +
-            " COALESCE(SUM(od.quantity), 0) as quantitySold, " +
-            " COALESCE(SUM(od.quantity * od.price), 0) as totalRevenue " +
-            "FROM product_variants pv " +
-            "JOIN products p ON pv.product_id = p.id " +
-            "LEFT JOIN order_details od ON pv.id = od.product_variant_id " +
-            "LEFT JOIN orders o ON od.order_id = o.id " +
-            "WHERE pv.is_active = 1 AND (o.payment_status = 'PAID' OR o.payment_status IS NULL) " +
-            "GROUP BY p.id, p.name, p.thumbnail, pv.id, pv.variant_name " +
-            "ORDER BY COALESCE(SUM(od.quantity), 0) DESC " +
-            "LIMIT 10",
-            nativeQuery = true)
-    List<Object[]> findTop10ProductsNative();
+    @Query(value = """
+    SELECT CONCAT(p.name, ' - ', pv.variant_name), p.thumbnail, SUM(pv.sold), MONTH(pv.created_at)
+    FROM product_variants pv
+    JOIN products p ON pv.product_id = p.id
+    WHERE pv.is_active = 1
+      AND MONTH(pv.created_at) = :month
+      AND YEAR(pv.created_at) = :year
+    GROUP BY p.id, p.name, p.thumbnail, pv.id, pv.variant_name, MONTH(pv.created_at)
+    ORDER BY SUM(pv.sold) DESC
+    LIMIT 10
+    """, nativeQuery = true)
+    List<Object[]> findTop10ProductsSoldByMonthYear(@Param("month") int month, @Param("year") int year);
 
     // Convert method cho native query
-    default List<TopProductResponse> findTop10Products() {
-        return findTop10ProductsNative().stream()
-                .map(row -> TopProductResponse.builder()
-                        .productName((String) row[0])
-                        .thumbnail((String) row[1])
-                        .quantitySold(((Number) row[2]).longValue())
-                        .totalRevenue((BigDecimal) row[3])
+    default List<TopProductResponse> findTop10ProductsSoldByMonthYearDto(int month, int year) {
+        return findTop10ProductsSoldByMonthYear(month, year).stream()
+                .map(r -> TopProductResponse.builder()
+                        .productName((String) r[0])
+                        .thumbnail((String) r[1])
+                        .quantitySold(((Number) r[2]).longValue())
+                        .soldMonth(((Number) r[3]).intValue())
+                        .soldYear(year)
                         .build())
+                .toList();
+    }
+
+    @Query(value = """
+        SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS date, pm.name AS name, SUM(t.amout) AS value
+        FROM transaction_logs t
+        JOIN payment_methods pm ON t.payment_method_id = pm.id
+        GROUP BY date, pm.name
+        ORDER BY date
+        """, nativeQuery = true)
+    List<Object[]> getRevenueChartNative();
+
+    default List<ChartPointResponse> getRevenueChart() {
+        return getRevenueChartNative().stream()
+                .map(row -> new ChartPointResponse((String) row[0], (String) row[1], (BigDecimal) row[2]))
                 .collect(Collectors.toList());
     }
 
-    //Thống kê doanh thu theo từng ngày
-    @Query(value = "SELECT " +
-            " DATE_FORMAT(t.created_at, '%Y-%m-%d') as date, " +
-            " COUNT(DISTINCT t.order_id) as orderCount, " +
-            " COALESCE(SUM(od_sum.total_quantity), 0) as productsSold, " +
-            " COALESCE(SUM(t.amout), 0) as totalRevenue " +
-            "FROM transaction_logs t " +
-            "LEFT JOIN orders o ON t.order_id = o.id " +
-            "LEFT JOIN (" +
-            "   SELECT order_id, SUM(quantity) as total_quantity " +
-            "   FROM order_details " +
-            "   GROUP BY order_id" +
-            ") od_sum ON o.id = od_sum.order_id " +
-            "WHERE t.status = 1 AND o.payment_status = 'PAID' " +
-            "GROUP BY DATE_FORMAT(t.created_at, '%Y-%m-%d') " +
-            "ORDER BY DATE_FORMAT(t.created_at, '%Y-%m-%d') ASC",
-            nativeQuery = true)
-    List<Object[]> getDailyChartNative();
+    @Query(value = """
+        SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS date, o.order_status AS name, COUNT(o.id) AS value
+        FROM orders o
+        GROUP BY date, o.order_status
+        ORDER BY date
+        """, nativeQuery = true)
+    List<Object[]> getOrderChartNative();
 
-    default List<RevenueChartResponse> getDailyChart() {
-        return getDailyChartNative().stream()
-                .map(row -> new RevenueChartResponse(
-                        (String) row[0],           // date
-                        ((Number) row[1]).longValue(),     // orderCount
-                        ((Number) row[2]).longValue(),     // productsSold
-                        (BigDecimal) row[3]        // totalRevenue
-                ))
+    default List<ChartPointIntResponse> getOrderChart() {
+        return getOrderChartNative().stream()
+                .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
+                .collect(Collectors.toList());
+    }
+
+    @Query(value = """
+        SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS date, p.name, SUM(od.quantity) AS value
+        FROM order_details od
+        JOIN orders o ON od.order_id = o.id
+        JOIN products p ON od.product_id = p.id
+        GROUP BY date, p.name
+        ORDER BY date
+        """, nativeQuery = true)
+    List<Object[]> getProductChartNative();
+
+    default List<ChartPointIntResponse> getProductChart() {
+        return getProductChartNative().stream()
+                .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
                 .collect(Collectors.toList());
     }
 }

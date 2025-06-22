@@ -8,8 +8,6 @@ import lombok.AccessLevel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -18,20 +16,20 @@ public class DashboardService {
 
     DashboardRepository dashboardRepository;
 
-    public DashboardSummaryResponse getSummary() {
-        return DashboardSummaryResponse.builder()
+    public DashboardResponse getShow() {
+        int month = java.time.LocalDate.now().getMonthValue();
+        int year = java.time.LocalDate.now().getYear();
+        return DashboardResponse.builder()
                 .totalCustomers(dashboardRepository.countTotalUsers())
                 .totalOrders(dashboardRepository.countTotalOrders())
                 .totalRevenue(dashboardRepository.sumTotalRevenue())
                 .totalProductsSold(dashboardRepository.countTotalProductsSold())
+                .topProducts(dashboardRepository.findTop10ProductsSoldByMonthYearDto(month, year))
+                .chartData(ChartData.builder()
+                        .revenueChart(dashboardRepository.getRevenueChart())
+                        .orderChart(dashboardRepository.getOrderChart())
+                        .productChart(dashboardRepository.getProductChart())
+                        .build())
                 .build();
-    }
-
-    public List<TopProductResponse> getTopProducts() {
-        return dashboardRepository.findTop10Products();
-    }
-
-    public List<RevenueChartResponse> getRevenueChart() {
-        return dashboardRepository.getDailyChart();
     }
 }
