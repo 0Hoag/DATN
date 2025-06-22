@@ -3,12 +3,12 @@ package com.fpl.datn.exception;
 import org.springframework.http.HttpStatus;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Getter
-@AllArgsConstructor
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
 
@@ -30,12 +30,6 @@ public enum ErrorCode {
     EMAIL_UNCHANGED(1015, "Email is the same as the current one", HttpStatus.BAD_REQUEST),
     PHONE_UNCHANGED(1015, "Phone is the same as the current one", HttpStatus.BAD_REQUEST),
     PASSWORD_INCORRECT(1006, "PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
-
-    PRODUCT_SLUG_EXISTED(1026, "Product slug existed", HttpStatus.CONFLICT),
-    PRODUCT_NOT_EXISTED(1027, "Product create existed", HttpStatus.CONFLICT),
-    PRODUCT_UPDATE_NOT_EXISTED(1028, "Product update existed", HttpStatus.CONFLICT),
-    PRODUCT_DELETE_NOT_EXISTED(1029, "Product delete existed", HttpStatus.CONFLICT),
-    PRODUCT_REVIEW_NOT_FOUND(1030, "Product review not found", HttpStatus.BAD_REQUEST),
 
     // Permission
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),
@@ -62,7 +56,6 @@ public enum ErrorCode {
 
     // Product / Variant
     PRODUCT_VARIANT_NOT_FOUND(1501, "Product variant not found", HttpStatus.BAD_REQUEST),
-    VARIANT_NOT_EXISTED(1244, "Variant not existed", HttpStatus.BAD_REQUEST),
     PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
     PRODUCT_NAME_EXISTED(1503, "Tên sản phẩm đã tồn tại", HttpStatus.BAD_REQUEST),
@@ -78,7 +71,13 @@ public enum ErrorCode {
     PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU existed", HttpStatus.CONFLICT),
     VARIANT_UPDATE_EXISTED(1245, "Variant update existed", HttpStatus.CONFLICT),
     VARIANT_DELETE_EXISTED(1246, "Variant delete existed", HttpStatus.CONFLICT),
+    PRODUCT_SLUG_EXISTED(1026, "Product slug existed", HttpStatus.CONFLICT),
+    PRODUCT_NOT_EXISTED(1027, "Product create existed", HttpStatus.CONFLICT),
+    PRODUCT_UPDATE_NOT_EXISTED(1028, "Product update existed", HttpStatus.CONFLICT),
+    PRODUCT_DELETE_NOT_EXISTED(1029, "Product delete existed", HttpStatus.CONFLICT),
+    PRODUCT_REVIEW_NOT_FOUND(1030, "Product review not found", HttpStatus.BAD_REQUEST),
     VARIANT_VALUE_NOT_FOUND(1244, "Không tìm thấy ID thuộc tính", HttpStatus.CONFLICT),
+    VARIANT_NOT_EXISTED(1244, "Variant not existed", HttpStatus.BAD_REQUEST),
 
     // Cart
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
