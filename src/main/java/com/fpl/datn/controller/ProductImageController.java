@@ -19,19 +19,19 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
-@RequestMapping("/productimage")
+@RequestMapping("/product_image")
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductImageController {
 
-    ProductImageService prdimageService;
+    ProductImageService prdImageService;
 
     @PostMapping("/")
     public ApiResponse<Boolean> create(@ModelAttribute @Valid ProductImageRequest request) {
         return ApiResponse.<Boolean>builder()
                 .code(1000)
-                .result(prdimageService.create(request))
+                .result(prdImageService.create(request))
                 .build();
     }
 
@@ -39,7 +39,7 @@ public class ProductImageController {
     public ApiResponse<ProductImageResponse> detail(@PathVariable("id") int id) {
         return ApiResponse.<ProductImageResponse>builder()
                 .code(1000)
-                .result(prdimageService.detail(id))
+                .result(prdImageService.detail(id))
                 .build();
     }
 
@@ -47,7 +47,7 @@ public class ProductImageController {
     public ApiResponse<List<ProductImageResponse>> list() {
         return ApiResponse.<List<ProductImageResponse>>builder()
                 .code(1000)
-                .result(prdimageService.list())
+                .result(prdImageService.list())
                 .build();
     }
 
@@ -57,7 +57,7 @@ public class ProductImageController {
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<ProductImageResponse>>builder()
                 .code(1000)
-                .result(prdimageService.get(page, size))
+                .result(prdImageService.get(page, size))
                 .build();
     }
 
@@ -66,13 +66,13 @@ public class ProductImageController {
             @PathVariable("id") int id, @RequestBody @Valid UpdateProductImageRequest request) {
         return ApiResponse.<ProductImageResponse>builder()
                 .code(1000)
-                .result(prdimageService.update(id, request))
+                .result(prdImageService.update(id, request))
                 .build();
     }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Void> delete(@PathVariable("id") int id) {
-        prdimageService.delete(id);
+        prdImageService.delete(id);
         return ApiResponse.<Void>builder().code(1000).message("Delete Success!").build();
     }
 }

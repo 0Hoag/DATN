@@ -62,8 +62,10 @@ public enum ErrorCode {
 
     // Product / Variant
     PRODUCT_VARIANT_NOT_FOUND(1501, "Product variant not found", HttpStatus.BAD_REQUEST),
+    VARIANT_NOT_EXISTED(1244, "Variant not existed", HttpStatus.BAD_REQUEST),
     PRODUCT_OUT_OF_STOCK(1502, "Product is out of stock", HttpStatus.BAD_REQUEST),
     PRODUCT_NOT_FOUND(1503, "Product not found", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_EXISTED(1503, "Tên sản phẩm đã tồn tại", HttpStatus.BAD_REQUEST),
     SELECTED_PRODUCT_NOT_FOUND(1504, "Selected product not found", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_EXISTED(1239, "Product_Variant DELETE existed", HttpStatus.CONFLICT),
     UPLOAD_IMAGE_FAILED(1018, "UPLOAD IMAGE EXITED", HttpStatus.BAD_REQUEST),
@@ -76,6 +78,7 @@ public enum ErrorCode {
     PRODUCT_VARIANT_SKU_EXISTED(1248, "SKU existed", HttpStatus.CONFLICT),
     VARIANT_UPDATE_EXISTED(1245, "Variant update existed", HttpStatus.CONFLICT),
     VARIANT_DELETE_EXISTED(1246, "Variant delete existed", HttpStatus.CONFLICT),
+    VARIANT_VALUE_NOT_FOUND(1244, "Không tìm thấy ID thuộc tính", HttpStatus.CONFLICT),
 
     // Cart
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),

@@ -19,8 +19,6 @@ public interface ProductVariantAttributeValueMapper {
     ProductVariantAttributeValue toEntity(ProductVariantAttributeValueRequest request);
 
     // Response
-    @Mapping(source = "productVariant.id", target = "productVariantId")
-    @Mapping(source = "attributeValue.id", target = "attributeValueId")
     @Mapping(source = "attributeValue.value", target = "attributeValue")
     @Mapping(source = "attributeValue.attribute.name", target = "attributeName")
     ProductVariantAttributeValueResponse toResponse(ProductVariantAttributeValue entity);

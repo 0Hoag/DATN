@@ -13,12 +13,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProductVariantRequest {
     private Integer id;
-    private String sku;
+    private Integer productId;
     private String variantName;
     private BigDecimal price;
     private Integer quantity;
     private Integer sold;
     private Boolean isActive;
-    private Integer productId; // ID sản phẩm cha
-    List<Integer> attributeValueIds;
+    private List<Integer> attributeValueIds;
+    private List<ProductImageRequest> images;
 }

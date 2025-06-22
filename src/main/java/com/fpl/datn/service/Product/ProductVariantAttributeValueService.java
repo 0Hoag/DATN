@@ -41,11 +41,11 @@ public class ProductVariantAttributeValueService {
     public Boolean create(ProductVariantAttributeValueRequest request) {
         ProductVariant variant = productVariantRepo
                 .findById(request.getProductVariantId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
         VariantAttributeValue value = variantAttributeValueRepo
                 .findById(request.getAttributeValueId())
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND));
 
         boolean exists = repo.existsByProductVariantIdAndAttributeValueId(
                 request.getProductVariantId(), request.getAttributeValueId());
@@ -67,14 +67,13 @@ public class ProductVariantAttributeValueService {
 
         ProductVariant variant = productVariantRepo
                 .findById(request.getProductVariantId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_VARIANT_NOT_FOUND));
 
         VariantAttributeValue attributeValue = variantAttributeValueRepo
                 .findById(request.getAttributeValueId())
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND));
 
-        // Giả sử mapper.update(...) có tồn tại, như ProductImageService
-        mapper.update(entity, request); // Nếu bạn có phương thức này trong mapper
+        mapper.update(entity, request);
 
         entity.setProductVariant(variant);
         entity.setAttributeValue(attributeValue);

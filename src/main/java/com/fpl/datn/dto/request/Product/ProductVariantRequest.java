@@ -12,6 +12,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantRequest {
+    private Integer id;
     private String variantName;
     private BigDecimal price;
     private Integer quantity;

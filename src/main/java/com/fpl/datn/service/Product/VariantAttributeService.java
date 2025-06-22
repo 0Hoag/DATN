@@ -60,7 +60,7 @@ public class VariantAttributeService {
 
     public VariantAttributeResponse detail(Integer id) {
         VariantAttribute variantAttribute =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND));
         return mapper.toResponse(variantAttribute);
     }
 
@@ -75,7 +75,7 @@ public class VariantAttributeService {
         var data = pageData.getContent().stream()
                 .map(product -> {
                     var cat = repo.findById(product.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.VARIANT_DETAIL_EXISTED));
+                            .orElseThrow(() -> new AppException(ErrorCode.VARIANT_VALUE_NOT_FOUND));
                     return mapper.toResponse(cat);
                 })
                 .collect(Collectors.toList());
@@ -91,14 +91,14 @@ public class VariantAttributeService {
 
     public VariantAttributeResponse update(Integer id, UpdateVariantAttributeRequest request) {
         VariantAttribute variantAttribute =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_UPDATE_EXISTED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTED));
         mapper.update(variantAttribute, request);
         return mapper.toResponse(repo.save(variantAttribute));
     }
 
     public void delete(Integer id) {
         VariantAttribute variantAttribute =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_DELETE_EXISTED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTED));
         repo.delete(variantAttribute);
     }
 }
