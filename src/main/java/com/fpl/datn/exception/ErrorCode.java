@@ -27,9 +27,13 @@ public enum ErrorCode {
     PHONE_EXISTED(1012, "Phone already exists", HttpStatus.BAD_REQUEST),
     EMAIL_UNCHANGED(1013, "Email is the same as the current one", HttpStatus.BAD_REQUEST),
     PHONE_UNCHANGED(1014, "Phone is the same as the current one", HttpStatus.BAD_REQUEST),
+    EMAIL_INCORRECT(1015, "Email incorrect", HttpStatus.BAD_REQUEST),
     PASSWORD_INCORRECT(1015, "Password is incorrect", HttpStatus.BAD_REQUEST),
     ERROR_CREATE_USER(1016, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1017, "Error update user", HttpStatus.BAD_REQUEST),
+    OLD_PASSWORD_INCORRECT(1019, "OLD_PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
+    NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD(
+            1020, "NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD", HttpStatus.BAD_REQUEST),
 
     // Permission (1100–1199)
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),
