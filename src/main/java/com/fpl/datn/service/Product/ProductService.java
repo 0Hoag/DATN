@@ -39,7 +39,7 @@ public class ProductService {
 
     // thêm sản phẩ
     @Transactional
-    public Boolean create(ProductRequest request) {
+    public ProductResponse create(ProductRequest request) {
         if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
@@ -61,7 +61,7 @@ public class ProductService {
             variantRequest.setProductId(savedProduct.getId()); // cần ID cha
             productVariantService.create(variantRequest); // gọi đúng logic sinh SKU
         }
-        return true;
+        return mapper.toProductResponse(product);
     }
 
     @Transactional
