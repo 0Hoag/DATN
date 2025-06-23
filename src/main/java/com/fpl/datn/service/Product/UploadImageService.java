@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fpl.datn.configuration.CloudinaryConfig;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.response.Product.UploadImageResponse;
 import com.fpl.datn.mapper.Product.UploadImageMapper;
@@ -29,19 +30,19 @@ public class UploadImageService {
     private final Cloudinary cloudinary;
     private final UploadImageRepository uploadImageRepo;
     private final UploadImageMapper mapper;
+    private final CloudinaryConfig cloudinaryConfig ;
 
     // Upload một ảnh đơn
     public UploadImage upload(MultipartFile file) {
+    	
         try {
             Map<?, ?> result =
-                    cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder", "product-images"));
-
+                    cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap());
             UploadImage image = UploadImage.builder()
                     .url((String) result.get("secure_url"))
                     .publicId((String) result.get("public_id"))
                     .fileName(file.getOriginalFilename())
                     .build();
-
             return uploadImageRepo.save(image);
         } catch (IOException e) {
             log.error("Upload failed", e);

@@ -133,8 +133,8 @@ public class OrderService {
             String paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
             response.setPaymentUrl(paymentUrl);
         }
-        //        String txnRef = vnpayService.extractTxnRefFromUrl(response.getPaymentUrl());
-        logService.logPayment(order, OrderActionType.CREATE.getType(), response.getPaymentUrl());
+        String txnRef = vnpayService.extractTxnRefFromUrl(response.getPaymentUrl());
+        logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef);
         return response;
     }
 
