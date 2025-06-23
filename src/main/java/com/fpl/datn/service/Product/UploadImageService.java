@@ -30,14 +30,13 @@ public class UploadImageService {
     private final Cloudinary cloudinary;
     private final UploadImageRepository uploadImageRepo;
     private final UploadImageMapper mapper;
-    private final CloudinaryConfig cloudinaryConfig ;
+    private final CloudinaryConfig cloudinaryConfig;
 
     // Upload một ảnh đơn
     public UploadImage upload(MultipartFile file) {
-    	
+
         try {
-            Map<?, ?> result =
-                    cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap());
+            Map<?, ?> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap());
             UploadImage image = UploadImage.builder()
                     .url((String) result.get("secure_url"))
                     .publicId((String) result.get("public_id"))

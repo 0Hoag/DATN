@@ -129,12 +129,13 @@ public class OrderService {
         order.setOrderDetails(details);
         repository.save(order);
         var response = mapper.toOrderResponse(order);
+        String txnRef = null;
         if (isVnpay(order)) {
-            String paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
-            response.setPaymentUrl(paymentUrl);
+            var payment = vnpayService.createPaymentUrl(order, httpRequest);
+            response.setPaymentUrl(payment.getPaymentUrl());
+            txnRef = payment.getTxnRef();
         }
-        String txnRef = vnpayService.extractTxnRefFromUrl(response.getPaymentUrl());
-        logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef);
+        logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef, null);
         return response;
     }
 
@@ -162,8 +163,8 @@ public class OrderService {
         repository.save(order);
         var response = mapper.toOrderResponse(order);
         if (isVnpay(order)) {
-            String paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
-            response.setPaymentUrl(paymentUrl);
+            var paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
+            response.setPaymentUrl(paymentUrl.getPaymentUrl());
         }
         return response;
     }
@@ -176,7 +177,7 @@ public class OrderService {
         order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
         order.setIsDelete(true);
         repository.save(order);
-        logService.logPayment(order, OrderActionType.DELETE.getType(), null);
+        logService.logPayment(order, OrderActionType.DELETE.getType(), null, null);
     }
 
     // Update trạng thái đơn hàng và Trạng thái thanh toán;
@@ -206,7 +207,7 @@ public class OrderService {
         repository.save(order);
         var response = mapper.toOrderResponse(order);
         if (isValidPaymentCOD(order) || isValidPaymentVNPAY(order)) {
-            logService.logPayment(order, OrderActionType.UPDATESTATUS.getType(), response.getPaymentUrl());
+            logService.logPayment(order, OrderActionType.UPDATESTATUS.getType(), response.getPaymentUrl(), null);
         }
         return response;
     }

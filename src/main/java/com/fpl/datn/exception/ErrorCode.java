@@ -40,7 +40,7 @@ public enum ErrorCode {
     ORDERS_NOT_EXISTED(1203, "Orders do not exist", HttpStatus.BAD_REQUEST),
     ORDER_CANNOT_BE_MODIFIED(1204, "Order cannot be modified", HttpStatus.BAD_REQUEST),
     ORDER_STATUS_NOT_FOUND(1205, "Order status not found", HttpStatus.BAD_REQUEST),
-    INVALID_ORDER_STATUS(1206, "Order must be in DELIVERED status to perform this action", HttpStatus.BAD_REQUEST),
+    INVALID_ORDER_STATUS(1206, "Order must be in RECEIED status to perform this action", HttpStatus.BAD_REQUEST),
     RETURN_PERIOD_EXPIRED(1207, "The return period has expired", HttpStatus.BAD_REQUEST),
     RETURN_REQUEST_ALREADY_EXISTS(1208, "A return request already exists for this order", HttpStatus.BAD_REQUEST),
     ORDER_RETURN_NOT_FOUND(1209, "Order return not found", HttpStatus.BAD_REQUEST),

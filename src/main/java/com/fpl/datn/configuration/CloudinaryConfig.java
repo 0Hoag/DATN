@@ -4,17 +4,12 @@ import java.util.Map;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 
 import lombok.AccessLevel;
-
-//import com.cloudinary.Cloudinary;
-//import com.cloudinary.utils.ObjectUtils;
-
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
@@ -30,16 +25,15 @@ public class CloudinaryConfig {
     String apiKey;
     String apiSecret;
     Boolean secure = true;
-    
-    @SuppressWarnings("unchecked") 
+
+    @SuppressWarnings("unchecked")
     @Bean
     Cloudinary cloudinary() {
-        Map<String, Object> config =  ObjectUtils.asMap(
+        Map<String, Object> config = ObjectUtils.asMap(
                 "cloud_name", cloudName,
                 "api_key", apiKey,
                 "api_secret", apiSecret,
-                "secure", secure
-        );
+                "secure", secure);
         return new Cloudinary(config);
     }
 }

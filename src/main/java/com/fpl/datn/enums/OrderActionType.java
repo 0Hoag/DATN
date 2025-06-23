@@ -9,10 +9,12 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum OrderActionType {
-    CREATE("Create"),
-    UPDATE("Update"),
-    DELETE("Delete"),
-    UPDATESTATUS("Update status");
+    CREATE("CREATE"),
+    UPDATE("UPDATE"),
+    DELETE("DELETE"),
+    REFUND("REFUND"),
+    VNPAY_SUCCESS("VNPAY_SUCCESS"),
+    UPDATESTATUS("UPDATE_STATUS");
 
     String type;
 }

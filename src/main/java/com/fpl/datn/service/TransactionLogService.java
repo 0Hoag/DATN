@@ -26,28 +26,31 @@ public class TransactionLogService {
         return repository.findAll();
     }
 
-    public void logPayment(Order order, String message, String transactionRef) {
+    public void logPayment(Order order, String acctionType, String transactionRef, String transactionNo) {
         var orderlog = TransactionLog.builder()
                 .amount(order.getTotalAmount())
                 .createdAt(LocalDateTime.now())
-                .message(message + " order " + order.getId())
+                .message(acctionType + " order " + order.getId())
                 .transactionRef(transactionRef)
+                .transactionNo(transactionNo)
                 .status(order.getOrderStatus())
                 .type(1) // 1 = payment
+                .actionType(acctionType)
                 .order(order)
                 .paymentMethod(order.getPaymentMethod())
                 .build();
         repository.save(orderlog);
     }
 
-    public void logReturn(OrderReturn orderReturn, String message) {
+    public void logReturn(OrderReturn orderReturn, String acctionType) {
         var paymentMethod = methodRepository
                 .findById(Integer.valueOf(orderReturn.getPaymentMethod()))
                 .orElse(null);
         var orderlog = TransactionLog.builder()
                 .amount(orderReturn.getRefundAmount())
                 .createdAt(LocalDateTime.now())
-                .message(message + " order return " + orderReturn.getId())
+                .message(acctionType + " order return " + orderReturn.getId())
+                .actionType(acctionType)
                 .status(orderReturn.getStatus())
                 .type(2) // 2 Return
                 .orderReturn(orderReturn)

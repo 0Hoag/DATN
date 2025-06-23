@@ -66,7 +66,7 @@ public class OrderReturnService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         // Chỉ cho trả hàng nếu đã giao hàng
-        if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.DELIVERED.getDescription()))
+        if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
 
         // Chỉ cho trả hàng trong vòng 7 ngày sau khi giao
@@ -88,7 +88,7 @@ public class OrderReturnService {
                 .user(user)
                 .build();
         var response = mapper.toOrderReturnResponse(repository.save(orderReturn));
-        logService.logReturn(orderReturn, OrderActionType.CREATE.getType());
+        logService.logReturn(orderReturn, OrderActionType.REFUND.getType());
         return response;
     }
 

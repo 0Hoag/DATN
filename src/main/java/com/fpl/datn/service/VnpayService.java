@@ -19,6 +19,7 @@ import jakarta.xml.bind.DatatypeConverter;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.configuration.VnpayConfig;
+import com.fpl.datn.dto.response.PaymentResponse;
 import com.fpl.datn.enums.OrderActionType;
 import com.fpl.datn.enums.PaymentStatus;
 import com.fpl.datn.exception.AppException;
@@ -38,7 +39,7 @@ public class VnpayService {
     OrderRepository orderRepository;
     VnpayConfig config;
 
-    public String createPaymentUrl(Order order, HttpServletRequest request) {
+    public PaymentResponse createPaymentUrl(Order order, HttpServletRequest request) {
         String vnp_TxnRef = String.valueOf(System.currentTimeMillis());
         String vnp_IpAddr = request.getRemoteAddr();
 
@@ -81,7 +82,12 @@ public class VnpayService {
         String secureHash = hmacSHA512(config.getHashSecret(), rawHash);
         query.append("vnp_SecureHash=").append(secureHash);
 
-        return config.getUrl() + "?" + query.toString();
+        String paymentUrl = config.getUrl() + "?" + query.toString();
+        var response = PaymentResponse.builder()
+                .txnRef(vnp_TxnRef)
+                .paymentUrl(paymentUrl)
+                .build();
+        return response;
     }
 
     private String hmacSHA512(String key, String data) {
@@ -96,23 +102,25 @@ public class VnpayService {
         }
     }
 
-    public String extractTxnRefFromUrl(String url) {
-        try {
-            String[] parts = url.split("[?&]");
-            for (String part : parts) {
-                if (part.startsWith("vnp_TxnRef=")) {
-                    return part.split("=")[1];
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
+    //    public String extractTxnRefFromUrl(String url) {
+    //        try {
+    //            String[] parts = url.split("[?&]");
+    //            for (String part : parts) {
+    //                if (part.startsWith("vnp_TxnRef=")) {
+    //                    return part.split("=")[1];
+    //                }
+    //            }
+    //        } catch (Exception e) {
+    //            e.printStackTrace();
+    //        }
+    //        return null;
+    //    }
 
     public String handleVnpayReturn(Map<String, String> params) {
         String responseCode = params.get("vnp_ResponseCode");
         String orderInfo = params.get("vnp_OrderInfo");
+        String txnRef = params.get("vnp_TxnRef");
+        String transactionNo = params.get("vnp_TransactionNo");
         int orderId = Integer.parseInt(orderInfo.replace("Order:", ""));
 
         var order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
@@ -120,7 +128,7 @@ public class VnpayService {
         if ("00".equals(responseCode)) {
             order.setPaymentStatus(PaymentStatus.PAID.getDescription());
             orderRepository.save(order);
-            logService.logPayment(order, OrderActionType.UPDATESTATUS.getType(), null);
+            logService.logPayment(order, OrderActionType.VNPAY_SUCCESS.getType(), txnRef, transactionNo);
             return "Thanh toán thành công cho đơn hàng #" + orderId;
         } else {
             return "Thanh toán thất bại cho đơn hàng #" + orderId;
