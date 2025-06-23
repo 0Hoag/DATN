@@ -34,10 +34,13 @@ public enum ErrorCode {
     IMAGE_NOT_EXISTED(1014, "Image not existed", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1015, "Email existed", HttpStatus.BAD_REQUEST),
     EMAIL_UNCHANGED(1015, "Email is the same as the current one", HttpStatus.BAD_REQUEST),
+    EMAIL_INCORRECT(1015, "Email incorrect", HttpStatus.BAD_REQUEST),
     PHONE_EXISTED(1016, "Phone existed", HttpStatus.BAD_REQUEST),
     PHONE_UNCHANGED(1015, "Phone is the same as the current one", HttpStatus.BAD_REQUEST),
     ERROR_CREATE_USER(1017, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
+    OLD_PASSWORD_INCORRECT(1019, "OLD_PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
+    NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD(1020, "NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD", HttpStatus.BAD_REQUEST),
 
     // Category
     CATEGORY_NOT_EXISTED(1019,"Category not existed", HttpStatus.BAD_REQUEST),
