@@ -31,7 +31,6 @@ public class CloudinaryConfig {
     String apiSecret;
     Boolean secure = true;
     
-    @SuppressWarnings("unchecked") 
     @Bean
     Cloudinary cloudinary() {
         Map<String, Object> config =  ObjectUtils.asMap(

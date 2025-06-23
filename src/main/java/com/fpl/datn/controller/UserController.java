@@ -4,17 +4,16 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.fpl.datn.dto.request.*;
+import com.fpl.datn.dto.response.Product.ProductResponse;
 import jakarta.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
-import com.fpl.datn.dto.request.RegisterRequest;
-import com.fpl.datn.dto.request.UpdateProfileRequest;
-import com.fpl.datn.dto.request.UpdateUserRequest;
-import com.fpl.datn.dto.request.UserRequest;
 import com.fpl.datn.dto.response.UserResponse;
 import com.fpl.datn.service.UserService;
 
@@ -41,8 +40,8 @@ public class UserController {
     }
 
     @PostMapping("/create")
-    ApiResponse<UserResponse> create(@RequestBody @Valid UserRequest request) throws SQLException, IOException {
-        return ApiResponse.<UserResponse>builder()
+    ApiResponse<Boolean> create(@RequestBody @Valid UserRequest request) throws SQLException, IOException {
+        return ApiResponse.<Boolean>builder()
                 .code(1000)
                 .result(userService.Create(request))
                 .build();
@@ -100,12 +99,31 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/password")
+    ApiResponse<Boolean> changePassword(@RequestBody ChangePasswordRequest request) {
+        return ApiResponse.<Boolean>builder()
+                .code(1000)
+                .result(userService.changePassword(request))
+                .build();
+    }
+
     @DeleteMapping("/{id}")
     ApiResponse<String> delete(@PathVariable int id) {
         userService.Delete(id);
         return ApiResponse.<String>builder()
                 .code(1000)
                 .message("User has been delete")
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<UserResponse>> searchUser(
+            @RequestParam String keyword,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .code(1000)
+                .result(userService.search(keyword, page, size))
                 .build();
     }
 }

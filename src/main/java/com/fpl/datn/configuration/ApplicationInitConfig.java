@@ -108,17 +108,9 @@ public class ApplicationInitConfig {
                         .build());
 
                 Set<Permission> guestPermissions = Set.of(view_product);
-                Set<Permission> CustomerPermissions =
-                        Set.of(view_product, track_order, create_review, buy_product, view_order);
-                Set<Permission> ManagerPermissions = Set.of(
-                        view_product,
-                        track_order,
-                        create_review,
-                        buy_product,
-                        view_order,
-                        manager_users,
-                        manager_products,
-                        manager_orders);
+                Set<Permission> CustomerPermissions = Set.of(view_product, track_order, create_review, buy_product, view_order);
+                Set<Permission> ShiftStaff = Set.of(view_product, track_order, create_review, buy_product, view_order, manager_orders);
+                Set<Permission> ManagerPermissions = Set.of(view_product, track_order, create_review, buy_product, view_order, manager_users, manager_products, manager_orders);
                 Set<Permission> AdminPermissions = Set.of(assign_role, system_settings, system_backup, view_dashboard);
 
                 roleRepository.save(Role.builder()
@@ -136,6 +128,7 @@ public class ApplicationInitConfig {
                 roleRepository.save(Role.builder()
                         .name(PredefinedRole.ROLE_SHIFT_STAFF)
                         .description("Shift staff role")
+                        .permissions(ShiftStaff)
                         .build());
 
                 Role managerRole = roleRepository.save(Role.builder()

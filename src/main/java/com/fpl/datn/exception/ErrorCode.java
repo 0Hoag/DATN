@@ -11,6 +11,10 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
+    UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNKNOWN_ERROR(9000, "Unknown server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
+    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allow", HttpStatus.BAD_REQUEST),
 
     // User (1000–1099)
     USER_ALREADY_EXISTS(1001, "User already exists", HttpStatus.BAD_REQUEST),
@@ -120,14 +124,13 @@ public enum ErrorCode {
     CATEGORY_HAS_PRODUCTS(2203, "Category has products", HttpStatus.BAD_REQUEST),
     CATEGORY_NAME_EXISTED(2204, "Category name already exists", HttpStatus.CONFLICT),
     CATEGORY_SLUG_EXISTED(2205, "Category slug already exists", HttpStatus.CONFLICT),
+    OLD_PASSWORD_INCORRECT(1019, "OLD_PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
+    NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD(1020, "NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD", HttpStatus.BAD_REQUEST),
+    EMAIL_INCORRECT(1030, "Email incorrect", HttpStatus.BAD_REQUEST),
 
     // Common (2500–2599)
-    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),
+    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND);
 
-    // System (7000+)
-    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allowed", HttpStatus.BAD_REQUEST),
-    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
-    UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
 
     int code;
     String message;
