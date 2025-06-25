@@ -251,8 +251,8 @@ public class OrderService {
         if (request.getAddressId() == null && request.getInputAddress() != null) {
             address = Address.builder()
                     .addressLine(request.getInputAddress())
-                    .fullName(user.getFullName())
-                    .phone(user.getPhone())
+                    .fullName(request.getInputFullname())
+                    .phone(request.getInputPhone())
                     .user(user)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
