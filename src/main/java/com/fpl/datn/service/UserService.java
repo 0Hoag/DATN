@@ -38,7 +38,7 @@ public class UserService {
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public Boolean Create(UserRequest request) {
         HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
 

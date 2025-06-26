@@ -1,7 +1,5 @@
 package com.fpl.datn.dto.request;
 
-import java.time.LocalDate;
-
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,10 +11,10 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateOrderRequest {
-    int userId;
+    //    int userId;
     int addressId;
-    int paymentMethodId;
+    //    int paymentMethodId;
     String note;
-    LocalDate updatedAt;
+    //    LocalDate updatedAt;
     //    List<OrderItemResponse> items;
 }

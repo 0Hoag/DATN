@@ -27,4 +27,16 @@ public class PaymentController {
                 .result(vnpayService.handleVnpayReturn(params))
                 .build();
     }
+
+    //    @PostMapping("/refund")
+    //    public ApiResponse<String> refund(@RequestBody RefundRequest request, HttpServletRequest httpRequest) {
+    //        try {
+    //            String response = vnpayService.refund(request, "admin", httpRequest);
+    //            return ApiResponse.<String>builder().message(response).build();
+    //        } catch (Exception e) {
+    //            e.printStackTrace();
+    //            System.out.println(e.getMessage());
+    //            throw new AppException(ErrorCode.UNKNOWN_ERROR);
+    //        }
+    //    }
 }

@@ -18,6 +18,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
@@ -62,6 +64,7 @@ public class OrderService {
     OrderMapper mapper;
     TransactionLogService logService;
     VnpayService vnpayService;
+    MomoService momoService;
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ORDER')")
     public PageResponse<OrderResponse> getAll(int page, int size, boolean isDesc) {
@@ -115,7 +118,8 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest) {
+    public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest)
+            throws JsonMappingException, JsonProcessingException {
         var order = prepareOrder(request);
         var details = processOrderItems(order, request.getItems(), false);
 
@@ -135,6 +139,11 @@ public class OrderService {
             response.setPaymentUrl(payment.getPaymentUrl());
             txnRef = payment.getTxnRef();
         }
+        if (isMomo(order)) {
+            var payment = momoService.createMomoPayment(order);
+            response.setPaymentUrl(payment.getPaymentUrl());
+            txnRef = payment.getTxnRef();
+        }
         logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef, null);
         return response;
     }
@@ -145,19 +154,19 @@ public class OrderService {
         if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         mapper.toUpdateOrder(order, request);
 
-        var user = userRepository
-                .findById(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        //        var user = userRepository
+        //                .findById(request.getUserId())
+        //                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         var address = addressRepository
                 .findById(request.getAddressId())
                 .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
-        var paymentMethod = paymentRepository
-                .findById(request.getPaymentMethodId())
-                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_FOUND));
+        //        var paymentMethod = paymentRepository
+        //                .findById(request.getPaymentMethodId())
+        //                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_FOUND));
 
-        order.setUser(user);
+        //        order.setUser(user);
         order.setAddress(address);
-        order.setPaymentMethod(paymentMethod);
+        //        order.setPaymentMethod(paymentMethod);
         order.setUpdatedAt(LocalDateTime.now());
 
         repository.save(order);
@@ -207,7 +216,7 @@ public class OrderService {
         repository.save(order);
         var response = mapper.toOrderResponse(order);
         if (isValidPaymentCOD(order) || isValidPaymentVNPAY(order)) {
-            logService.logPayment(order, OrderActionType.UPDATESTATUS.getType(), response.getPaymentUrl(), null);
+            logService.logPayment(order, OrderActionType.UPDATE_STATUS.getType(), response.getPaymentUrl(), null);
         }
         return response;
     }
@@ -249,10 +258,12 @@ public class OrderService {
         }
         Address address = null;
         if (request.getAddressId() == null && request.getInputAddress() != null) {
+            if (request.getInputFullname() == null) throw new AppException(ErrorCode.FULLNAME_NOT_NULL);
+            if (request.getInputPhone() == null) throw new AppException(ErrorCode.PHONE_NOT_NULL);
             address = Address.builder()
                     .addressLine(request.getInputAddress())
-                    .fullName(user.getFullName())
-                    .phone(user.getPhone())
+                    .fullName(request.getInputFullname())
+                    .phone(request.getInputPhone())
                     .user(user)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
@@ -351,6 +362,12 @@ public class OrderService {
     // Xử lí thanh toán
     private boolean isVnpay(Order order) {
         return PaymentMethod.VNPAY
+                .name()
+                .equalsIgnoreCase(order.getPaymentMethod().getName());
+    }
+    // Xử lí thanh toán
+    private boolean isMomo(Order order) {
+        return PaymentMethod.MOMO
                 .name()
                 .equalsIgnoreCase(order.getPaymentMethod().getName());
     }

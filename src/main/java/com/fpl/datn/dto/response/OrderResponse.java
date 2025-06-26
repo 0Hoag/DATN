@@ -23,6 +23,8 @@ public class OrderResponse {
     String note;
     // Thông tin người dùng
     String address;
+    String nickname;
+    String phone;
     OrderUserResponse user;
     // Thồn tin Đơn hàng chi tiết
     BigDecimal totalAmount;

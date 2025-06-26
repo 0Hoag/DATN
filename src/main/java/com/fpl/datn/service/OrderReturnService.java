@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
@@ -11,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderReturnRequest;
 import com.fpl.datn.dto.request.OrderReturnStatusRequest;
@@ -24,6 +27,7 @@ import com.fpl.datn.mapper.OrderReturnMapper;
 import com.fpl.datn.models.OrderReturn;
 import com.fpl.datn.repository.OrderRepository;
 import com.fpl.datn.repository.OrderReturnRepository;
+import com.fpl.datn.repository.TransactionLogRepository;
 import com.fpl.datn.repository.UserRepository;
 
 import lombok.AccessLevel;
@@ -34,9 +38,12 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderReturnService {
+
+    //    VnpayService vnpayService;
     OrderReturnRepository repository;
     OrderRepository orderRepository;
     UserRepository userRepository;
+    TransactionLogRepository logRepository;
     OrderReturnMapper mapper;
     TransactionLogService logService;
 
@@ -65,7 +72,7 @@ public class OrderReturnService {
                 .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        // Chỉ cho trả hàng nếu đã giao hàng
+        // Chỉ cho trả hàng nếu đã nhận hàng
         if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
             throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
 
@@ -77,6 +84,10 @@ public class OrderReturnService {
         if (repository.existsByOrderAndStatusNot(order, OrderReturnEnums.REJECTED.getDescription())) {
             throw new AppException(ErrorCode.RETURN_REQUEST_ALREADY_EXISTS);
         }
+        var transactionLog = logRepository.findFirstByOrderIdAndActionTypeOrderByCreatedAtDesc(
+                order.getId(), OrderActionType.PAYMENT_SUCCESS.getType());
+        if (transactionLog == null) throw new AppException(ErrorCode.TRANCSACTION_LOG_NOT_FOUND);
+
         var orderReturn = OrderReturn.builder()
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
@@ -88,13 +99,21 @@ public class OrderReturnService {
                 .user(user)
                 .build();
         var response = mapper.toOrderReturnResponse(repository.save(orderReturn));
-        logService.logReturn(orderReturn, OrderActionType.REFUND.getType());
+        logService.logReturn(
+                orderReturn,
+                OrderActionType.REFUND_REQUEST.getType(),
+                transactionLog.getTransactionRef(),
+                transactionLog.getTransactionNo(),
+                order);
         return response;
     }
 
     @Transactional
-    public OrderReturnResponse updateStatus(int id, OrderReturnStatusRequest request) {
+    public OrderReturnResponse updateStatus(int id, OrderReturnStatusRequest request, HttpServletRequest httpRequest)
+            throws JsonMappingException, JsonProcessingException {
         var orderReturn = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_RETURN_NOT_FOUND));
+        var transactionLog = logRepository.findFirstByOrderIdAndActionTypeOrderByCreatedAtDesc(
+                orderReturn.getOrder().getId(), OrderActionType.PAYMENT_SUCCESS.getType());
         if (!isValidStatus(request.getStatus())) {
             throw new AppException(ErrorCode.ORDER_RETURN_STATUS_NOT_FOUND);
         }
@@ -109,7 +128,15 @@ public class OrderReturnService {
         }
         orderReturn.setUpdatedAt(LocalDateTime.now());
         var response = mapper.toOrderReturnResponse(repository.save(orderReturn));
-        logService.logReturn(orderReturn, OrderActionType.UPDATESTATUS.getType());
+        if (request.getStatus().equalsIgnoreCase(OrderReturnEnums.REFUNDED.getDescription())) {
+            //            vnpayService.refund(orderReturn, "admin", httpRequest);
+            logService.logReturn(
+                    orderReturn,
+                    OrderActionType.UPDATE_STATUS.getType(),
+                    transactionLog.getTransactionRef(),
+                    transactionLog.getTransactionNo(),
+                    orderReturn.getOrder());
+        }
         return response;
     }
 

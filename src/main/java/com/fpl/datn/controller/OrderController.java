@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderRequest;
@@ -70,7 +72,8 @@ public class OrderController {
     }
 
     @PostMapping
-    ApiResponse<OrderResponse> createOrder(@RequestBody @Valid OrderRequest request, HttpServletRequest httpRequest) {
+    ApiResponse<OrderResponse> createOrder(@RequestBody @Valid OrderRequest request, HttpServletRequest httpRequest)
+            throws JsonMappingException, JsonProcessingException {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.create(request, httpRequest))
                 .build();

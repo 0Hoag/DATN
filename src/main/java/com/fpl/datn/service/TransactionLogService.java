@@ -30,7 +30,7 @@ public class TransactionLogService {
         var orderlog = TransactionLog.builder()
                 .amount(order.getTotalAmount())
                 .createdAt(LocalDateTime.now())
-                .message(acctionType + " order " + order.getId())
+                .message(acctionType + " ORDER " + order.getId())
                 .transactionRef(transactionRef)
                 .transactionNo(transactionNo)
                 .status(order.getOrderStatus())
@@ -42,19 +42,23 @@ public class TransactionLogService {
         repository.save(orderlog);
     }
 
-    public void logReturn(OrderReturn orderReturn, String acctionType) {
+    public void logReturn(
+            OrderReturn orderReturn, String acctionType, String txnRef, String transactionNo, Order order) {
         var paymentMethod = methodRepository
                 .findById(Integer.valueOf(orderReturn.getPaymentMethod()))
                 .orElse(null);
         var orderlog = TransactionLog.builder()
                 .amount(orderReturn.getRefundAmount())
                 .createdAt(LocalDateTime.now())
-                .message(acctionType + " order return " + orderReturn.getId())
+                .message(acctionType + " ORDER RETURN " + orderReturn.getId())
                 .actionType(acctionType)
+                .transactionNo(transactionNo)
+                .transactionRef(txnRef)
                 .status(orderReturn.getStatus())
                 .type(2) // 2 Return
                 .orderReturn(orderReturn)
                 .paymentMethod(paymentMethod)
+                .order(order)
                 .build();
         repository.save(orderlog);
     }

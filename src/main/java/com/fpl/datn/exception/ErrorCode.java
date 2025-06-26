@@ -49,6 +49,7 @@ public enum ErrorCode {
     RETURN_REQUEST_ALREADY_EXISTS(1208, "A return request already exists for this order", HttpStatus.BAD_REQUEST),
     ORDER_RETURN_NOT_FOUND(1209, "Order return not found", HttpStatus.BAD_REQUEST),
     ORDER_RETURN_STATUS_NOT_FOUND(1210, "Order return status not found", HttpStatus.BAD_REQUEST),
+    VNPAY_REFUND_FAILED(1210, "VNPAY REFUND FAILED", HttpStatus.BAD_REQUEST),
 
     // Address (1300–1399)
     ADDRESS_NOT_FOUND(1301, "Address not found", HttpStatus.BAD_REQUEST),
@@ -88,6 +89,14 @@ public enum ErrorCode {
     PRODUCT_IMAGE_SORT_ORDER_REQUIRED(1074, "Image sort order must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_VARIANT_ID_REQUIRED(1075, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_URL_REQUIRED(1076, "Image URL must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ID_REQUIRED(1540, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_NAME_REQUIRED(1541, "Product variant name must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_PRICE_REQUIRED(1542, "Product price must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_QUANTITY_REQUIRED(1543, "Product quantity must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_SOLD_REQUIRED(1544, "Sold quantity must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ISACTIVE_REQUIRED(1545, "Active status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_PRODUCT_ID_REQUIRED(1546, "Product ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED(1547, "Attribute value list must not be null", HttpStatus.BAD_REQUEST),
 
     // Cart (1600–1699)
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
@@ -109,6 +118,8 @@ public enum ErrorCode {
     INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
     INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
     USERID_NOT_NULL(2003, "UserId cannot be null", HttpStatus.BAD_REQUEST),
+    FULLNAME_NOT_NULL(2004, "Name cannot be null", HttpStatus.BAD_REQUEST),
+    PHONE_NOT_NULL(2005, "Phone cannot be null", HttpStatus.BAD_REQUEST),
 
     // Voucher (2100–2199)
     VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
@@ -124,6 +135,9 @@ public enum ErrorCode {
     CATEGORY_HAS_PRODUCTS(2203, "Category has products", HttpStatus.BAD_REQUEST),
     CATEGORY_NAME_EXISTED(2204, "Category name already exists", HttpStatus.CONFLICT),
     CATEGORY_SLUG_EXISTED(2205, "Category slug already exists", HttpStatus.CONFLICT),
+
+    // Transactionlog(2300-2399)
+    TRANCSACTION_LOG_NOT_FOUND(2301, "Transaction log not found", HttpStatus.NOT_FOUND),
 
     // Common (2500–2599)
     RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),

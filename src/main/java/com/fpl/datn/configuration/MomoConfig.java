@@ -9,14 +9,16 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Component
-@ConfigurationProperties(prefix = "vnpay")
+@ConfigurationProperties(prefix = "momo")
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VnpayConfig {
-    String tmnCode;
-    String hashSecret;
+public class MomoConfig {
     String url;
-    String returnUrl;
     String refundUrl;
+    String accessKey;
+    String partnerCode;
+    String secretKey;
+    String returnUrl;
+    String notifyUrl;
 }

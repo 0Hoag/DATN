@@ -1,5 +1,7 @@
 package com.fpl.datn.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderReturnRequest;
@@ -45,9 +49,11 @@ public class OrderReturnController {
     }
 
     @PutMapping("/{id}")
-    ApiResponse<OrderReturnResponse> update(@PathVariable int id, @RequestBody OrderReturnStatusRequest request) {
+    ApiResponse<OrderReturnResponse> update(
+            @PathVariable int id, @RequestBody OrderReturnStatusRequest request, HttpServletRequest httpRequest)
+            throws JsonMappingException, JsonProcessingException {
         return ApiResponse.<OrderReturnResponse>builder()
-                .result(orderReturnService.updateStatus(id, request))
+                .result(orderReturnService.updateStatus(id, request, httpRequest))
                 .build();
     }
 }

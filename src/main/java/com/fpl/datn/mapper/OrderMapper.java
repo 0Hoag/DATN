@@ -18,6 +18,8 @@ public interface OrderMapper {
 
     @Mapping(target = "paymentMethod", source = "paymentMethod.name")
     @Mapping(target = "address", source = "address.addressLine")
+    @Mapping(target = "nickname", source = "address.fullName")
+    @Mapping(target = "phone", source = "address.phone")
     @Mapping(target = "PaymentUrl", ignore = true)
     @Mapping(target = "user.id", source = "user.id")
     OrderResponse toOrderResponse(Order order);

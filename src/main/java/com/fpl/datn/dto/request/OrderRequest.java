@@ -22,6 +22,8 @@ public class OrderRequest {
 
     Integer addressId;
     String inputAddress;
+    String inputFullname;
+    String inputPhone;
     Integer paymentMethodId;
     String orderStatus;
     String paymentStatus;
