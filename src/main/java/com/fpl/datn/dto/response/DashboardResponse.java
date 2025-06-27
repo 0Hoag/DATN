@@ -1,9 +1,11 @@
 package com.fpl.datn.dto.response;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

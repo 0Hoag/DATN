@@ -5,7 +5,7 @@ spring:
     url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/datn}
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
-    password: 135999
+    password: daohuucong123
   jpa:
     hibernate:
       ddl-auto: update

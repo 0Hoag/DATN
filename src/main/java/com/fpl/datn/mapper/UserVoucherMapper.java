@@ -1,8 +1,8 @@
-package com.fpl.datn.mappers;
+package com.fpl.datn.mapper;
 
 import org.springframework.stereotype.Component;
 
-import com.fpl.datn.dtos.response.UserVoucherResponse;
+import com.fpl.datn.dto.response.UserVoucherResponse;
 import com.fpl.datn.models.ZUserVoucher;
 
 @Component

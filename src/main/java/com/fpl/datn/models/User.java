@@ -4,10 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -69,4 +65,3 @@ public class User {
     @OneToMany(mappedBy = "userAction", cascade = CascadeType.ALL)
     private List<ActivityLog> activityLogs;
 }
-

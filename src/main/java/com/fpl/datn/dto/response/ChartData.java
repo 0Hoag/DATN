@@ -1,10 +1,6 @@
 package com.fpl.datn.dto.response;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
-import com.fpl.datn.models.Category;
-import com.fpl.datn.models.Product;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

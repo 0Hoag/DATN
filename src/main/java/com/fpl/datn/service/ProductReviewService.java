@@ -1,6 +1,5 @@
 package com.fpl.datn.service;
 
-import com.fpl.datn.repository.ProductReviewRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,7 @@ import com.fpl.datn.dto.response.ProductReviewResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.ProductReviewMapper;
+import com.fpl.datn.repository.ProductReviewRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

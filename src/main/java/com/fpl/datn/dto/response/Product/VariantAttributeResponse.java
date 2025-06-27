@@ -1,7 +1,8 @@
 package com.fpl.datn.dto.response.Product;
 
-import lombok.*;
 import java.util.List;
+
+import lombok.*;
 
 @Data
 @NoArgsConstructor

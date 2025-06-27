@@ -1,16 +1,18 @@
 package com.fpl.datn.controller;
 
+import java.util.List;
+
+import org.springframework.web.bind.annotation.*;
+
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.request.Product.AddressRequest;
 import com.fpl.datn.dto.response.Product.AddressResponse;
 import com.fpl.datn.service.AddressService;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/address")

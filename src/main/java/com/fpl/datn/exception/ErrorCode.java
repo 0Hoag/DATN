@@ -33,7 +33,7 @@ public enum ErrorCode {
     PHONE_EXISTED(1016, "Phone existed", HttpStatus.BAD_REQUEST),
     ERROR_CREATE_USER(1017, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1018, "Error update user", HttpStatus.BAD_REQUEST),
-    CATEGORY_NOT_EXISTED(1019,"Category not existed", HttpStatus.BAD_REQUEST),
+    CATEGORY_NOT_EXISTED(1019, "Category not existed", HttpStatus.BAD_REQUEST),
     CATEGORIES_NAME_EXISTED(1020, "Categories name existed", HttpStatus.CONFLICT),
     CATEGORIES_SLUG_EXISTED(1021, "Categories slug existed", HttpStatus.CONFLICT),
     CATEGORY_HAS_CHILDREN(1022, "Category has child categories", HttpStatus.BAD_REQUEST),

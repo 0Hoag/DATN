@@ -9,6 +9,6 @@ import lombok.*;
 public class ProductVariantAttributeValueResponse {
     private Integer id;
     private Integer productVariantId;
-    private String attributeName;      // Ví dụ: "Màu sắc"
+    private String attributeName; // Ví dụ: "Màu sắc"
     private String attributeValueName; // Ví dụ: "Đỏ"
 }

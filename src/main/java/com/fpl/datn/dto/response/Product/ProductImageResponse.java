@@ -1,9 +1,9 @@
 package com.fpl.datn.dto.response.Product;
 
+import java.sql.Timestamp;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.sql.Timestamp;
 
 @Data
 @AllArgsConstructor

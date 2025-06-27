@@ -1,14 +1,14 @@
 package com.fpl.datn.controller;
 
+import org.springframework.web.bind.annotation.*;
+
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.response.*;
 import com.fpl.datn.service.DashboardService;
+
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.AccessLevel;
-import org.springframework.web.bind.annotation.*;
-
-
 
 @RestController
 @RequestMapping("/dashboard")
@@ -25,5 +25,4 @@ public class DashboardController {
                 .result(dashboardService.getShow())
                 .build();
     }
-
 }

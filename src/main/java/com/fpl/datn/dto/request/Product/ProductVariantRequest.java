@@ -1,9 +1,10 @@
 package com.fpl.datn.dto.request.Product;
 
-import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import lombok.*;
 
 @Data
 @NoArgsConstructor

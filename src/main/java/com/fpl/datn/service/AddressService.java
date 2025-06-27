@@ -1,22 +1,23 @@
 package com.fpl.datn.service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
 import com.fpl.datn.dto.request.Product.AddressRequest;
 import com.fpl.datn.dto.request.Product.UpdateAddressRequest;
 import com.fpl.datn.dto.response.Product.AddressResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.AddressMapper;
-import com.fpl.datn.models.Address;
 import com.fpl.datn.repository.AddressRepository;
 import com.fpl.datn.repository.UserRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,13 +44,13 @@ public class AddressService {
     }
 
     public AddressResponse detail(int id) {
-        return addressMapper.toAddressResponse(addressRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND)));
+        return addressMapper.toAddressResponse(
+                addressRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND)));
     }
 
     public List<AddressResponse> all() {
-        return addressRepository.findAll()
-                .stream().map(addressMapper::toAddressResponse)
+        return addressRepository.findAll().stream()
+                .map(addressMapper::toAddressResponse)
                 .collect(Collectors.toList());
     }
 
@@ -62,14 +63,12 @@ public class AddressService {
         }
     }
 
-    public void update(int id, UpdateAddressRequest request)
-    {
+    public void update(int id, UpdateAddressRequest request) {
         if (userRepository.existsById(request.getUserID())) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
-        var address = addressRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+        var address = addressRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
         addressMapper.update(address, request);
     }
 }
