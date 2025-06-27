@@ -89,8 +89,6 @@ public class OrderService {
 
     public PageResponse<OrderResponse> search(
             String keyword,
-            Integer id,
-            String phone,
             String orderStatus,
             String paymentStatus,
             LocalDate startDate,
@@ -101,8 +99,6 @@ public class OrderService {
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         Specification<Order> spec = OrderSpecification.hasFullName(keyword)
-                .and(OrderSpecification.hasId(id))
-                .and(OrderSpecification.hasPhone(phone))
                 .and(OrderSpecification.hasOrderStatus(orderStatus))
                 .and(OrderSpecification.hasPaymentStatus(paymentStatus))
                 .and(OrderSpecification.createAtBetween(startDate, endDate));
@@ -182,6 +178,10 @@ public class OrderService {
     public void delete(int id) {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
+            throw new AppException(ErrorCode.ORDER_DELETE_RECEIVED);
+        if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription()))
+            throw new AppException(ErrorCode.ORDER_DELETE_PAID);
         restoreInventory(order);
         order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
         order.setIsDelete(true);
