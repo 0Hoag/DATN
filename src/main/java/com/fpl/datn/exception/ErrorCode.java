@@ -50,6 +50,8 @@ public enum ErrorCode {
     ORDER_RETURN_NOT_FOUND(1209, "Order return not found", HttpStatus.BAD_REQUEST),
     ORDER_RETURN_STATUS_NOT_FOUND(1210, "Order return status not found", HttpStatus.BAD_REQUEST),
     VNPAY_REFUND_FAILED(1210, "VNPAY REFUND FAILED", HttpStatus.BAD_REQUEST),
+    ORDER_DELETE_RECEIVED(1211, "Cannot delete an order that has already been delivered", HttpStatus.BAD_REQUEST),
+    ORDER_DELETE_PAID(1212, "Cannot delete an order that has already been paid", HttpStatus.BAD_REQUEST),
 
     // Address (1300–1399)
     ADDRESS_NOT_FOUND(1301, "Address not found", HttpStatus.BAD_REQUEST),

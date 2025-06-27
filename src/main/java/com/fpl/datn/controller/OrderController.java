@@ -56,8 +56,6 @@ public class OrderController {
     @GetMapping("/search")
     ApiResponse<PageResponse<OrderResponse>> search(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer id,
-            @RequestParam(required = false) String phone,
             @RequestParam(required = false) String orderStatus,
             @RequestParam(required = false) String paymentStatus,
             @RequestParam(required = false) LocalDate startDate,
@@ -66,8 +64,7 @@ public class OrderController {
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-                .result(orderService.search(
-                        keyword, id, phone, orderStatus, paymentStatus, startDate, endDate, page, size, sort))
+                .result(orderService.search(keyword, orderStatus, paymentStatus, startDate, endDate, page, size, sort))
                 .build();
     }
 

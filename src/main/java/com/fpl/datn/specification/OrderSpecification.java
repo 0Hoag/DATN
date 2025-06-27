@@ -8,31 +8,18 @@ import com.fpl.datn.models.Order;
 
 public class OrderSpecification {
 
-    // tìm theo id đơn hàng
-    public static Specification<Order> hasId(Integer id) {
+    // tìm theo keyword phone, id,fullname
+    public static Specification<Order> hasFullName(String keyword) {
         return (root, query, cb) -> {
-            if (id == null) {
+            if (keyword == null || keyword.isEmpty()) {
                 return null;
             }
-            return cb.equal(root.get("id"), id);
-        };
-    }
-    // tìm theo tên user
-    public static Specification<Order> hasFullName(String fullName) {
-        return (root, query, cb) -> {
-            if (fullName == null || fullName.isEmpty()) {
-                return null;
-            }
-            return cb.like(cb.lower(root.get("user").get("fullName")), "%" + fullName.toLowerCase() + "%");
-        };
-    }
-    // tìm theo số điện thoại
-    public static Specification<Order> hasPhone(String phone) {
-        return (root, query, cb) -> {
-            if (phone == null || phone.isEmpty()) {
-                return null;
-            }
-            return cb.like(cb.lower(root.get("user").get("phone")), "%" + phone.toLowerCase() + "%");
+            String likeKeyword = "%" + keyword.toLowerCase() + "%";
+
+            return cb.or(
+                    cb.like(cb.lower(root.get("user").get("fullName")), likeKeyword),
+                    cb.like(cb.lower(root.get("user").get("phone")), likeKeyword),
+                    cb.like(cb.toString(root.get("id")), likeKeyword));
         };
     }
     // tìm theo ngày
@@ -47,7 +34,7 @@ public class OrderSpecification {
     // tìm theo trạng thái đơn hàng
     public static Specification<Order> hasOrderStatus(String orderStatus) {
         return (root, query, cb) -> {
-            if (orderStatus == null) {
+            if (orderStatus == null || orderStatus.trim().isEmpty()) {
                 return null;
             }
             return cb.equal(root.get("orderStatus"), orderStatus);
@@ -56,7 +43,7 @@ public class OrderSpecification {
     // tìm theo trạng thái thanh toán
     public static Specification<Order> hasPaymentStatus(String paymentSatus) {
         return (root, query, cb) -> {
-            if (paymentSatus == null) {
+            if (paymentSatus == null || paymentSatus.trim().isEmpty()) {
                 return null;
             }
             return cb.equal(root.get("paymentStatus"), paymentSatus);
