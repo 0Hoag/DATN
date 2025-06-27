@@ -86,9 +86,12 @@ public class ProductImageService {
         return mapper.toResponse(repo.save(productImage));
     }
 
-    public void delete(Integer id) {
-        ProductImage productImage =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_ID_REQUIRED));
-        repo.delete(productImage);
+    public void delete(List<Integer> ids) {
+        List<ProductImage> images = repo.findAllById(ids);
+        if (images.size() != ids.size()) {
+            throw new AppException(ErrorCode.PRODUCT_IMAGE_ID_REQUIRED);
+        }
+        repo.deleteAll(images);
     }
+
 }

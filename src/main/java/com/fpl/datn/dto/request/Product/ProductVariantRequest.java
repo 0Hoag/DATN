@@ -15,8 +15,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductVariantRequest {
-    
-    private Integer id;
 
     @NotBlank(message = "PRODUCT_VARIANT_NAME_REQUIRED")
     private String variantName;

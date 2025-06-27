@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
@@ -76,10 +77,15 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ApiResponse<List<ProductResponse>> searchProducts(@RequestParam String keyword) {
-        return ApiResponse.<List<ProductResponse>>builder()
+    public ApiResponse<PageResponse<ProductResponse>> searchProducts(
+            @RequestParam String keyword,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .code(1000)
-                .result(productService.search(keyword))
+                .result(productService.search(keyword, page, size))
                 .build();
     }
+
 }

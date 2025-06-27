@@ -69,10 +69,9 @@ public class ProductImageController {
                 .result(prdImageService.update(id, request))
                 .build();
     }
-
-    @DeleteMapping("/{id}")
-    public ApiResponse<Void> delete(@PathVariable("id") int id) {
-        prdImageService.delete(id);
+    @DeleteMapping
+    public ApiResponse<Void> delete(@RequestBody List<Integer> ids) {
+        prdImageService.delete(ids);
         return ApiResponse.<Void>builder().code(1000).message("Delete Success!").build();
     }
 }

@@ -17,9 +17,6 @@ import lombok.experimental.FieldDefaults;
 public class UpdateProductVariantRequest {
     private Integer id;
 
-    @NotNull(message = "PRODUCT_VARIANT_PRODUCT_ID_REQUIRED")
-    private Integer productId;
-
     @NotBlank(message = "PRODUCT_VARIANT_NAME_REQUIRED")
     private String variantName;
 
