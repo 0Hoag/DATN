@@ -8,10 +8,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class TopProductResponse {
-    String productName;
-    String thumbnail;
-    long quantitySold;
-    Integer soldMonth;
-    Integer soldYear;
+public class ChartPointIntResponse {
+    String date; // YYYY-MM
+    String name;
+    long value;
 }

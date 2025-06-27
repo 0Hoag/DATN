@@ -12,13 +12,10 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DashboardResponse {
-    Long totalUsers;
-    Long totalOrders;
+    long totalCustomers;
+    long totalOrders;
     BigDecimal totalRevenue;
-    Long totalProductsSold;
-    Long totalProducts;
+    long totalProductsSold;
     List<TopProductResponse> topProducts;
-    List<ChartDataPoint> revenueChart;
-    List<ChartDataPoint> orderChart;
-    List<ChartDataPoint> productChart;
+    ChartData chartData;
 }
