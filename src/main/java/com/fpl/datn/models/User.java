@@ -4,15 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-
 import jakarta.persistence.*;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -75,4 +71,3 @@ public class User {
     @OneToMany(mappedBy = "userAction", cascade = CascadeType.ALL)
     private List<ActivityLog> activityLogs;
 }
-

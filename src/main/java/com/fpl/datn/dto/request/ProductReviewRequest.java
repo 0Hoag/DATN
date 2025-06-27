@@ -1,4 +1,4 @@
-package com.fpl.datn.dtos.request;
+package com.fpl.datn.dto.request;
 
 import jakarta.validation.constraints.*;
 

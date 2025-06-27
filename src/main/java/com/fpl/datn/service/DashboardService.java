@@ -1,13 +1,15 @@
 package com.fpl.datn.service;
 
-import com.fpl.datn.dto.response.DashboardResponse;
-import com.fpl.datn.repository.DashboardRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import static lombok.AccessLevel.PRIVATE;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import static lombok.AccessLevel.PRIVATE;
+import com.fpl.datn.dto.response.DashboardResponse;
+import com.fpl.datn.repository.DashboardRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 
 @Service
 @RequiredArgsConstructor

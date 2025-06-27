@@ -4,8 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import com.fpl.datn.models.*;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -36,7 +34,6 @@ public class UserResponse {
 
     public boolean hasRole(String roleName) {
         if (roles == null) return false;
-        return roles.stream()
-                .anyMatch(role -> roleName.equals(role.getName()));
+        return roles.stream().anyMatch(role -> roleName.equals(role.getName()));
     }
 }

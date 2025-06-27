@@ -32,6 +32,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         ObjectMapper objectMapper = new ObjectMapper();
 
         response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        System.out.println("JwtAuthenticationEntryPoint was triggered for: " + request.getRequestURI());
         response.flushBuffer();
     }
 }

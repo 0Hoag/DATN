@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,31 +14,31 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductRequest {
-    @NotBlank(message = "Tên sản phẩm không được để trống")
+    @NotBlank(message = "PRODUCT_NAME_REQUIRED")
     String name;
 
-    @NotBlank(message = "Slug không được để trống")
+    @NotBlank(message = "PRODUCT_SLUG_REQUIRED")
     String slug;
 
-    @NotBlank(message = "Miêu tả không được để trống")
+    @NotBlank(message = "PRODUCT_DESCRIPTION_REQUIRED")
     String description;
 
-    @NotBlank(message = "Thương hiệu không được để trống")
+    @NotBlank(message = "PRODUCT_BRAND_REQUIRED")
     String brand;
 
-    @NotBlank(message = "thumbnail không được để trống")
+    @NotBlank(message = "PRODUCT_THUMBNAIL_REQUIRED")
     String thumbnail;
 
-    @NotBlank(message = "Nội dung không được để trống")
+    @NotBlank(message = "PRODUCT_CONTENT_REQUIRED")
     String content;
 
-    @NotNull(message = "Mục hiển thị không được để trống")
+    @NotNull(message = "PRODUCT_ISHOME_REQUIRED")
     Boolean isHome;
 
-    @NotNull(message = "Mục hoạt động không được để trống")
+    @NotNull(message = "PRODUCT_ISACTIVE_REQUIRED")
     Boolean isActive;
 
-    @NotNull(message = "Danh mục không được để trống")
+    @NotNull(message = "PRODUCT_CATEGORY_REQUIRED")
     Integer category;
 
     List<ProductVariantRequest> productVariants;

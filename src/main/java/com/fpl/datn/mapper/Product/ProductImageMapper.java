@@ -1,15 +1,15 @@
 package com.fpl.datn.mapper.Product;
 
+import java.util.List;
+
+import org.mapstruct.*;
+
 import com.fpl.datn.dto.request.Product.ProductImageRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductImageRequest;
 import com.fpl.datn.dto.response.Product.ProductImageResponse;
 import com.fpl.datn.mapper.DateMapper;
 import com.fpl.datn.models.ProductImage;
 import com.fpl.datn.models.ProductVariant;
-
-import org.mapstruct.*;
-
-import java.util.List;
 
 @Mapper(componentModel = "spring", uses = DateMapper.class)
 public interface ProductImageMapper {

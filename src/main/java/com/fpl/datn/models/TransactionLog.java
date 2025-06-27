@@ -6,11 +6,13 @@ import java.time.LocalDateTime;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "transaction_logs")
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,13 +27,19 @@ public class TransactionLog {
     @Column(name = "amout", precision = 10, scale = 2)
     private BigDecimal amount;
 
-    private Integer status;
+    private String status;
 
-    @Column(name = "transaction_ref")
+    @Column(name = "transaction_ref", columnDefinition = "TEXT")
     private String transactionRef;
+
+    @Column(name = "transaction_no", columnDefinition = "TEXT")
+    private String transactionNo;
 
     @Column(columnDefinition = "TEXT")
     private String message;
+
+    @Column(name = "action_type")
+    private String actionType;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

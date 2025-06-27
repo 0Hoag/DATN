@@ -4,16 +4,14 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-import com.fpl.datn.dto.request.*;
-import com.fpl.datn.dto.response.Product.ProductResponse;
 import jakarta.validation.Valid;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.*;
 import com.fpl.datn.dto.response.UserResponse;
 import com.fpl.datn.service.UserService;
 

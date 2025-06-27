@@ -1,25 +1,26 @@
 package com.fpl.datn.dto.response;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.FieldDefaults;
+
 @Builder
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderReturnResponse {
-    private Integer id;
-    private String reason;
-    private BigDecimal refundAmount;
-    private Integer paymentMethod;
-    private String status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    int id;
+    LocalDateTime createdAt;
+    int paymentMethod;
+    String status;
+    String reason;
+    BigDecimal refundAmount;
 
-    private Integer userId;
-    private Integer orderId;
+    String fullName;
+    OrderResponse order;
 }
