@@ -22,6 +22,7 @@ public class OrderResponse {
     String paymentStatus;
     String note;
     // Thông tin người dùng
+    int idAddress;
     String address;
     String nickname;
     String phone;
