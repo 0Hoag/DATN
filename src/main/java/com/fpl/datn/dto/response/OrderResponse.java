@@ -18,11 +18,12 @@ public class OrderResponse {
     Integer id;
     LocalDateTime createdAt;
     String orderStatus;
+    Integer idPaymentMethod;
     String paymentMethod;
     String paymentStatus;
     String note;
     // Thông tin người dùng
-    int idAddress;
+    Integer idAddress;
     String address;
     String nickname;
     String phone;

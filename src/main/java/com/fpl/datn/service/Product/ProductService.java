@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -39,7 +40,7 @@ public class ProductService {
 
     // thêm sản phẩ
     @Transactional
-    public Boolean create(ProductRequest request) {
+    public ProductResponse create(ProductRequest request) {
         if (!cateRepo.existsById(request.getCategory())) {
             throw new AppException(ErrorCode.CATEGORY_NOT_EXISTED);
         }
@@ -61,7 +62,7 @@ public class ProductService {
             variantRequest.setProductId(savedProduct.getId()); // cần ID cha
             productVariantService.create(variantRequest); // gọi đúng logic sinh SKU
         }
-        return true;
+        return mapper.toProductResponse(product);
     }
 
     @Transactional
@@ -130,8 +131,18 @@ public class ProductService {
         repo.delete(product);
     }
 
-    public List<ProductResponse> search(String keyword) {
-        List<Product> products = repo.searchByNameOrSku(keyword);
-        return products.stream().map(mapper::toProductResponse).collect(Collectors.toList());
+    public PageResponse<ProductResponse> search(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Product> productPage = repo.searchByNameOrSku(keyword, pageable);
+        List<ProductResponse> data =
+                productPage.getContent().stream().map(mapper::toProductResponse).collect(Collectors.toList());
+
+        return PageResponse.<ProductResponse>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .pageSize(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .data(data)
+                .build();
     }
 }

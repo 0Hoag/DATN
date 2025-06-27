@@ -103,18 +103,18 @@ public class UserService {
         try {
             userRepositories.deleteById(id);
         } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
+            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public List<UserResponse> List() {
         return userRepositories.findAll().stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public PageResponse<UserResponse> Get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = userRepositories.findAll(pageable);
@@ -136,6 +136,12 @@ public class UserService {
         Set<Role> roles = new HashSet<>();
         roles.add(Role.builder().name(PredefinedRole.ROLE_CUSTOMER).build());
 
+        if (userRepositories.existsByEmail(request.getEmail())) {
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+        if (userRepositories.existsByPhone(request.getPhone())) {
+            throw new AppException(ErrorCode.PHONE_EXISTED);
+        }
         if (userRepositories.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
         }

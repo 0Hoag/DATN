@@ -21,6 +21,7 @@ public interface ProductVariantAttributeValueMapper {
     // Response
     @Mapping(source = "attributeValue.value", target = "attributeValue")
     @Mapping(source = "attributeValue.attribute.name", target = "attributeName")
+    @Mapping(source = "productVariant.variantName", target = "productVariantName")
     ProductVariantAttributeValueResponse toResponse(ProductVariantAttributeValue entity);
 
     // ✅ Update - cập nhật entity hiện tại từ request

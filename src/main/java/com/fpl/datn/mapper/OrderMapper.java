@@ -16,6 +16,7 @@ import com.fpl.datn.models.Order;
         uses = {OrderDetailMapper.class})
 public interface OrderMapper {
 
+    @Mapping(target = "idPaymentMethod", source = "paymentMethod.id")
     @Mapping(target = "paymentMethod", source = "paymentMethod.name")
     @Mapping(target = "idAddress", source = "address.id")
     @Mapping(target = "address", source = "address.addressLine")

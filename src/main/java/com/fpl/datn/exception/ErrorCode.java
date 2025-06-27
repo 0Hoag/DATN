@@ -11,6 +11,10 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
+    UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNKNOWN_ERROR(9000, "Unknown server error", HttpStatus.INTERNAL_SERVER_ERROR),
+    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
+    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allow", HttpStatus.BAD_REQUEST),
 
     // User (1000–1099)
     USER_ALREADY_EXISTS(1001, "User already exists", HttpStatus.BAD_REQUEST),
@@ -85,6 +89,23 @@ public enum ErrorCode {
     ATTRIBUTE_VALUE_ALREADY_EXISTS(1524, "Attribute Value EXISTED", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_UPLOAD_ID_REQUIRED(1525, "Upload image ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_ID_REQUIRED(1526, "Image ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_REQUIRED(1528, "Product name must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_SLUG_REQUIRED(1529, "Product slug must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_DESCRIPTION_REQUIRED(1530, "Product description must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_BRAND_REQUIRED(1531, "Product brand must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_THUMBNAIL_REQUIRED(1532, "Product thumbnail must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_CONTENT_REQUIRED(1533, "Product content must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_ISHOME_REQUIRED(1534, "Product home status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_ISACTIVE_REQUIRED(1535, "Product active status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_CATEGORY_REQUIRED(1536, "Product category must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_NAME_REQUIRED(1537, "Product variant name must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_PRICE_REQUIRED(1538, "Product variant price must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_QUANTITY_REQUIRED(1539, "Product variant quantity must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_SOLD_REQUIRED(1540, "Product variant sold must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ISACTIVE_REQUIRED(1541, "Product variant active status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_PRODUCT_ID_REQUIRED(1542, "Product variant product ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED(
+            1543, "Product variant attribute values must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_ALT_TEXT_REQUIRED(1071, "Alt text must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_DESCRIPTION_REQUIRED(1072, "Specification description must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_IS_THUMBNAIL_REQUIRED(1073, "Thumbnail status must not be null", HttpStatus.BAD_REQUEST),
@@ -92,13 +113,6 @@ public enum ErrorCode {
     PRODUCT_IMAGE_VARIANT_ID_REQUIRED(1075, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_URL_REQUIRED(1076, "Image URL must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_ID_REQUIRED(1540, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_NAME_REQUIRED(1541, "Product variant name must not be blank", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_PRICE_REQUIRED(1542, "Product price must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_QUANTITY_REQUIRED(1543, "Product quantity must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_SOLD_REQUIRED(1544, "Sold quantity must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_ISACTIVE_REQUIRED(1545, "Active status must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_PRODUCT_ID_REQUIRED(1546, "Product ID must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED(1547, "Attribute value list must not be null", HttpStatus.BAD_REQUEST),
 
     // Cart (1600–1699)
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
@@ -142,12 +156,7 @@ public enum ErrorCode {
     TRANCSACTION_LOG_NOT_FOUND(2301, "Transaction log not found", HttpStatus.NOT_FOUND),
 
     // Common (2500–2599)
-    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),
-
-    // System (7000+)
-    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allowed", HttpStatus.BAD_REQUEST),
-    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
-    UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
+    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND);
 
     int code;
     String message;

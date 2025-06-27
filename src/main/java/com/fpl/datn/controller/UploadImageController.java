@@ -16,7 +16,7 @@ import com.fpl.datn.service.Product.UploadImageService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/upload-image")
+@RequestMapping("/upload_image")
 @RequiredArgsConstructor
 public class UploadImageController {
 
