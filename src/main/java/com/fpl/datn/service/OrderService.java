@@ -149,29 +149,23 @@ public class OrderService {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         mapper.toUpdateOrder(order, request);
+        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
+            var address = addressRepository
+                    .findById(request.getAddressId())
+                    .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+            order.setAddress(address);
+            order.setUpdatedAt(LocalDateTime.now());
 
-        //        var user = userRepository
-        //                .findById(request.getUserId())
-        //                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        var address = addressRepository
-                .findById(request.getAddressId())
-                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
-        //        var paymentMethod = paymentRepository
-        //                .findById(request.getPaymentMethodId())
-        //                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_METHOD_NOT_FOUND));
-
-        //        order.setUser(user);
-        order.setAddress(address);
-        //        order.setPaymentMethod(paymentMethod);
-        order.setUpdatedAt(LocalDateTime.now());
-
-        repository.save(order);
-        var response = mapper.toOrderResponse(order);
-        if (isVnpay(order)) {
-            var paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
-            response.setPaymentUrl(paymentUrl.getPaymentUrl());
+            repository.save(order);
+            var response = mapper.toOrderResponse(order);
+            if (isVnpay(order)) {
+                var paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
+                response.setPaymentUrl(paymentUrl.getPaymentUrl());
+            }
+            return response;
+        } else {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_MODIFIED);
         }
-        return response;
     }
 
     @Transactional
