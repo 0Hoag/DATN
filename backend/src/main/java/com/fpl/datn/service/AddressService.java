@@ -11,6 +11,7 @@ import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.AddressMapper;
 import com.fpl.datn.repository.AddressRepository;
+import com.fpl.datn.repository.UserRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AddressService {
     AddressRepository repository;
+    UserRepository userRepository;
     AddressMapper mapper;
 
     public List<AddressResponse> findByUserId(int userId) {
@@ -32,10 +34,9 @@ public class AddressService {
     }
 
     public AddressResponse createByUserId(int userId, AddressRequest request) {
+
+        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         var userAddresses = repository.findByUser_Id(userId);
-        if (userAddresses == null || userAddresses.isEmpty()) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
         if (Boolean.TRUE.equals(request.getIsDefault())) {
             for (var addr : userAddresses) {
                 if (Boolean.TRUE.equals(addr.getIsDefault())) {
@@ -45,9 +46,10 @@ public class AddressService {
             }
         }
         var address = mapper.toAddress(request);
-        address.setCreatedAt(LocalDateTime.now());
-        address.setUser(userAddresses.get(0).getUser());
+        address.setUser(user);
         address.setIsDefault(request.getIsDefault());
+        address.setCreatedAt(LocalDateTime.now());
+        address.setUpdatedAt(LocalDateTime.now());
         repository.save(address);
         return mapper.toAddressResoonse(address);
     }

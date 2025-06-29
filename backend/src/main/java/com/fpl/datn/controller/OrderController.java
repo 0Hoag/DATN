@@ -3,6 +3,7 @@ package com.fpl.datn.controller;
 import java.time.LocalDate;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderRequest;
@@ -53,8 +56,6 @@ public class OrderController {
     @GetMapping("/search")
     ApiResponse<PageResponse<OrderResponse>> search(
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Integer id,
-            @RequestParam(required = false) String phone,
             @RequestParam(required = false) String orderStatus,
             @RequestParam(required = false) String paymentStatus,
             @RequestParam(required = false) LocalDate startDate,
@@ -63,13 +64,13 @@ public class OrderController {
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-                .result(orderService.search(
-                        keyword, id, phone, orderStatus, paymentStatus, startDate, endDate, page, size, sort))
+                .result(orderService.search(keyword, orderStatus, paymentStatus, startDate, endDate, page, size, sort))
                 .build();
     }
 
     @PostMapping
-    ApiResponse<OrderResponse> createOrder(@RequestBody OrderRequest request, HttpServletRequest httpRequest) {
+    ApiResponse<OrderResponse> createOrder(@RequestBody @Valid OrderRequest request, HttpServletRequest httpRequest)
+            throws JsonMappingException, JsonProcessingException {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.create(request, httpRequest))
                 .build();

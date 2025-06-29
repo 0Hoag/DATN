@@ -1,5 +1,7 @@
 package com.fpl.datn.configuration;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -15,8 +17,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -56,8 +56,10 @@ public class SecurityConfig {
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
-        httpSecurity.cors(httpSecurityCorsConfigurer -> corsConfigurationSource());
+        httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(httpSecurityCorsConfigurer -> corsConfigurationSource());
+
         return httpSecurity.build();
     }
 
@@ -71,6 +73,7 @@ public class SecurityConfig {
 
         return jwtAuthenticationConverter;
     }
+
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -95,6 +98,7 @@ public class SecurityConfig {
 
         return source;
     }
+
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

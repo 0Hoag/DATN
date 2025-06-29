@@ -22,4 +22,16 @@ export const ProductService = {
     fetchListProductVariant: (params) => {
         return axiosCall.get(API.LIST_PRODUCT_VARIANT, params);
     },
+    createProductVariant: (params) => {
+        return axiosCall.post(API.CREATE_PRODUCT_VARIANT, params);
+    },
+    updateProductVariant: (id, params) => {
+        return axiosCall.put(`${API.UPDATE_PRODUCT_VARIANT}/${id}`, params);
+    },
+    deleteProductVariant: (id) => {
+        return axiosCall.delete(`${API.DELETE_PRODUCT_VARIANT}/${id}`);
+    },
+    deleteVariantImage: (params) => {
+        return axiosCall.delete(`${API.DELETE_VARIANT_IMAGE}`,params);
+    },
 };

@@ -1,33 +1,37 @@
 package com.fpl.datn.service;
 
-import static lombok.AccessLevel.PRIVATE;
-
 import org.springframework.stereotype.Service;
 
-import com.fpl.datn.dto.response.DashboardResponse;
+import com.fpl.datn.dto.response.*;
 import com.fpl.datn.repository.DashboardRepository;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class DashboardService {
 
     DashboardRepository dashboardRepository;
 
-    public DashboardResponse getDashboardStats() {
+    public DashboardResponse getShow() {
+        int month = java.time.LocalDate.now().getMonthValue();
+        int year = java.time.LocalDate.now().getYear();
         return DashboardResponse.builder()
-                .totalUsers(dashboardRepository.countTotalUsers())
+                .totalCustomers(dashboardRepository.countTotalUsers())
                 .totalOrders(dashboardRepository.countTotalOrders())
                 .totalRevenue(dashboardRepository.sumTotalRevenue())
-                .totalProducts(dashboardRepository.countTotalProducts())
                 .totalProductsSold(dashboardRepository.countTotalProductsSold())
-                .topProducts(dashboardRepository.top10SellingProducts())
-                .revenueChart(dashboardRepository.revenueChart())
-                .orderChart(dashboardRepository.orderChart())
-                .productChart(dashboardRepository.productChart())
+                .topProducts(dashboardRepository.findTop10ProductsSoldByMonthYearDto(month, year))
+                .chartData(ChartData.builder()
+                        .revenueChart(dashboardRepository.getRevenueChart())
+                        .orderChart(dashboardRepository.getOrderChart())
+                        .productChart(dashboardRepository.getProductChart())
+                        .build())
                 .build();
     }
 }

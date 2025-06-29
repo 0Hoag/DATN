@@ -13,6 +13,7 @@ public enum OrderStatus {
     CONFIRMED("CONFIRMED"),
     SHIPPED("SHIPPED"),
     DELIVERED("DELIVERED"),
+    RECEIED("RECEIED"),
     CANCELLED("CANCELLED");
 
     String description;

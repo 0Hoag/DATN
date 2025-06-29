@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -34,15 +35,16 @@ public class CategoryService {
     CategoryRepository repo;
     CategoryBuilder builder;
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public Boolean createCategory(CategoryRequest request) {
         if (request.getName() == null || request.getName().isEmpty()) {
             throw new AppException(ErrorCode.MISSING_INPUT);
         }
         if (repo.existsByName(request.getName())) {
-            throw new AppException(ErrorCode.CATEGORIES_NAME_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_NAME_EXISTED);
         }
         if (repo.existsBySlug(request.getSlug())) {
-            throw new AppException(ErrorCode.CATEGORIES_SLUG_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_SLUG_EXISTED);
         }
 
         Category category = mapper.toCategory(request);
@@ -97,6 +99,7 @@ public class CategoryService {
                 .build();
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public CategoryResponse update(Integer id, UpdateCategoryRequest request) {
         Category category = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 
@@ -121,6 +124,7 @@ public class CategoryService {
         return mapper.toCategoryResponse(repo.save(category));
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public void delete(Integer id) {
         Category category = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
 

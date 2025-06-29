@@ -10,6 +10,8 @@ public class PredefinedPermission {
     public static final String MANAGE_PRODUCTS = "MANAGE_PRODUCTS";
     public static final String MANAGE_ORDERS = "MANAGE_ORDERS";
     public static final String VIEW_PRODUCT = "VIEW_PRODUCT";
+    public static final String VIEW_DASHBOARD = "VIEW_DASHBOARD";
+    public static final String VIEW_ORDER = "VIEW_ORDER";
     public static final String TRACK_ORDER = "TRACK_ORDER";
     public static final String CREATE_REVIEW = "CREATE_REVIEW";
     public static final String BUY_PRODUCT = "BUY_PRODUCT";

@@ -25,9 +25,15 @@
         Đã hủy
       </button>
     </div>
-    <div class="">
-      <input type="text" class="form-control w-100" placeholder="Tìm kiếm đơn hàng..." />
-    </div>
+  <div class="d-flex justify-content-end">
+  <input
+   type="text"
+   class="form-control w-100"
+   placeholder="Tìm kiếm đơn hàng.."
+   @input="handleSearch"
+   v-model="searchKeyword"
+  />
+ </div>
   </div>
 
   <table class="table table-hover text-center align-middle my-3">
@@ -79,6 +85,15 @@ import { handleError, hideLoading, showLoading, showPromtDelete } from "@/api/fu
 import { OrderService } from "@/api/service/OrderService";
 import { onBeforeMount, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
+// tìm kiếm
+const searchKeyword = ref("");
+const timer = ref(null);
+const startDate = ref(null)
+const endDate = ref(null)
+const orderStatus = ref(null)
+const paymentSatus = ref(null)
+const sort = ref(true)
+
 
 const activeType = ref("ALL");
 
@@ -106,6 +121,44 @@ async function fetchList() {
     console.log(error);
   }
 }
+async function searchList() {
+  try {
+    showLoading();
+    // isSearching.value = true;
+
+    const response = await OrderService.searchOrder({
+      keyword: searchKeyword.value.trim(),
+      page: pagination.value.current,
+      size: pagination.value.pageSize,
+      // orderStatus: sort.value,
+      // paymentStatus: searchKeyword.value.trim(),
+      // startDate: searchKeyword.value.trim(),
+      // endDate: searchKeyword.value.trim(),
+    });
+
+    list.value = response.result.data;
+    pagination.value.total = response.result.totalElements;
+
+  } catch (error) {
+    toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+    hideLoading();
+  }
+}
+
+ async function handleSearch() {
+  if (timer.value) clearTimeout(timer.value);
+
+  timer.value = setTimeout(async () => {
+   pagination.value.current = 1;
+
+   if (!searchKeyword.value.trim()) {
+    await fetchList(); // Gọi API fetch bình thường
+   } else {
+    await searchList(); // Gọi API search
+   }
+  }, 1000); // debounce 
+ }
 
 async function updateStatusOrder(order) {
   try {

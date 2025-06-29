@@ -1,7 +1,9 @@
 package com.fpl.datn.dto.request.Product;
 
-import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+import lombok.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,11 +17,23 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductImageRequest {
-    String imageUrl;
+    Integer id;
+
+    @NotBlank(message = "PRODUCT_IMAGE_ALT_TEXT_REQUIRED")
     String altText;
+
+    @NotBlank(message = "PRODUCT_IMAGE_DESCRIPTION_REQUIRED")
     String specDescription;
+
+    @NotNull(message = "PRODUCT_IMAGE_IS_THUMBNAIL_REQUIRED")
     Boolean isThumbnail;
-    int sortOrder;
+
+    @NotNull(message = "PRODUCT_IMAGE_SORT_ORDER_REQUIRED")
+    Integer sortOrder;
+
+    @NotNull(message = "PRODUCT_IMAGE_VARIANT_ID_REQUIRED")
     Integer productVariantId;
-    MultipartFile image;
+
+    @NotNull(message = "PRODUCT_IMAGE_URL_REQUIRED")
+    String imageUrl;
 }

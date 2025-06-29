@@ -20,4 +20,7 @@ export const AccountService = {
   logout: (params) => {
     return axiosCall.post(API.LOGOUT, params);
   },
+  searchUser:  (params) => {
+    return axiosCall.get(API.LIST_ACCOUNT, params);
+  },
 };

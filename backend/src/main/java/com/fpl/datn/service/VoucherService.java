@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -48,10 +49,11 @@ public class VoucherService {
         return mapper.toVoucherResponse(voucher);
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public VoucherResponse create(VoucherRequest request) {
         // Chỉ check trùng code thôi
         if (repository.existsByCode(request.getCode())) {
-            throw new AppException(ErrorCode.CATEGORIES_NAME_EXISTED);
+            throw new AppException(ErrorCode.CATEGORY_NAME_EXISTED);
         }
 
         // Validate cơ bản
@@ -65,13 +67,14 @@ public class VoucherService {
         return mapper.toVoucherResponse(voucher);
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public VoucherResponse update(int id, UpdateVoucherRequest request) {
         var voucher = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
 
         // Check trùng code nếu có thay đổi
         if (request.getCode() != null && !request.getCode().equals(voucher.getCode())) {
             if (repository.existsByCode(request.getCode())) {
-                throw new AppException(ErrorCode.CATEGORIES_NAME_EXISTED);
+                throw new AppException(ErrorCode.CATEGORY_NAME_EXISTED);
             }
         }
 
@@ -92,6 +95,7 @@ public class VoucherService {
         return mapper.toVoucherResponse(voucher);
     }
 
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public void delete(int id) {
         if (!repository.existsById(id)) {
             throw new AppException(ErrorCode.VOUCHER_NOT_FOUND);

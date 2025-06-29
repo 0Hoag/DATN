@@ -1,9 +1,9 @@
 import Swal from "sweetalert2";
 import { toast } from "vue3-toastify";
 
-export const showLoading = () => {
+export const showLoading = (msg = 'Chờ xíu') => {
   Swal.fire({
-    title: "Chờ xíu...",
+    title: msg,
     didOpen: () => {
       Swal.showLoading();
     },
@@ -29,256 +29,162 @@ export const showPromtDelete = (onConfirm) => {
   });
 };
 
-export const handleError = (error) => {
-  console.log(error);
-  const errorCode = error?.response?.data?.code;
-  let errorMessage = "Đã xảy ra lỗi. Vui lòng thử lại.";
+export const showPromtConfirm = (title, onConfirm) => {
+  Swal.fire({
+    title: title,
+    showCancelButton: true,
+    cancelButtonText: 'Huỷ',
+    confirmButtonText: 'Đồng ý',
+  }).then((result) => {
+    if (result.isConfirmed) {
+      onConfirm();
+    }
+  })
+};
 
-  switch (errorCode) {
+
+export const handleError = (error) => {
+  const errorCode = error?.response?.data?.code;
+  const defaultMessage = "Đã xảy ra lỗi không xác định! Vui lòng liên hệ bộ phận kỹ thuật.";
+
+  const errorMessages = {
     // Common
-    case 8888:
-      errorMessage = "Vui lòng nhập đầy đủ thông tin.";
-      break;
-    case 7777:
-      errorMessage = "Không cho phép tham chiếu vòng lặp.";
-      break;
-    case 9999:
-      errorMessage = "Lỗi chưa được phân loại. Vui lòng liên hệ quản trị viên.";
-      break;
+    8888: "Vui lòng nhập đầy đủ thông tin.",
+    7777: "Không cho phép tham chiếu vòng lặp.",
+    9999: "Lỗi chưa được phân loại. Vui lòng liên hệ quản trị viên.",
 
     // User
-    case 1001:
-      errorMessage = "Người dùng đã tồn tại.";
-      break;
-    case 1002:
-      errorMessage = "Không tìm thấy người dùng.";
-      break;
-    case 1003:
-      errorMessage = "Email đã được sử dụng.";
-      break;
-    case 1004:
-      errorMessage = "Tên đăng nhập không hợp lệ (quá ngắn).";
-      break;
-    case 1005:
-      errorMessage = "Mật khẩu không hợp lệ (quá ngắn).";
-      break;
-    case 1006:
-      errorMessage = "Người dùng không tồn tại hoặc mật khẩu không đúng.";
-      break;
-    case 1007:
-      errorMessage = "Mật khẩu đã được sử dụng trước đó.";
-      break;
-    case 1008:
-      errorMessage = "Tạo người dùng thất bại.";
-      break;
-    case 1009:
-      errorMessage = "Cập nhật người dùng thất bại.";
-      break;
-    case 1010:
-      errorMessage = "Email đã tồn tại.";
-      break;
-    case 1011:
-      errorMessage = "Số điện thoại đã tồn tại.";
-      break;
-    case 1017:
-      errorMessage = "Lỗi khi tạo người dùng.";
-      break;
-    case 1018:
-      errorMessage = "Lỗi khi cập nhật người dùng hoặc tải ảnh.";
-      break;
-
-    // Product
-    case 1026:
-      errorMessage = "Slug sản phẩm đã tồn tại.";
-      break;
-    case 1027:
-      errorMessage = "Sản phẩm cần tạo đã tồn tại.";
-      break;
-    case 1028:
-      errorMessage = "Sản phẩm cần cập nhật không tồn tại.";
-      break;
-    case 1029:
-      errorMessage = "Sản phẩm cần xóa không tồn tại.";
-      break;
-    case 1030:
-      errorMessage = "Không tìm thấy đánh giá sản phẩm.";
-      break;
+    1001: "Người dùng đã tồn tại.",
+    1002: "Không tìm thấy người dùng.",
+    1003: "Email đã được sử dụng.",
+    1004: "Tên đăng nhập không hợp lệ (quá ngắn).",
+    1005: "Mật khẩu không hợp lệ (quá ngắn).",
+    1006: "Tuổi không đủ yêu cầu.",
+    1007: "Người dùng không tồn tại.",
+    1008: "Mật khẩu đã được sử dụng trước đó.",
+    1009: "Tạo người dùng thất bại.",
+    1010: "Cập nhật người dùng thất bại.",
+    1011: "Email đã tồn tại.",
+    1012: "Số điện thoại đã tồn tại.",
+    1013: "Email không có thay đổi.",
+    1014: "Số điện thoại không có thay đổi.",
+    1015: "Mật khẩu không đúng.",
+    1016: "Lỗi khi tạo người dùng.",
+    1017: "Lỗi khi cập nhật người dùng.",
+    1019: "Mật khẩu cũ không chính xác.",
+    1020: "Mật khẩu mới không được trùng với xác nhận mật khẩu.",
+    1030: "Email không đúng.",
 
     // Permission
-    case 1101:
-      errorMessage = "Không tìm thấy quyền.";
-      break;
+    1101: "Không tìm thấy quyền.",
 
     // Order
-    case 1201:
-      errorMessage = "Không tìm thấy đơn hàng.";
-      break;
-    case 1202:
-      errorMessage = "Đơn hàng đã được xử lý.";
-      break;
-    case 1203:
-      errorMessage = "Danh sách đơn hàng không tồn tại.";
-      break;
-    case 1204:
-      errorMessage = "Không thể chỉnh sửa đơn hàng này.";
-      break;
-    case 1205:
-      errorMessage = "Không tìm thấy trạng thái đơn hàng.";
-      break;
-    case 1206:
-      errorMessage = "Đơn hàng phải ở trạng thái 'Đã giao' để thực hiện thao tác này.";
-      break;
-    case 1207:
-      errorMessage = "Thời gian đổi trả hàng (7 ngày) đã hết.";
-      break;
-    case 1208:
-      errorMessage = "Yêu cầu hoàn hàng đã tồn tại.";
-      break;
-    case 1209:
-      errorMessage = "Không tìm thấy thông tin hoàn đơn hàng.";
-      break;
-    case 1210:
-      errorMessage = "Không tìm thấy trạng thái hoàn hàng.";
-      break;
+    1201: "Không tìm thấy đơn hàng.",
+    1202: "Đơn hàng đã được xử lý.",
+    1203: "Danh sách đơn hàng không tồn tại.",
+    1204: "Không thể chỉnh sửa đơn hàng này.",
+    1205: "Không tìm thấy trạng thái đơn hàng.",
+    1206: "Đơn hàng phải ở trạng thái 'Đã giao' để thực hiện thao tác này.",
+    1207: "Thời gian đổi trả hàng đã hết.",
+    1208: "Yêu cầu hoàn hàng đã tồn tại.",
+    1209: "Không tìm thấy thông tin hoàn đơn hàng.",
+    1210: "Không tìm thấy trạng thái hoàn hàng.",
+    1522: "Không thể thay đổi trạng thái đơn hàng.",
 
     // Address
-    case 1301:
-      errorMessage = "Không tìm thấy địa chỉ.";
-      break;
+    1301: "Không tìm thấy địa chỉ.",
 
     // Payment
-    case 1401:
-      errorMessage = "Không tìm thấy phương thức hoặc trạng thái thanh toán.";
-      break;
+    1401: "Không tìm thấy phương thức thanh toán.",
+    1402: "Không tìm thấy trạng thái thanh toán.",
 
-    // Product Variant
-    case 1501:
-      errorMessage = "Không tìm thấy biến thể sản phẩm.";
-      break;
-    case 1502:
-      errorMessage = "Sản phẩm đã hết hàng.";
-      break;
-    case 1503:
-      errorMessage = "Không tìm thấy sản phẩm.";
-      break;
-    case 1504:
-      errorMessage = "Sản phẩm đã chọn không tồn tại.";
-      break;
-    case 1239:
-    case 1248:
-      errorMessage = "SKU đã tồn tại.";
-      break;
-    case 1240:
-      errorMessage = "Chi tiết ảnh sản phẩm đã tồn tại.";
-      break;
-    case 1242:
-      errorMessage = "Không thể cập nhật ảnh sản phẩm.";
-      break;
-    case 1243:
-      errorMessage = "Không thể xóa ảnh sản phẩm.";
-      break;
-    case 1244:
-      errorMessage = "Chi tiết biến thể đã tồn tại.";
-      break;
-    case 1245:
-      errorMessage = "Không thể cập nhật biến thể.";
-      break;
-    case 1246:
-      errorMessage = "Không thể xóa biến thể.";
-      break;
-    case 1247:
-      errorMessage = "Giá trị biến thể đã tồn tại.";
-      break;
-    case 1238:
-      errorMessage = "Không thể xóa biến thể sản phẩm.";
-      break;
+    // Product / Variant
+    1501: "Không tìm thấy biến thể sản phẩm.",
+    1502: "Sản phẩm đã hết hàng.",
+    1503: "Không tìm thấy sản phẩm.",
+    1504: "Tên sản phẩm đã tồn tại.",
+    1505: "Sản phẩm đã chọn không tồn tại.",
+    1506: "Biến thể sản phẩm đã tồn tại.",
+    1510: "Giá trị thuộc tính biến thể đã tồn tại.",
+    1511: "Chi tiết biến thể đã tồn tại.",
+    1512: "SKU đã tồn tại.",
+    1513: "Biến thể cập nhật đã tồn tại.",
+    1514: "Không thể xóa biến thể đã tồn tại.",
+    1515: "Slug sản phẩm đã tồn tại.",
+    1516: "Tạo sản phẩm thất bại.",
+    1517: "Cập nhật sản phẩm thất bại.",
+    1518: "Xóa sản phẩm thất bại.",
+    1519: "Không tìm thấy đánh giá sản phẩm.",
+    1520: "Không tìm thấy thuộc tính biến thể.",
+    1523: "Giá trị thuộc tính bị trùng.",
+    1524: "Giá trị thuộc tính đã tồn tại.",
+    1525: "ID hình ảnh không được để trống.",
+    1526: "ID ảnh không được để trống.",
+    1528: "Tên sản phẩm không được để trống.",
+    1529: "Slug sản phẩm không được để trống.",
+    1530: "Mô tả sản phẩm không được để trống.",
+    1531: "Thương hiệu không được để trống.",
+    1532: "Ảnh đại diện sản phẩm không được để trống.",
+    1533: "Nội dung sản phẩm không được để trống.",
+    1534: "Trạng thái trang chủ không được để trống.",
+    1535: "Trạng thái hoạt động không được để trống.",
+    1536: "Danh mục sản phẩm không được để trống.",
+    1537: "Tên biến thể không được để trống.",
+    1538: "Giá biến thể không được để trống.",
+    1539: "Số lượng biến thể không được để trống.",
+    1540: "Số lượng đã bán không được để trống.",
+    1541: "Trạng thái hoạt động của biến thể không được để trống.",
+    1542: "ID sản phẩm của biến thể không được để trống.",
+    1543: "Giá trị thuộc tính của biến thể không được để trống.",
+    1071: "Alt text không được để trống.",
+    1072: "Thông số kỹ thuật không được để trống.",
+    1073: "Trạng thái ảnh đại diện không được để trống.",
+    1074: "Thứ tự sắp xếp ảnh không được để trống.",
+    1075: "ID biến thể của ảnh không được để trống.",
+    1076: "URL ảnh không được để trống.",
+    1995: "Sản phẩm đã được sử dụng, không thể xóa.",
 
     // Cart
-    case 1601:
-      errorMessage = "Sản phẩm đã tồn tại trong giỏ hàng.";
-      break;
+    1601: "Sản phẩm đã tồn tại trong giỏ hàng.",
 
     // File
-    case 1701:
-      errorMessage = "Tải tệp lên thất bại.";
-      break;
-    case 1702:
-      errorMessage = "Xóa tệp thất bại.";
-      break;
-    case 1703:
-      errorMessage = "Không tìm thấy hình ảnh.";
-      break;
+    1701: "Tải tệp lên thất bại.",
+    1702: "Xóa tệp thất bại.",
+    1703: "Không tìm thấy hình ảnh.",
 
     // Account
-    case 1801:
-      errorMessage = "Email đã tồn tại.";
-      break;
-    case 1802:
-      errorMessage = "Số điện thoại đã tồn tại.";
-      break;
+    1801: "Email đã tồn tại.",
+    1802: "Số điện thoại đã tồn tại.",
 
     // Auth
-    case 1901:
-      errorMessage = "Chưa xác thực người dùng.";
-      break;
-    case 1902:
-      errorMessage = "Bạn không có quyền thực hiện hành động này.";
-      break;
+    1901: "Chưa xác thực người dùng.",
+    1902: "Bạn không có quyền thực hiện hành động này.",
 
     // Input
-    case 2001:
-      errorMessage = "Dữ liệu nhập vào không hợp lệ.";
-      break;
-    case 2002:
-      errorMessage = "Khóa thông báo không hợp lệ.";
-      break;
+    2001: "Dữ liệu nhập vào không hợp lệ.",
+    2002: "Khóa thông báo không hợp lệ.",
+    2003: "UserId không được để trống.",
 
     // Voucher
-    case 2101:
-      errorMessage = "Không tìm thấy voucher.";
-      break;
-    case 2102:
-      errorMessage = "Voucher đã hết hạn.";
-      break;
-    case 2103:
-      errorMessage = "Giá trị đơn hàng chưa đủ để áp dụng voucher.";
-      break;
-    case 2104:
-      errorMessage = "Bạn đã có voucher này rồi.";
-      break;
-    case 2105:
-      errorMessage = "Voucher không hợp lệ.";
-      break;
-    case 2106:
-      errorMessage = "Voucher đã vượt quá số lượt sử dụng.";
-      break;
+    2101: "Không tìm thấy voucher.",
+    2102: "Voucher đã hết hạn.",
+    2103: "Đơn hàng không đủ giá trị để áp dụng voucher.",
+    2104: "Bạn đã có voucher này.",
+    2105: "Voucher không hợp lệ.",
+    2106: "Voucher đã vượt quá số lượt sử dụng.",
 
     // Category
-    case 2201:
-      errorMessage = "Danh mục không tồn tại.";
-      break;
-    case 2202:
-      errorMessage = "Danh mục có danh mục con, không thể xóa.";
-      break;
-    case 2203:
-      errorMessage = "Danh mục có sản phẩm, không thể xóa.";
-      break;
-    case 2204:
-      errorMessage = "Tên danh mục đã tồn tại.";
-      break;
-    case 2205:
-      errorMessage = "Slug của danh mục đã tồn tại.";
-      break;
+    2201: "Danh mục không tồn tại.",
+    2202: "Danh mục có danh mục con, không thể xóa.",
+    2203: "Danh mục có sản phẩm, không thể xóa.",
+    2204: "Tên danh mục đã tồn tại.",
+    2205: "Slug danh mục đã tồn tại.",
 
     // System
-    case 2501:
-      errorMessage = "Không tìm thấy tài nguyên.";
-      break;
+    2501: "Không tìm thấy tài nguyên.",
+  };
 
-    default:
-      errorMessage = "Lỗi không xác định! Vui lòng liên hệ bộ phận kỹ thuật.";
-      break;
-  }
+  const errorMessage = errorMessages[errorCode] || defaultMessage;
 
-  toast.error(errorMessage);
+  toast?.error?.(errorMessage);
 };

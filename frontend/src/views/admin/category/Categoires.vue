@@ -86,7 +86,7 @@ const openEditModal = (categroy) => {
   let c = null;
 
   if (categroy.parent) {
-    c = listCategory.value.find((item) => item.parent === categroy.parent);
+    c = listCategory.value.find((item) => item.id === categroy.parent);
   }
 
   categoryData.value = {
@@ -320,7 +320,7 @@ onMounted(() => {
           <label for="parentModalAdd" class="form-label fw-bold">Danh mục cha</label>
           <select class="form-select" id="parentModalAdd" v-model="categoryData.parent">
             <option :value="null">Chọn danh mục</option>
-            <option :value="category.id" v-for="category in listCategory.filter((item) => item.children && item.children.length === 0)" :key="category.id">
+            <option :value="category.id" v-for="category in listCategory" :key="category.id">
               {{ category.name }}
             </option>
           </select>
@@ -375,7 +375,7 @@ onMounted(() => {
           <label for="parentModalEdit" class="form-label fw-bold">Danh mục cha</label>
           <select class="form-select" id="parentModalEdit" v-model="categoryData.parent">
             <option :value="null">Chọn danh mục</option>
-            <option :value="category.id" v-for="category in listCategory" :key="category.id">
+            <option :value="category.id" v-for="category in listCategory.filter(item => item.id != categoryData.id)" :key="category.id">
               {{ category.name }}
             </option>
           </select>

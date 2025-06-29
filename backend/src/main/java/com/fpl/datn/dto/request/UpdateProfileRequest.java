@@ -10,7 +10,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProfileRequest {
     String fullName;
-    String email;
-    String password;
     String phone;
 }

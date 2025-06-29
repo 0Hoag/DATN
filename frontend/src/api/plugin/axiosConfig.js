@@ -14,12 +14,14 @@ axios.interceptors.request.use(
         if (decoded.exp && decoded.exp < now) {
           // Token đã hết hạn
           localStorage.removeItem("token");
-          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-          if (window.location.pathname !== "/login") {
-            setTimeout(() => {
-              window.location.href = "/login";
-            }, 1500);
-          }
+          toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", {
+            autoClose: 5000,
+            onClose: () => {
+              if (window.location.pathname !== "/login") {
+                window.location.href = "/login";
+              }
+            },
+          });
           return Promise.reject(new Error("Token expired"));
         }
 

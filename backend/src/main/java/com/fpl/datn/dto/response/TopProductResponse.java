@@ -10,5 +10,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TopProductResponse {
     String productName;
-    Long quantitySold;
+    String thumbnail;
+    long quantitySold;
+    Integer soldMonth;
+    Integer soldYear;
 }

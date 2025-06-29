@@ -11,12 +11,12 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductImageResponse {
-    int id;
+    Integer id;
     String imageUrl;
     String altText;
     String specDescription;
     Boolean isThumbnail;
-    int sortOrder;
+    Integer sortOrder;
     Timestamp createdAt;
     Timestamp updatedAt;
     Integer productVariantId;

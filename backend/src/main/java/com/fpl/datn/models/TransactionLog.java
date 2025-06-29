@@ -29,11 +29,17 @@ public class TransactionLog {
 
     private String status;
 
-    @Column(name = "transaction_ref")
+    @Column(name = "transaction_ref", columnDefinition = "TEXT")
     private String transactionRef;
+
+    @Column(name = "transaction_no", columnDefinition = "TEXT")
+    private String transactionNo;
 
     @Column(columnDefinition = "TEXT")
     private String message;
+
+    @Column(name = "action_type")
+    private String actionType;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

@@ -16,9 +16,14 @@ import com.fpl.datn.models.Order;
         uses = {OrderDetailMapper.class})
 public interface OrderMapper {
 
+    @Mapping(target = "idPaymentMethod", source = "paymentMethod.id")
     @Mapping(target = "paymentMethod", source = "paymentMethod.name")
+    @Mapping(target = "idAddress", source = "address.id")
     @Mapping(target = "address", source = "address.addressLine")
+    @Mapping(target = "nickname", source = "address.fullName")
+    @Mapping(target = "phone", source = "address.phone")
     @Mapping(target = "PaymentUrl", ignore = true)
+    @Mapping(target = "user.id", source = "user.id")
     OrderResponse toOrderResponse(Order order);
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -26,5 +31,7 @@ public interface OrderMapper {
 
     @BeanMapping(unmappedTargetPolicy = ReportingPolicy.IGNORE)
     @Mapping(target = "note", ignore = true)
+    @Mapping(target = "orderStatus", ignore = true)
+    @Mapping(target = "paymentStatus", ignore = true)
     void toUpdateStatus(@MappingTarget Order order, OrderStatusRequest request);
 }

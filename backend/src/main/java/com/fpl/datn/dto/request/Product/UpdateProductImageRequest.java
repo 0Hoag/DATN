@@ -1,5 +1,7 @@
 package com.fpl.datn.dto.request.Product;
 
+import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,10 +11,19 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProductImageRequest {
-    String imageUrl;
+    @NotNull(message = "PRODUCT_IMAGE_ID_REQUIRED")
+    Integer id;
+
     String altText;
+
     String specDescription;
+
+    @NotNull(message = "PRODUCT_IMAGE_IS_THUMBNAIL_REQUIRED")
     Boolean isThumbnail;
-    int sortOrder;
-    Integer productVariantId;
+
+    @NotNull(message = "PRODUCT_IMAGE_SORT_ORDER_REQUIRED")
+    Integer sortOrder;
+
+    @NotNull(message = "PRODUCT_IMAGE_UPLOAD_ID_REQUIRED")
+    Integer imageUrl;
 }

@@ -13,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderDetailResponse {
+    Integer id;
     BigDecimal price;
     Integer quantity;
     // tến sản phẩm

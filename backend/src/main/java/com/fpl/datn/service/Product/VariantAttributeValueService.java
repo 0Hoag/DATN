@@ -21,7 +21,7 @@ public class VariantAttributeValueService {
 
     public void delete(Integer id) {
         VariantAttributeValue variantAttributeValue =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_DELETE_EXISTED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTED));
         repo.delete(variantAttributeValue);
     }
 }

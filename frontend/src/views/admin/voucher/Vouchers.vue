@@ -27,7 +27,7 @@
         <td>{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</td>
         <td>{{ voucher.code }}</td>
         <td>{{ voucher.description }}</td>
-        <td>{{ voucher.discountValue }}</td>
+        <td>{{ voucher.discountValue <=100 ? voucher.discountValue + "%" : voucher.discountValue + "đ" }}</td>
         <td>{{ voucher.usageCount }}</td>
         <td>{{ voucher.displayEndAt }}</td>
         <td>{{ voucher.isActive ? "Hoạt động" : "Hết hạn" }}</td>

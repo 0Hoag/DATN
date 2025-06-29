@@ -3,8 +3,10 @@
     collapsible
     :collapsed="collapsed"
     @collapse="collapsed = $event"
+    
+
   >
-    <div class="logo" />
+    <div class="logo" ></div>
     <a-menu
       theme="dark"
       mode="inline"

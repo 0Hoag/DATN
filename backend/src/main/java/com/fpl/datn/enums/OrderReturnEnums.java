@@ -9,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum OrderReturnEnums {
-    PENDING("Chưa xác nhận"),
-    REFUNDED("Đã hoàn tiền"),
-    REJECTED("Đã từ chối");
+    PENDING("PENDING"),
+    REFUNDED("REFUNDED"),
+    REJECTED("REJECTED");
     String description;
 }

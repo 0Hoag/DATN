@@ -4,7 +4,6 @@ import java.util.List;
 
 import jakarta.validation.Valid;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
@@ -28,8 +27,8 @@ public class ProductController {
     ProductService productService;
 
     @PostMapping("/")
-    public ApiResponse<Boolean> Create(@RequestBody @Valid ProductRequest request) {
-        return ApiResponse.<Boolean>builder()
+    public ApiResponse<ProductResponse> Create(@RequestBody @Valid ProductRequest request) {
+        return ApiResponse.<ProductResponse>builder()
                 .code(1000)
                 .result(productService.create(request))
                 .build();
@@ -62,7 +61,8 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> Update(@PathVariable("id") int id, @RequestBody UpdateProductRequest request) {
+    public ApiResponse<ProductResponse> Update(
+            @PathVariable("id") int id, @RequestBody @Valid UpdateProductRequest request) {
         return ApiResponse.<ProductResponse>builder()
                 .code(1000)
                 .result(productService.update(id, request))
@@ -76,8 +76,14 @@ public class ProductController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<?> searchProducts(@RequestParam String keyword) {
-        List<ProductResponse> results = productService.search(keyword);
-        return ResponseEntity.ok(results);
+    public ApiResponse<PageResponse<ProductResponse>> searchProducts(
+            @RequestParam String keyword,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<ProductResponse>>builder()
+                .code(1000)
+                .result(productService.search(keyword, page, size))
+                .build();
     }
 }

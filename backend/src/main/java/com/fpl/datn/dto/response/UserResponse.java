@@ -24,11 +24,16 @@ public class UserResponse {
 
     Set<RoleResponse> roles;
 
-    List<AddressResponse> addresses;
-    List<OrderResponse> orders;
-    List<ProductReviewResponse> productReviews;
-    List<CartResponse> carts;
-    List<OrderReturnResponse> orderReturns;
-    List<UserVoucherResponse> ZUserVouchers;
-    List<ActivityLogResponse> activityLogs;
+    private List<AddressResponse> addresses;
+    private List<OrderResponse> orders;
+    private List<ProductReviewResponse> productReviews;
+    private List<CartResponse> carts;
+    private List<OrderReturnResponse> orderReturns;
+    private List<ZUserVoucherResponse> ZUserVouchers;
+    private List<ActivityLogResponse> activityLogs;
+
+    public boolean hasRole(String roleName) {
+        if (roles == null) return false;
+        return roles.stream().anyMatch(role -> roleName.equals(role.getName()));
+    }
 }

@@ -218,9 +218,9 @@ async function handlePageChange(page) {
     <tbody>
       <tr v-for="(account, index) in filterPagination" :key="account.id">
         <td>{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</td>
-        <td>{{ account.fullName }}</td>
+        <td>{{ account.fullName || 'Chưa có tên' }}</td>
         <td>{{ account.email }}</td>
-        <td>{{ account.phone }}</td>
+        <td>{{ account.phone  || 'Chưa có số điện thoại'}}</td>
         <td>{{ account.roles.map((role) => role.name).join(", ") }}</td>
         <td>{{ account.isEnable ? "Hoạt động" : "Khóa" }}</td>
         <td>{{ dayjs(account.createdAt).format("DD-MM-YYYY") }}</td>

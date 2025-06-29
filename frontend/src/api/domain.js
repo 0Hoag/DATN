@@ -11,6 +11,7 @@ export const API = {
   UPDATE_ACCOUNT: DOMAIN + "users",
   DELETE_ACCOUNT: DOMAIN + "users",
   DETAIL_ACCOUNT: DOMAIN + "users",
+  SEARCH_USER: DOMAIN + "users/search",
   // Category
   LIST_CATEGORY: DOMAIN + "category/List",
   CREATE_CATEGORY: DOMAIN + "category/",
@@ -42,6 +43,14 @@ export const API = {
   DELETE_ORDER: DOMAIN + "order",
   UPDATE_STATUS: DOMAIN + "order/status",
   DETAIL_ORDER: DOMAIN + "order",
+  SEARCH_ORDER: DOMAIN + "order/search",
+
+  // order return
+  LIST_ORDER_RETURN: DOMAIN + "order-return",
+  CREATE_ORDER_RETURN: DOMAIN + "order-return",
+  UPDATE_ORDER_RETURN: DOMAIN + "order-return",
+  SEARCH_ORDER_RETURN: DOMAIN + "order-return/search",
+
   // Product
   LIST_PRODUCT: DOMAIN + "product/Get",
   CREATE_PRODUCT: DOMAIN + "product/",
@@ -50,7 +59,18 @@ export const API = {
   DETAIL_PRODUCT: DOMAIN + "product",
   SEARCH_PRODUCT: DOMAIN + "product/search",
 
-  LIST_PRODUCT_VARIANT: DOMAIN + "productvariant/Get",
+  // Product variant
+  LIST_PRODUCT_VARIANT: DOMAIN + "product_variant/Get",
+  CREATE_PRODUCT_VARIANT: DOMAIN + "product_variant",
+  UPDATE_PRODUCT_VARIANT: DOMAIN + "product_variant",
+  DELETE_PRODUCT_VARIANT: DOMAIN + "product_variant",
+
+  DELETE_VARIANT_IMAGE: DOMAIN + "product_image",
+
+  // Image
+  UPLOAD_IMAGE: DOMAIN + "upload-image/",
+  DELETE_IMAGES: DOMAIN + "upload-image/",
+  LIST_IMAGE: DOMAIN + "upload_image/list",
   // Setting
 
   // Role
@@ -58,4 +78,8 @@ export const API = {
   CREATE_ROLE: DOMAIN + "roles/list",
   UPDATE_ROLE: DOMAIN + "roles/list",
   DELETE_ROLE: DOMAIN + "roles/list",
+
+  // Adress
+  LIST_ADDRESS_BY_USER: DOMAIN +  "address",
+  CREATE_ADDRESS_BY_USER: DOMAIN +  "address",
 };
