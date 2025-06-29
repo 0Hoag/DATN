@@ -68,8 +68,8 @@ export const API = {
   DELETE_VARIANT_IMAGE: DOMAIN + "product_image",
 
   // Image
-  UPLOAD_IMAGE: DOMAIN + "upload-image/",
-  DELETE_IMAGES: DOMAIN + "upload-image/",
+  UPLOAD_IMAGE: DOMAIN + "upload_image/",
+  DELETE_IMAGES: DOMAIN + "upload_image/",
   LIST_IMAGE: DOMAIN + "upload_image/list",
   // Setting
 

@@ -15,7 +15,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProductVariantRequest {
-    private Integer id;
 
     @NotBlank(message = "PRODUCT_VARIANT_NAME_REQUIRED")
     private String variantName;
@@ -32,7 +31,7 @@ public class UpdateProductVariantRequest {
     @NotNull(message = "PRODUCT_VARIANT_ISACTIVE_REQUIRED")
     private Boolean isActive;
 
-    @NotNull(message = "PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED")
+
     private List<Integer> attributeValueIds;
 
     private List<ProductImageRequest> images;

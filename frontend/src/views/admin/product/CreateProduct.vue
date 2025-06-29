@@ -272,6 +272,7 @@ const listImage = ref([]);
 const selectedIndexes = ref([]);
 const currentVariantIndex = ref(null);
 
+
 const onFilesSelected = (event) => {
  selectedFiles.value = Array.from(event.target.files);
  console.log(selectedFiles.value);
@@ -286,6 +287,7 @@ const onUploadImage = async () => {
   const res = await ImageService.uploadImage(formData);
   toast.success('Upload thành công')
   console.log("Upload thành công:", res);
+   await fetchListImage();
  } catch (error) {
   console.error("Lỗi upload:", error);
  } finally {
