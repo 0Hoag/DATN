@@ -1,5 +1,7 @@
 package com.fpl.datn.controller;
 
+import java.time.LocalDate;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -54,6 +56,20 @@ public class OrderReturnController {
             throws JsonMappingException, JsonProcessingException {
         return ApiResponse.<OrderReturnResponse>builder()
                 .result(orderReturnService.updateStatus(id, request, httpRequest))
+                .build();
+    }
+
+    @GetMapping("/search")
+    ApiResponse<PageResponse<OrderReturnResponse>> search(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String orderStatus,
+            @RequestParam(required = false) LocalDate startDate,
+            @RequestParam(required = false) LocalDate endDate,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
+        return ApiResponse.<PageResponse<OrderReturnResponse>>builder()
+                .result(orderReturnService.search(keyword, orderStatus, startDate, endDate, page, size, sort))
                 .build();
     }
 }

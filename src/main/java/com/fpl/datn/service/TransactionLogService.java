@@ -30,7 +30,7 @@ public class TransactionLogService {
         var orderlog = TransactionLog.builder()
                 .amount(order.getTotalAmount())
                 .createdAt(LocalDateTime.now())
-                .message(acctionType + " ORDER " + order.getId())
+                .message(acctionType + order.getId())
                 .transactionRef(transactionRef)
                 .transactionNo(transactionNo)
                 .status(order.getOrderStatus())

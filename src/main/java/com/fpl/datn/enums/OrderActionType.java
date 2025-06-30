@@ -21,6 +21,7 @@ public enum OrderActionType {
     // Đơn hàng
     CREATE("CREATE ORDER"),
     UPDATE("UPDATE ORDER"),
+    CANCELLED("CANCELLED"),
     DELETE("DELETE ORDER"),
     UPDATE_STATUS("UPDATE STATUS"),
 

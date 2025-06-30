@@ -32,8 +32,8 @@ public class UpdateProductVariantRequest {
     @NotNull(message = "PRODUCT_VARIANT_ISACTIVE_REQUIRED")
     private Boolean isActive;
 
-    @NotNull(message = "PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED")
-    private List<Integer> attributeValueIds;
+    //    @NotNull(message = "PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED")
+    //    private List<Integer> attributeValueIds;
 
     private List<ProductImageRequest> images;
 }

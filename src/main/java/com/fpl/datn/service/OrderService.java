@@ -183,6 +183,20 @@ public class OrderService {
         logService.logPayment(order, OrderActionType.DELETE.getType(), null, null);
     }
 
+    @Transactional
+    public void cancel(int id) {
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
+            restoreInventory(order);
+            order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
+            repository.save(order);
+            logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
+            return;
+        }
+        throw new AppException(ErrorCode.ORDER_DELETE_PAID);
+    }
+
     // Update trạng thái đơn hàng và Trạng thái thanh toán;
     @Transactional
     public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) {
@@ -304,7 +318,7 @@ public class OrderService {
     }
 
     // Xử lí hoàn hàng tồn kho
-    private void restoreInventory(Order order) {
+    public void restoreInventory(Order order) {
         if (order.getOrderDetails() != null) {
             for (OrderDetail detail : order.getOrderDetails()) {
                 var variant = detail.getProductVariant();

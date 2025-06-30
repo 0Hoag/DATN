@@ -53,6 +53,12 @@ public class OrderController {
                 .build();
     }
 
+    @GetMapping("/cancel/{id}")
+    ApiResponse<Void> cancel(@PathVariable int id) {
+        orderService.cancel(id);
+        return ApiResponse.<Void>builder().message("Cancel Success!").build();
+    }
+
     @GetMapping("/search")
     ApiResponse<PageResponse<OrderResponse>> search(
             @RequestParam(required = false) String keyword,

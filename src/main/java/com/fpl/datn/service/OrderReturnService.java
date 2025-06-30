@@ -1,6 +1,7 @@
 package com.fpl.datn.service;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
@@ -10,6 +11,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,6 +31,7 @@ import com.fpl.datn.repository.OrderRepository;
 import com.fpl.datn.repository.OrderReturnRepository;
 import com.fpl.datn.repository.TransactionLogRepository;
 import com.fpl.datn.repository.UserRepository;
+import com.fpl.datn.specification.OrderReturnSpecification;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +49,7 @@ public class OrderReturnService {
     TransactionLogRepository logRepository;
     OrderReturnMapper mapper;
     TransactionLogService logService;
+    OrderService orderService;
 
     public PageResponse<OrderReturnResponse> get(int page, int size, boolean isDesc) {
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
@@ -130,14 +134,43 @@ public class OrderReturnService {
         var response = mapper.toOrderReturnResponse(repository.save(orderReturn));
         if (request.getStatus().equalsIgnoreCase(OrderReturnEnums.REFUNDED.getDescription())) {
             //            vnpayService.refund(orderReturn, "admin", httpRequest);
+            // Xử lí hoàn hàng tồn kho
+            orderService.restoreInventory(orderReturn.getOrder());
+
             logService.logReturn(
                     orderReturn,
-                    OrderActionType.UPDATE_STATUS.getType(),
+                    OrderActionType.REFUND_SUCCESS.getType(),
                     transactionLog.getTransactionRef(),
                     transactionLog.getTransactionNo(),
                     orderReturn.getOrder());
         }
         return response;
+    }
+
+    public PageResponse<OrderReturnResponse> search(
+            String keyword,
+            String orderReturnStatus,
+            LocalDate startDate,
+            LocalDate endDate,
+            int page,
+            int size,
+            boolean isDesc) {
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        Specification<OrderReturn> spec = OrderReturnSpecification.hasFullName(keyword)
+                .and(OrderReturnSpecification.hasOrderReturnStatus(orderReturnStatus))
+                .and(OrderReturnSpecification.createAtBetween(startDate, endDate));
+        var pageData = repository.findAll(spec, pageable);
+        var data = pageData.stream()
+                .map(orderReturn -> mapper.toOrderReturnResponse(orderReturn))
+                .toList();
+        return PageResponse.<OrderReturnResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
     }
 
     public static boolean isValidStatus(String input) {
