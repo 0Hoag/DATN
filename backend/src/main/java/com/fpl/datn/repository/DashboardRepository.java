@@ -26,8 +26,8 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     BigDecimal sumTotalRevenue();
 
     @Query(
-            "SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID' AND MONTH(od.order.createdAt) = MONTH(CURRENT_DATE()) AND YEAR(od.order.createdAt) = YEAR(CURRENT_DATE())")
-    long countTotalProductsSold();
+            "SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID' AND MONTH(od.order.createdAt) = :month AND YEAR(od.order.createdAt) = :year")
+    long countTotalProductsSold(@Param("month") int month, @Param("year") int year);
 
     @Query(
             value =
@@ -45,7 +45,6 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
             nativeQuery = true)
     List<Object[]> findTop10ProductsSoldByMonthYear(@Param("month") int month, @Param("year") int year);
 
-    // Convert method cho native query
     default List<TopProductResponse> findTop10ProductsSoldByMonthYearDto(int month, int year) {
         return findTop10ProductsSoldByMonthYear(month, year).stream()
                 .map(r -> TopProductResponse.builder()
@@ -61,17 +60,18 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     @Query(
             value =
                     """
-		SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS date, pm.name AS name, SUM(t.amout) AS value
+		SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS date, pm.name AS name, SUM(t.amount) AS value
 		FROM transaction_logs t
 		JOIN payment_methods pm ON t.payment_method_id = pm.id
+		WHERE MONTH(t.created_at) = :month AND YEAR(t.created_at) = :year
 		GROUP BY date, pm.name
 		ORDER BY date
 		""",
             nativeQuery = true)
-    List<Object[]> getRevenueChartNative();
+    List<Object[]> getRevenueChartNative(@Param("month") int month, @Param("year") int year);
 
-    default List<ChartPointResponse> getRevenueChart() {
-        return getRevenueChartNative().stream()
+    default List<ChartPointResponse> getRevenueChart(int month, int year) {
+        return getRevenueChartNative(month, year).stream()
                 .map(row -> new ChartPointResponse((String) row[0], (String) row[1], (BigDecimal) row[2]))
                 .collect(Collectors.toList());
     }
@@ -81,14 +81,15 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
                     """
 		SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS date, o.order_status AS name, COUNT(o.id) AS value
 		FROM orders o
+		WHERE MONTH(o.created_at) = :month AND YEAR(o.created_at) = :year
 		GROUP BY date, o.order_status
 		ORDER BY date
 		""",
             nativeQuery = true)
-    List<Object[]> getOrderChartNative();
+    List<Object[]> getOrderChartNative(@Param("month") int month, @Param("year") int year);
 
-    default List<ChartPointIntResponse> getOrderChart() {
-        return getOrderChartNative().stream()
+    default List<ChartPointIntResponse> getOrderChart(int month, int year) {
+        return getOrderChartNative(month, year).stream()
                 .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
                 .collect(Collectors.toList());
     }
@@ -100,14 +101,15 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
 		FROM order_details od
 		JOIN orders o ON od.order_id = o.id
 		JOIN products p ON od.product_id = p.id
+		WHERE MONTH(o.created_at) = :month AND YEAR(o.created_at) = :year
 		GROUP BY date, p.name
 		ORDER BY date
 		""",
             nativeQuery = true)
-    List<Object[]> getProductChartNative();
+    List<Object[]> getProductChartNative(@Param("month") int month, @Param("year") int year);
 
-    default List<ChartPointIntResponse> getProductChart() {
-        return getProductChartNative().stream()
+    default List<ChartPointIntResponse> getProductChart(int month, int year) {
+        return getProductChartNative(month, year).stream()
                 .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
                 .collect(Collectors.toList());
     }
