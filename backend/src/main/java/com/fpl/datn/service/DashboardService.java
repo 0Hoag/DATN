@@ -6,6 +6,7 @@ import com.fpl.datn.dto.response.*;
 import com.fpl.datn.repository.DashboardRepository;
 import java.math.BigDecimal;
 import lombok.AccessLevel;
+import org.springframework.security.access.prepost.PreAuthorize;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,7 @@ import java.util.List;
 public class DashboardService {
 
     DashboardRepository dashboardRepository;
-
+    @PreAuthorize("hasRole('ADMIN')")
     public long getTotalUsers() {
         return dashboardRepository.countTotalUsers();
     }

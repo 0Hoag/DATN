@@ -57,24 +57,28 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
                 .toList();
     }
 
-    @Query(
-            value =
-                    """
-		SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS date, pm.name AS name, SUM(t.amount) AS value
-		FROM transaction_logs t
-		JOIN payment_methods pm ON t.payment_method_id = pm.id
-		WHERE MONTH(t.created_at) = :month AND YEAR(t.created_at) = :year
-		GROUP BY date, pm.name
-		ORDER BY date
-		""",
-            nativeQuery = true)
+	@Query(
+			value = """
+        SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS date, pm.name AS name, SUM(t.amout) AS value
+        FROM transaction_logs t
+        JOIN payment_methods pm ON t.payment_method_id = pm.id
+        WHERE MONTH(t.created_at) = :month AND YEAR(t.created_at) = :year
+        GROUP BY date, pm.name
+        ORDER BY date
+        """,
+			nativeQuery = true)
     List<Object[]> getRevenueChartNative(@Param("month") int month, @Param("year") int year);
 
-    default List<ChartPointResponse> getRevenueChart(int month, int year) {
-        return getRevenueChartNative(month, year).stream()
-                .map(row -> new ChartPointResponse((String) row[0], (String) row[1], (BigDecimal) row[2]))
-                .collect(Collectors.toList());
-    }
+	default List<ChartPointResponse> getRevenueChart(int month, int year) {
+		return getRevenueChartNative(month, year).stream()
+				.map(row -> ChartPointResponse.builder()
+						.name((String) row[1])
+						.value((BigDecimal) row[2])
+						.month(month)
+						.year(year)
+						.build())
+				.collect(Collectors.toList());
+	}
 
     @Query(
             value =
@@ -88,11 +92,16 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
             nativeQuery = true)
     List<Object[]> getOrderChartNative(@Param("month") int month, @Param("year") int year);
 
-    default List<ChartPointIntResponse> getOrderChart(int month, int year) {
-        return getOrderChartNative(month, year).stream()
-                .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
-                .collect(Collectors.toList());
-    }
+	default List<ChartPointIntResponse> getOrderChart(int month, int year) {
+		return getOrderChartNative(month, year).stream()
+				.map(row -> ChartPointIntResponse.builder()
+						.name((String) row[1])
+						.value(((Number) row[2]).longValue())
+						.soldMonth(month)
+						.soldYear(year)
+						.build())
+				.toList();
+	}
 
     @Query(
             value =
@@ -108,9 +117,14 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
             nativeQuery = true)
     List<Object[]> getProductChartNative(@Param("month") int month, @Param("year") int year);
 
-    default List<ChartPointIntResponse> getProductChart(int month, int year) {
-        return getProductChartNative(month, year).stream()
-                .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
-                .collect(Collectors.toList());
-    }
+	default List<ChartPointIntResponse> getProductChart(int month, int year) {
+		return getProductChartNative(month, year).stream()
+				.map(row -> ChartPointIntResponse.builder()
+						.name((String) row[1])
+						.value(((Number) row[2]).longValue())
+						.soldMonth(month)
+						.soldYear(year)
+						.build())
+				.toList();
+	}
 }

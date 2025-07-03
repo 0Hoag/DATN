@@ -9,7 +9,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChartPointIntResponse {
-    String date; // YYYY-MM
     String name;
     long value;
+    Integer soldMonth;
+    Integer soldYear;
 }
