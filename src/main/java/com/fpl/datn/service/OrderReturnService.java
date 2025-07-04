@@ -26,6 +26,7 @@ import com.fpl.datn.enums.OrderStatus;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.OrderReturnMapper;
+import com.fpl.datn.models.Order;
 import com.fpl.datn.models.OrderReturn;
 import com.fpl.datn.repository.OrderRepository;
 import com.fpl.datn.repository.OrderReturnRepository;
@@ -76,18 +77,8 @@ public class OrderReturnService {
                 .findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        // Chỉ cho trả hàng nếu đã nhận hàng
-        if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
-            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+        validateOrderReturnCondition(order);
 
-        // Chỉ cho trả hàng trong vòng 7 ngày sau khi giao
-        if (Duration.between(order.getUpdatedAt(), LocalDateTime.now()).toDays() > 7)
-            throw new AppException(ErrorCode.RETURN_PERIOD_EXPIRED);
-
-        // Chỉ cho trả lại nếu chưa trả hoặc đã bị từ chối
-        if (repository.existsByOrderAndStatusNot(order, OrderReturnEnums.REJECTED.getDescription())) {
-            throw new AppException(ErrorCode.RETURN_REQUEST_ALREADY_EXISTS);
-        }
         var transactionLog = logRepository.findFirstByOrderIdAndActionTypeOrderByCreatedAtDesc(
                 order.getId(), OrderActionType.PAYMENT_SUCCESS.getType());
         if (transactionLog == null) throw new AppException(ErrorCode.TRANCSACTION_LOG_NOT_FOUND);
@@ -176,5 +167,20 @@ public class OrderReturnService {
     public static boolean isValidStatus(String input) {
         return Arrays.stream(OrderReturnEnums.values())
                 .anyMatch(status -> status.getDescription().equalsIgnoreCase(input));
+    }
+
+    private void validateOrderReturnCondition(Order order) {
+        // Chỉ cho trả hàng nếu đã nhận hàng
+        if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
+            throw new AppException(ErrorCode.INVALID_ORDER_STATUS);
+
+        // Chỉ cho trả hàng trong vòng 7 ngày sau khi giao
+        if (Duration.between(order.getUpdatedAt(), LocalDateTime.now()).toDays() > 7)
+            throw new AppException(ErrorCode.RETURN_PERIOD_EXPIRED);
+
+        // Chỉ cho trả lại nếu chưa trả hoặc đã bị từ chối
+        if (repository.existsByOrderAndStatusNot(order, OrderReturnEnums.REJECTED.getDescription())) {
+            throw new AppException(ErrorCode.RETURN_REQUEST_ALREADY_EXISTS);
+        }
     }
 }

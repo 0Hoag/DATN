@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Hóa đơn bán hàng</title>
+  <style>
+    body {
+      font-family: 'DejaVu Sans', sans-serif;
+      font-size: 14px;
+      width: 100%;
+      max-width: 800px;
+      margin: 20px auto;
+
+    }
+
+    .header, .footer {
+      width: 100%;
+      display: table;
+      margin-bottom: 20px;
+    }
+
+    .left, .right {
+      display: table-cell;
+      vertical-align: top;
+      width: 50%;
+    }
+
+    .right {
+      text-align: right;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 20px;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .mb-1 {
+      margin-bottom: 8px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    table th, table td {
+      border: 1px solid #000;
+      padding: 8px;
+      text-align: left;
+    }
+
+    table th {
+      background-color: #f2f2f2;
+    }
+
+    .no-border {
+      border: none;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .signature {
+      margin-top: 40px;
+      text-align: center;
+    }
+
+    .logo {
+      max-height: 140px;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="left">
+      <img src="file:src/main/resources/static/images/logo.jpg" alt="Logo" class="logo" />
+    </div>
+    <div class="right">
+      <!-- <div class="bold">PhoneZone</div> -->
+      <h2>PhoneZone</h2>
+      <div>Địa chỉ: Số 147 Quốc lộ 13, Phường Hiệp Bình, TP.HCM</div>
+      <div>Điện thoại: 0909 999 888</div>
+      <div>Email: phonezone@gmail.com</div>
+    </div>
+  </div>
+
+  <h1>HÓA ĐƠN BÁN HÀNG</h1>
+
+  <div class="header">
+    <div class="left">
+      <b>Khách hàng: </b> <span th:text="${customerName}"></span> <br/>
+      <b>Địa chỉ: </b> <span th:text="${address}"></span>
+    </div>
+    <div class="right">
+      <b>Mã hóa đơn: </b>#<span th:text="${orderId}"></span> <br/>
+      <b>Ngày: </b> <span th:text="${#temporals.format(createAt,'dd/MM/yyyy')}"></span>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>STT</th>
+        <th>Tên sản phẩm</th>
+        <th>Số lượng</th>
+        <th>Đơn giá</th>
+        <th>Thành tiền</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="item, iterStat: ${items}">
+      <td th:text="${iterStat.index + 1}"></td>
+                <td th:text="${item.productVariant.variantName}"></td>
+                <td th:text="${item.quantity}"></td>
+                <td th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')}"></td>
+               	<td th:text="${#numbers.formatDecimal(item.price * item.quantity, 0, 'COMMA', 0, 'POINT')}"></td>
+      </tr>
+      <tr>
+        <td colspan="4" class="text-right bold">Tổng tiền</td>
+        <td th:text="${#numbers.formatDecimal(total, 0, 'COMMA', 0, 'POINT')}"></td>
+      </tr>
+      <tr>
+        <td colspan="4" class="text-right bold">Giảm giá</td>
+        <td><p th:if="${voucher > 0 and voucher <= 100}" 
+     th:text="'-' + ${ #numbers.formatDecimal(voucher, 0, 'COMMA', 0, 'POINT')} + '%'"></p>
+  <p th:unless="${voucher > 0 and voucher <= 100}" 
+     th:text="'-' + ${#numbers.formatDecimal(voucher, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></p></td>
+      </tr>
+      <tr>
+        <td colspan="4" class="text-right bold">Thanh toán</td>
+        <td><p th:text="${#numbers.formatDecimal(totalAmount, 0, 'COMMA', 0, 'POINT')}"></p></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="mb-1"><b>Phương thức thanh toán: </b><span th:text="${paymentMethod}"></span></div>
+
+  <div class="header" style="margin-top: 40px;">
+    <div class="left text-center">
+      <div class="bold">Khách hàng</div>
+      <div>(Ký và ghi rõ họ tên)</div>
+    </div>
+    <div class="right text-center">
+      <div class="bold">Nhân viên bán hàng</div>
+      <div>(Ký và ghi rõ họ tên)</div>
+    </div>
+  </div>
+ 
+
+</body>
+</html>

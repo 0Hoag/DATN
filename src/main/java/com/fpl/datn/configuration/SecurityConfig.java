@@ -35,6 +35,7 @@ public class SecurityConfig {
         "/cartItem/addCart/{userId}",
         "/selectProduct/registration",
         "/order/registration",
+        "/pdf/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -47,7 +48,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, publicEnpoint)
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, "/payment/**")
+                .requestMatchers(HttpMethod.GET, "/payment/**", "/pdf/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated());
