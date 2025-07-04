@@ -26,4 +26,18 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             "OR u.phone LIKE CONCAT('%', :keyword, '%')")
     Page<User> findByEmailOrFullNameOrPhoneContaining(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE " +
+            "LOWER(r.name) = LOWER(:roleName)")
+    Page<User> findByRoleName(@Param("roleName") String roleName, Pageable pageable);
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE " +
+            "LOWER(r.name) = LOWER(:roleName) AND " +
+            "(" +
+            "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+            "OR u.phone LIKE CONCAT('%', :keyword, '%')" +
+            ")")
+    Page<User> findByKeywordAndRoleName(@Param("keyword") String keyword,
+                                        @Param("roleName") String roleName,
+                                        Pageable pageable);
 }
