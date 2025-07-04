@@ -54,6 +54,9 @@ public class User {
     @ManyToMany
     Set<Role> roles;
 
+    @OneToOne(mappedBy = "user")
+    ForgotPassword forgotPassword;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> addresses;
 

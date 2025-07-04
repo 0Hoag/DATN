@@ -42,6 +42,10 @@ public enum ErrorCode {
     OLD_PASSWORD_INCORRECT(1019, "OLD_PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
     NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD(1020, "NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD", HttpStatus.BAD_REQUEST),
 
+    //Email
+    EMAIL_OR_PASSWORD_INCORRECT(1021, "Email or Password incorrect please try again", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1022, "Invalid otp", HttpStatus.BAD_REQUEST),
+
     // Category
     CATEGORY_NOT_EXISTED(1019,"Category not existed", HttpStatus.BAD_REQUEST),
     CATEGORIES_NAME_EXISTED(1020, "Categories name existed", HttpStatus.CONFLICT),
