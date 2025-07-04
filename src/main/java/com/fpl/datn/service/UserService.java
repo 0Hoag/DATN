@@ -241,25 +241,22 @@ public class UserService {
         return true;
     }
 
-    public PageResponse<UserResponse> search(String keyword, int page, int size) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            Pageable pageable = PageRequest.of(page - 1, size);
-            var pageData = userRepositories.findAll(pageable);
-
-            var data =
-                    pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
-
-            return PageResponse.<UserResponse>builder()
-                    .currentPage(page)
-                    .totalPages(pageData.getTotalPages())
-                    .pageSize(pageData.getSize())
-                    .totalElements(pageData.getTotalElements())
-                    .data(data)
-                    .build();
-        }
-
+    public PageResponse<UserResponse> search(String keyword, String roleName, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<User> pageData = userRepositories.findByEmailOrFullNameOrPhoneContaining(keyword.trim(), pageable);
+        Page<User> pageData;
+
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasRoleName = roleName != null && !roleName.trim().isEmpty();
+
+        if (hasKeyword && hasRoleName) {
+            pageData = userRepositories.findByKeywordAndRoleName(keyword.trim(), roleName.trim(), pageable);
+        } else if (hasKeyword) {
+            pageData = userRepositories.findByEmailOrFullNameOrPhoneContaining(keyword.trim(), pageable);
+        } else if (hasRoleName) {
+            pageData = userRepositories.findByRoleName(roleName.trim(), pageable);
+        } else {
+            pageData = userRepositories.findAll(pageable);
+        }
 
         var data = pageData.getContent().stream()
                 .map(userMapper::toUserResponse)
