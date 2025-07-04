@@ -23,6 +23,7 @@ public class UserResponse {
     Boolean isEnable;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    LocalDateTime deletedAt;
 
     Set<RoleResponse> roles;
 

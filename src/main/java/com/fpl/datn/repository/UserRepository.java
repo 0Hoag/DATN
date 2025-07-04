@@ -1,5 +1,6 @@
 package com.fpl.datn.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -20,17 +21,28 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE " +
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
+    Page<User> findAllActive(Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
+    List<User> findAllActive();
+
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.deletedAt IS NULL")
+    Optional<User> findByIdAndNotDeleted(@Param("id") Integer id);
+
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND " +
+            "(" +
             "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
             "OR LOWER(u.fullName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-            "OR u.phone LIKE CONCAT('%', :keyword, '%')")
+            "OR u.phone LIKE CONCAT('%', :keyword, '%')" +
+            ")")
     Page<User> findByEmailOrFullNameOrPhoneContaining(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE " +
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE u.deletedAt IS NULL AND " +
             "LOWER(r.name) = LOWER(:roleName)")
     Page<User> findByRoleName(@Param("roleName") String roleName, Pageable pageable);
 
-    @Query("SELECT u FROM User u JOIN u.roles r WHERE " +
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE u.deletedAt IS NULL AND " +
             "LOWER(r.name) = LOWER(:roleName) AND " +
             "(" +
             "LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
@@ -40,4 +52,7 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     Page<User> findByKeywordAndRoleName(@Param("keyword") String keyword,
                                         @Param("roleName") String roleName,
                                         Pageable pageable);
+
+    @Query("SELECT u FROM User u WHERE u.deletedAt IS NOT NULL")
+    Page<User> findDeletedUsers(Pageable pageable);
 }
