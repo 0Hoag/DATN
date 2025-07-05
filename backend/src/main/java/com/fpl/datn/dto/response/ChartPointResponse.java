@@ -13,6 +13,6 @@ import lombok.experimental.FieldDefaults;
 public class ChartPointResponse {
     String name;
     BigDecimal value;
-    Integer month;
+    String date;
     Integer year;
 }

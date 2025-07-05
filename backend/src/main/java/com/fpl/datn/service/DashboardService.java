@@ -19,7 +19,7 @@ import java.util.List;
 public class DashboardService {
 
     DashboardRepository dashboardRepository;
-    @PreAuthorize("hasRole('ADMIN')")
+
     public long getTotalUsers() {
         return dashboardRepository.countTotalUsers();
     }
@@ -32,23 +32,38 @@ public class DashboardService {
         return dashboardRepository.sumTotalRevenue();
     }
 
-    public long getTotalProductsSold(int month, int year) {
-        return dashboardRepository.countTotalProductsSold(month, year);
+    public long getTotalProductsSold(int year) {
+        return dashboardRepository.countTotalProductsSold(year);
     }
 
-    public List<TopProductResponse> getTopProducts(int month, int year) {
-        return dashboardRepository.findTop10ProductsSoldByMonthYearDto(month, year);
+    public List<TopProductResponse> getTopProducts(int year) {
+        return dashboardRepository.findTop10ProductsSoldByYearDto(year);
     }
 
-    public List<ChartPointResponse> getRevenueChart(int month, int year) {
-        return dashboardRepository.getRevenueChart(month, year);
+    public List<ChartPointResponse> getRevenueChart(int year) {
+        return dashboardRepository.getRevenueChart(year);
     }
 
-    public List<ChartPointIntResponse> getOrderChart(int month, int year) {
-        return dashboardRepository.getOrderChart(month, year);
+    public List<ChartPointIntResponse> getOrderChart(int year) {
+        return dashboardRepository.getOrderChart(year);
     }
 
-    public List<ChartPointIntResponse> getProductChart(int month, int year) {
-        return dashboardRepository.getProductChart(month, year);
+    public List<ChartPointIntResponse> getProductChart(int year) {
+        return dashboardRepository.getProductChart(year);
+    }
+
+    public DashboardResponse getDashboardData(int year) {
+        return DashboardResponse.builder()
+                .totalCustomers(getTotalUsers())
+                .totalOrders(getTotalOrders())
+                .totalRevenue(getTotalRevenue())
+                .totalProductsSold(getTotalProductsSold(year))
+                .topProducts(getTopProducts(year))
+                .chartData(ChartData.builder()
+                        .revenueChart(getRevenueChart(year))
+                        .orderChart(getOrderChart(year))
+                        .productChart(getProductChart(year))
+                        .build())
+                .build();
     }
 }
