@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+	<style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px #cccccc;
+        }
+
+        h1 {
+            color: #2196F3;
+        }
+
+        .status {
+            font-size: 18px;
+            font-weight: bold;
+            color: #555555;
+        }
+
+        /* .footer {
+            margin-top: 30px;
+            font-size: 13px;
+            color: #888888;
+        } */
+    </style>
+</head>
+<body>
+	<div class="container">
+        <h1>Đơn hàng đang được giao đến bạn!</h1>
+        <p class="status">Mã đơn hàng: <span th:text="${orderId}"></span></p>
+        <p>Chúng tôi sẽ sớm giao hàng tới địa chỉ của bạn. Vui lòng giữ điện thoại để nhân viên giao hàng có thể liên hệ.</p>
+        <p>Cảm ơn bạn đã mua sắm tại PhoneZone Store!</p>
+
+        <!-- <div class="footer">
+            © 2025 FPL Store. Hotline: 1900 9999
+        </div> -->
+    </div>
+</body>
+</html>

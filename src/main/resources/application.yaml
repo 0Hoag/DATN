@@ -15,6 +15,18 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 100MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: phonezone.shop11@gmail.com
+    password: koyi qojj mijo zohp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   port: 8080
   servlet:
@@ -43,5 +55,4 @@ momo:
   secret-key: SetA5RDnLHvt51AULf51DyauxUo3kDU6
   return-url: https://088e-2402-800-63b6-9b27-b497-4453-825e-43fb.ngrok-free.app/datn/payment/momo-return
   notify-url: https://088e-2402-800-63b6-9b27-b497-4453-825e-43fb.ngrok-free.app/datn/payment/momo-notify
-
 

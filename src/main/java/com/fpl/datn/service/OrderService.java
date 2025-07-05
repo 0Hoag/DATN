@@ -18,8 +18,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
@@ -65,6 +63,7 @@ public class OrderService {
     TransactionLogService logService;
     VnpayService vnpayService;
     MomoService momoService;
+    SendMailService sendMailService;
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ORDER')")
     public PageResponse<OrderResponse> getAll(int page, int size, boolean isDesc) {
@@ -114,8 +113,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest)
-            throws JsonMappingException, JsonProcessingException {
+    public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest) throws Exception {
         var order = prepareOrder(request);
         var details = processOrderItems(order, request.getItems(), false);
 
@@ -128,6 +126,9 @@ public class OrderService {
         order.setTotalAmount(total);
         order.setOrderDetails(details);
         repository.save(order);
+        // gửi mail
+        sendMailService.sendInvoiceToUser(order.getId());
+
         var response = mapper.toOrderResponse(order);
         String txnRef = null;
         if (isVnpay(order)) {
@@ -199,7 +200,7 @@ public class OrderService {
 
     // Update trạng thái đơn hàng và Trạng thái thanh toán;
     @Transactional
-    public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) {
+    public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) throws Exception {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         // Nếu đã nhận hàng thì báo không thể chỉnh sửa
@@ -222,6 +223,9 @@ public class OrderService {
 
         order.setUpdatedAt(LocalDateTime.now());
         repository.save(order);
+        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.SHIPPED.getDescription())) {
+            sendMailService.sendInvoiceToUserUpdateStatus(id);
+        }
         var response = mapper.toOrderResponse(order);
         if (isValidPaymentCOD(order) || isValidPaymentVNPAY(order)) {
             logService.logPayment(order, OrderActionType.UPDATE_STATUS.getType(), response.getPaymentUrl(), null);
