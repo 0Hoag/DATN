@@ -36,6 +36,8 @@ public enum ErrorCode {
     ERROR_CREATE_USER(1016, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1017, "Error update user", HttpStatus.BAD_REQUEST),
     OLD_PASSWORD_INCORRECT(1019, "OLD_PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
+    USER_EXITED(1002, "USER EXITED", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_DELETED(1020, "USER_ALREADY_DELETED", HttpStatus.BAD_REQUEST),
     NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD(
             1020, "NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD", HttpStatus.BAD_REQUEST),
 
@@ -155,6 +157,9 @@ public enum ErrorCode {
     // Transactionlog(2300-2399)
     TRANCSACTION_LOG_NOT_FOUND(2301, "Transaction log not found", HttpStatus.NOT_FOUND),
 
+    // Email(2400-2499)
+    EMAIL_OR_PASSWORD_INCORRECT(1021, "Email or Password incorrect please try again", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1022, "Invalid otp", HttpStatus.BAD_REQUEST),
     // Common (2500–2599)
     RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND);
 

@@ -1,14 +1,12 @@
 package com.fpl.datn.service;
 
 import java.time.LocalDateTime;
-import java.util.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -60,13 +58,16 @@ public class UserService {
         user.setRoles(roles);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
+
         userRepositories.save(user);
         return true;
     }
 
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserResponse Update(int id, UpdateUserRequest request) {
-        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var user = userRepositories
+                .findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (request.getEmail().equals(user.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_UNCHANGED);
@@ -90,26 +91,27 @@ public class UserService {
 
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public UserResponse Detail(int id) {
-        User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        User user = userRepositories
+                .findByIdAndNotDeleted(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUserResponse(user);
     }
 
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public void Delete(int id) {
-        if (!userRepositories.existsById(id)) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getDeletedAt() != null) {
+            throw new AppException(ErrorCode.USER_ALREADY_DELETED);
         }
 
-        try {
-            userRepositories.deleteById(id);
-        } catch (DataIntegrityViolationException e) {
-            throw new AppException(ErrorCode.UNCATEGORIZE_EXCEPTION);
-        }
+        user.setDeletedAt(LocalDateTime.now());
+        userRepositories.save(user);
     }
 
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public List<UserResponse> List() {
-        return userRepositories.findAll().stream()
+        return userRepositories.findAllActive().stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
@@ -117,7 +119,7 @@ public class UserService {
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public PageResponse<UserResponse> Get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        var pageData = userRepositories.findAll(pageable);
+        var pageData = userRepositories.findAllActive(pageable);
 
         var data =
                 pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
@@ -142,12 +144,6 @@ public class UserService {
         if (userRepositories.existsByPhone(request.getPhone())) {
             throw new AppException(ErrorCode.PHONE_EXISTED);
         }
-        if (userRepositories.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
-        }
-        if (userRepositories.existsByPhone(request.getPhone())) {
-            throw new AppException(ErrorCode.PHONE_EXISTED);
-        }
 
         User user = userMapper.toUserRegister(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -165,7 +161,7 @@ public class UserService {
         String userId = context.getAuthentication().getName();
 
         User user = userRepositories
-                .findById(Integer.valueOf(userId))
+                .findByIdAndNotDeleted(Integer.valueOf(userId))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         return userMapper.toUserResponse(user);
@@ -174,7 +170,9 @@ public class UserService {
     // Api client
     public UserResponse UpdateProfile(int id, UpdateProfileRequest request) {
         try {
-            User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = userRepositories
+                    .findByIdAndNotDeleted(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             if (request.getPhone().equals(user.getPhone())) {
                 throw new AppException(ErrorCode.PHONE_UNCHANGED);
@@ -222,26 +220,22 @@ public class UserService {
         return true;
     }
 
-    public PageResponse<UserResponse> search(String keyword, int page, int size) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            Pageable pageable = PageRequest.of(page - 1, size);
-            var pageData = userRepositories.findAll(pageable);
-
-            var data = pageData.getContent().stream()
-                    .map(userMapper::toUserResponse)
-                    .collect(Collectors.toList());
-
-            return PageResponse.<UserResponse>builder()
-                    .currentPage(page)
-                    .totalPages(pageData.getTotalPages())
-                    .pageSize(pageData.getSize())
-                    .totalElements(pageData.getTotalElements())
-                    .data(data)
-                    .build();
-        }
-
+    public PageResponse<UserResponse> search(String keyword, String roleName, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<User> pageData = userRepositories.findByEmailOrFullNameOrPhoneContaining(keyword.trim(), pageable);
+        Page<User> pageData;
+
+        boolean hasKeyword = keyword != null && !keyword.trim().isEmpty();
+        boolean hasRoleName = roleName != null && !roleName.trim().isEmpty();
+
+        if (hasKeyword && hasRoleName) {
+            pageData = userRepositories.findByKeywordAndRoleName(keyword.trim(), roleName.trim(), pageable);
+        } else if (hasKeyword) {
+            pageData = userRepositories.findByEmailOrFullNameOrPhoneContaining(keyword.trim(), pageable);
+        } else if (hasRoleName) {
+            pageData = userRepositories.findByRoleName(roleName.trim(), pageable);
+        } else {
+            pageData = userRepositories.findAllActive(pageable);
+        }
 
         var data =
                 pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
@@ -253,5 +247,37 @@ public class UserService {
                 .totalElements(pageData.getTotalElements())
                 .data(data)
                 .build();
+    }
+
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public PageResponse<UserResponse> getDeletedUsers(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        var pageData = userRepositories.findDeletedUsers(pageable);
+
+        var data =
+                pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
+
+        return PageResponse.<UserResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
+    }
+
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public UserResponse restoreUser(int id) {
+        User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getDeletedAt() == null) {
+            throw new AppException(ErrorCode.USER_EXITED);
+        }
+
+        user.setDeletedAt(null);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepositories.save(user);
+
+        return userMapper.toUserResponse(user);
     }
 }

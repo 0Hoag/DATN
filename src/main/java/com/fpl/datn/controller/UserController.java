@@ -117,11 +117,30 @@ public class UserController {
     @GetMapping("/search")
     public ApiResponse<PageResponse<UserResponse>> searchUser(
             @RequestParam String keyword,
+            @RequestParam(value = "role") String roleName,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<UserResponse>>builder()
                 .code(1000)
-                .result(userService.search(keyword, page, size))
+                .result(userService.search(keyword, roleName, page, size))
+                .build();
+    }
+
+    @GetMapping("/get/deleted")
+    public ApiResponse<PageResponse<UserResponse>> getDeleted(
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .code(1000)
+                .result(userService.getDeletedUsers(page, size))
+                .build();
+    }
+
+    @PostMapping("/restore/{id}")
+    public ApiResponse<UserResponse> restoreUser(@PathVariable int id) {
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userService.restoreUser(id))
                 .build();
     }
 }

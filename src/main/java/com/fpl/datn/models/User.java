@@ -47,8 +47,14 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @ManyToMany
     Set<Role> roles;
+
+    @OneToOne(mappedBy = "user")
+    ForgotPassword forgotPassword;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> addresses;

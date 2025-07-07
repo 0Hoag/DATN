@@ -25,6 +25,9 @@ public class SecurityConfig {
 
     private final String[] publicEnpoint = {
         "/users/registration",
+        "/forgotPassword/verifyMail/*",
+        "/forgotPassword/verifyOtp/*/*",
+        "/forgotPassword/changePassword/*",
         "/auth/token",
         "/auth/introspect",
         "/auth/logout",
@@ -36,7 +39,8 @@ public class SecurityConfig {
         "/selectProduct/registration",
         "/order/registration",
         "/pdf/**",
-        "/email/**"
+        "/email/**",
+        "/order/registration"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
