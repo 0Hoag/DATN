@@ -29,9 +29,8 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
 	long countTotalProductsSold(@Param("year") int year);
 
 	@Query(
-			value =
-					"""
-        SELECT CONCAT(p.name, ' - ', pv.variant_name) AS product_name, p.thumbnail, SUM(pv.sold) AS quantity_sold, DATE_FORMAT(pv.created_at, '%Y-%m') AS date
+			value = """
+        SELECT CONCAT(p.name, ' - ', pv.variant_name) AS product_name, p.thumbnail, SUM(pv.sold) AS quantity_sold, DATE_FORMAT(pv.created_at, '%m') AS date
         FROM product_variants pv
         JOIN products p ON pv.product_id = p.id
         WHERE pv.is_active = 1
@@ -49,7 +48,7 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
 						.productName((String) r[0])
 						.thumbnail((String) r[1])
 						.quantitySold(((Number) r[2]).longValue())
-						.date((String) r[3]) // Map trường date
+						.date((String) r[3])
 						.year(year)
 						.build())
 				.toList();
@@ -57,10 +56,10 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
 
 	@Query(
 			value = """
-    SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS date, 'Total Revenue' AS name, SUM(t.amout) AS value
+    SELECT DATE_FORMAT(t.created_at, '%m') AS date, 'Total Revenue' AS name, SUM(t.amout) AS value
     FROM transaction_logs t
     WHERE YEAR(t.created_at) = :year
-    GROUP BY DATE_FORMAT(t.created_at, '%Y-%m')
+    GROUP BY DATE_FORMAT(t.created_at, '%m')
     ORDER BY date
     """,
 			nativeQuery = true)
@@ -71,7 +70,7 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
 				.map(row -> ChartPointResponse.builder()
 						.date((String) row[0])
 						.name((String) row[1])
-						.value(row[2] != null ? new BigDecimal(row[2].toString()) : BigDecimal.ZERO) // Chuyển đổi an toàn
+						.value(row[2] != null ? new BigDecimal(row[2].toString()) : BigDecimal.ZERO)
 						.year(year)
 						.build())
 				.toList();
@@ -79,12 +78,12 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
 
 	@Query(
 			value = """
-        SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS date, o.order_status AS name, COUNT(o.id) AS value
-        FROM orders o
-        WHERE YEAR(o.created_at) = :year
-        GROUP BY DATE_FORMAT(o.created_at, '%Y-%m'), o.order_status
-        ORDER BY date
-        """,
+    SELECT DATE_FORMAT(o.created_at, '%m') AS date, o.order_status AS name, COUNT(o.id) AS value
+    FROM orders o
+    WHERE YEAR(o.created_at) = :year
+    GROUP BY DATE_FORMAT(o.created_at, '%m'), o.order_status
+    ORDER BY date
+    """,
 			nativeQuery = true)
 	List<Object[]> getOrderChartNative(@Param("year") int year);
 
@@ -101,14 +100,14 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
 
 	@Query(
 			value = """
-        SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS date, p.name, SUM(od.quantity) AS value
-        FROM order_details od
-        JOIN orders o ON od.order_id = o.id
-        JOIN products p ON od.product_id = p.id
-        WHERE YEAR(o.created_at) = :year
-        GROUP BY DATE_FORMAT(o.created_at, '%Y-%m'), p.name
-        ORDER BY date
-        """,
+    SELECT DATE_FORMAT(o.created_at, '%m') AS date, p.name, SUM(od.quantity) AS value
+    FROM order_details od
+    JOIN orders o ON od.order_id = o.id
+    JOIN products p ON od.product_id = p.id
+    WHERE YEAR(o.created_at) = :year
+    GROUP BY DATE_FORMAT(o.created_at, '%m'), p.name
+    ORDER BY date
+    """,
 			nativeQuery = true)
 	List<Object[]> getProductChartNative(@Param("year") int year);
 

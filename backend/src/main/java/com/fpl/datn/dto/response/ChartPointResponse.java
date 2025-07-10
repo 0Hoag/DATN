@@ -11,8 +11,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChartPointResponse {
+    String date;
     String name;
     BigDecimal value;
-    String date;
     Integer year;
 }
