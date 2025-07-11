@@ -12,6 +12,6 @@ public class TopProductResponse {
     String productName;
     String thumbnail;
     long quantitySold;
-    Integer soldMonth;
-    Integer soldYear;
+    String date;
+    Integer year;
 }

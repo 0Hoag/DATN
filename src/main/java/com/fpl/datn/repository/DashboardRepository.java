@@ -25,90 +25,100 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM TransactionLog t WHERE t.order.paymentStatus = 'PAID'")
     BigDecimal sumTotalRevenue();
 
-    @Query(
-            "SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID' AND MONTH(od.order.createdAt) = MONTH(CURRENT_DATE()) AND YEAR(od.order.createdAt) = YEAR(CURRENT_DATE())")
-    long countTotalProductsSold();
+    @Query("SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID' AND YEAR(od.order.createdAt) = :year")
+    long countTotalProductsSold(@Param("year") int year);
 
     @Query(
-            value =
-                    """
-	SELECT CONCAT(p.name, ' - ', pv.variant_name), p.thumbnail, SUM(pv.sold), MONTH(pv.created_at)
-	FROM product_variants pv
-	JOIN products p ON pv.product_id = p.id
-	WHERE pv.is_active = 1
-	AND MONTH(pv.created_at) = :month
-	AND YEAR(pv.created_at) = :year
-	GROUP BY p.id, p.name, p.thumbnail, pv.id, pv.variant_name, MONTH(pv.created_at)
-	ORDER BY SUM(pv.sold) DESC
-	LIMIT 10
-	""",
+            value = """
+        SELECT CONCAT(p.name, ' - ', pv.variant_name) AS product_name, p.thumbnail, SUM(pv.sold) AS quantity_sold, DATE_FORMAT(pv.created_at, '%m') AS date
+        FROM product_variants pv
+        JOIN products p ON pv.product_id = p.id
+        WHERE pv.is_active = 1
+        AND YEAR(pv.created_at) = :year
+        GROUP BY DATE_FORMAT(pv.created_at, '%Y-%m'), p.id, p.name, p.thumbnail, pv.id, pv.variant_name
+        ORDER BY SUM(pv.sold) DESC
+        LIMIT 10
+        """,
             nativeQuery = true)
-    List<Object[]> findTop10ProductsSoldByMonthYear(@Param("month") int month, @Param("year") int year);
+    List<Object[]> findTop10ProductsSoldByYear(@Param("year") int year);
 
-    // Convert method cho native query
-    default List<TopProductResponse> findTop10ProductsSoldByMonthYearDto(int month, int year) {
-        return findTop10ProductsSoldByMonthYear(month, year).stream()
+    default List<TopProductResponse> findTop10ProductsSoldByYearDto(int year) {
+        return findTop10ProductsSoldByYear(year).stream()
                 .map(r -> TopProductResponse.builder()
                         .productName((String) r[0])
                         .thumbnail((String) r[1])
                         .quantitySold(((Number) r[2]).longValue())
-                        .soldMonth(((Number) r[3]).intValue())
-                        .soldYear(year)
+                        .date((String) r[3])
+                        .year(year)
                         .build())
                 .toList();
     }
 
     @Query(
-            value =
-                    """
-		SELECT DATE_FORMAT(t.created_at, '%Y-%m') AS date, pm.name AS name, SUM(t.amout) AS value
-		FROM transaction_logs t
-		JOIN payment_methods pm ON t.payment_method_id = pm.id
-		GROUP BY date, pm.name
-		ORDER BY date
-		""",
+            value = """
+    SELECT DATE_FORMAT(t.created_at, '%m') AS date, 'Total Revenue' AS name, SUM(t.amout) AS value
+    FROM transaction_logs t
+    WHERE YEAR(t.created_at) = :year
+    GROUP BY DATE_FORMAT(t.created_at, '%m')
+    ORDER BY date
+    """,
             nativeQuery = true)
-    List<Object[]> getRevenueChartNative();
+    List<Object[]> getRevenueChartNative(@Param("year") int year);
 
-    default List<ChartPointResponse> getRevenueChart() {
-        return getRevenueChartNative().stream()
-                .map(row -> new ChartPointResponse((String) row[0], (String) row[1], (BigDecimal) row[2]))
-                .collect(Collectors.toList());
+    default List<ChartPointResponse> getRevenueChart(int year) {
+        return getRevenueChartNative(year).stream()
+                .map(row -> ChartPointResponse.builder()
+                        .date((String) row[0])
+                        .name((String) row[1])
+                        .value(row[2] != null ? new BigDecimal(row[2].toString()) : BigDecimal.ZERO)
+                        .year(year)
+                        .build())
+                .toList();
     }
 
     @Query(
-            value =
-                    """
-		SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS date, o.order_status AS name, COUNT(o.id) AS value
-		FROM orders o
-		GROUP BY date, o.order_status
-		ORDER BY date
-		""",
+            value = """
+    SELECT DATE_FORMAT(o.created_at, '%m') AS date, o.order_status AS name, COUNT(o.id) AS value
+    FROM orders o
+    WHERE YEAR(o.created_at) = :year
+    GROUP BY DATE_FORMAT(o.created_at, '%m'), o.order_status
+    ORDER BY date
+    """,
             nativeQuery = true)
-    List<Object[]> getOrderChartNative();
+    List<Object[]> getOrderChartNative(@Param("year") int year);
 
-    default List<ChartPointIntResponse> getOrderChart() {
-        return getOrderChartNative().stream()
-                .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
-                .collect(Collectors.toList());
+    default List<ChartPointIntResponse> getOrderChart(int year) {
+        return getOrderChartNative(year).stream()
+                .map(row -> ChartPointIntResponse.builder()
+                        .date((String) row[0])
+                        .name((String) row[1])
+                        .value(row[2] != null ? Long.parseLong(row[2].toString()) : 0L)
+                        .year(year)
+                        .build())
+                .toList();
     }
 
     @Query(
-            value =
-                    """
-		SELECT DATE_FORMAT(o.created_at, '%Y-%m') AS date, p.name, SUM(od.quantity) AS value
-		FROM order_details od
-		JOIN orders o ON od.order_id = o.id
-		JOIN products p ON od.product_id = p.id
-		GROUP BY date, p.name
-		ORDER BY date
-		""",
+            value = """
+    SELECT DATE_FORMAT(o.created_at, '%m') AS date, p.name, SUM(od.quantity) AS value
+    FROM order_details od
+    JOIN orders o ON od.order_id = o.id
+    JOIN products p ON od.product_id = p.id
+    WHERE YEAR(o.created_at) = :year
+    GROUP BY DATE_FORMAT(o.created_at, '%m'), p.name
+    ORDER BY date
+    """,
             nativeQuery = true)
-    List<Object[]> getProductChartNative();
+    List<Object[]> getProductChartNative(@Param("year") int year);
 
-    default List<ChartPointIntResponse> getProductChart() {
-        return getProductChartNative().stream()
-                .map(row -> new ChartPointIntResponse((String) row[0], (String) row[1], ((Number) row[2]).longValue()))
-                .collect(Collectors.toList());
+    default List<ChartPointIntResponse> getProductChart(int year) {
+        return getProductChartNative(year).stream()
+                .map(row -> ChartPointIntResponse.builder()
+                        .date((String) row[0])
+                        .name((String) row[1])
+                        .value(row[2] != null ? Long.parseLong(row[2].toString()) : 0L)
+                        .year(year)
+                        .build())
+                .toList();
     }
 }
