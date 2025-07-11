@@ -3,6 +3,7 @@ package com.fpl.datn.models;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ZUserVoucher {
     // tại sao lại để chữ Z hỏi Hoàng
     @Id

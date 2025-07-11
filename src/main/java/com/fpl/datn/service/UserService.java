@@ -276,7 +276,7 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getDeletedAt() == null) {
-            throw new AppException(ErrorCode.USER_EXITED);
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
         user.setDeletedAt(null);

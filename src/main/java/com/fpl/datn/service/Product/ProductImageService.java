@@ -55,7 +55,7 @@ public class ProductImageService {
 
     public ProductImageResponse detail(Integer id) {
         ProductImage productImage = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_DETAIL_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_UPDATE_EXISTED));
         return mapper.toResponse(productImage);
     }
 
