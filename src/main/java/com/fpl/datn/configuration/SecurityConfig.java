@@ -1,5 +1,7 @@
 package com.fpl.datn.configuration;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -12,6 +14,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -32,6 +37,9 @@ public class SecurityConfig {
         "/cartItem/registration",
         "/cartItem/addCart/{userId}",
         "/selectProduct/registration",
+        "/order/registration",
+        "/pdf/**",
+        "/email/**",
         "/order/registration"
     };
 
@@ -45,6 +53,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, publicEnpoint)
                 .permitAll()
+                .requestMatchers(HttpMethod.GET, "/payment/**", "/pdf/**", "/email/**")
+                .permitAll()
                 .anyRequest()
                 .authenticated());
 
@@ -52,7 +62,9 @@ public class SecurityConfig {
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+        httpSecurity
+                .csrf(AbstractHttpConfigurer::disable)
+                .cors(httpSecurityCorsConfigurer -> corsConfigurationSource());
 
         return httpSecurity.build();
     }
@@ -66,6 +78,31 @@ public class SecurityConfig {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
 
         return jwtAuthenticationConverter;
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+
+        // ✅ CHỈ ĐỊNH ORIGIN ĐƯỢC PHÉP
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
+
+        // ✅ CHO PHÉP CÁC METHOD CẦN DÙNG
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+        // ✅ CHO PHÉP HEADER NÀO GỬI ĐI
+        config.setAllowedHeaders(List.of("*"));
+
+        // ✅ CHO PHÉP GỬI COOKIE, AUTHORIZATION HEADER
+        config.setAllowCredentials(true);
+
+        // ✅ HEADER SẼ ĐƯỢC EXPOSE VỀ CLIENT (nếu cần)
+        config.setExposedHeaders(List.of("Authorization"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+
+        return source;
     }
 
     @Bean

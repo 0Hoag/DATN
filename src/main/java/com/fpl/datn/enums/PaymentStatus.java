@@ -9,10 +9,10 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum PaymentStatus {
-    PENDING("Chờ thanh toán"),
-    PAID("Đã thanh toán"),
-    REFUNDED("Đã hoàn tiền"),
-    FAILED("Thất bại");
+    PENDING("PENDING"),
+    PAID("PAID"),
+    REFUNDED("REFUNDED"),
+    FAILED("FAILED");
 
     String description;
 }

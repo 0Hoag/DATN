@@ -1,16 +1,16 @@
 package com.fpl.datn.repository;
 
-import com.fpl.datn.models.Category;
-import com.fpl.datn.models.ForgotPassword;
-import com.fpl.datn.models.User;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.fpl.datn.models.ForgotPassword;
+import com.fpl.datn.models.User;
 
 @Repository
-public interface ForgotPasswordRepository extends JpaRepository<ForgotPassword, Integer>{
+public interface ForgotPasswordRepository extends JpaRepository<ForgotPassword, Integer> {
 
     Optional<ForgotPassword> findByUser(User user);
 

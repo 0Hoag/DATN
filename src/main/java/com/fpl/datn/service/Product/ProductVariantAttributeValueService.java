@@ -107,7 +107,7 @@ public class ProductVariantAttributeValueService {
         var data = pageData.getContent().stream()
                 .map(product -> {
                     var cat = repo.findById(product.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_DETAIL_EXISTED));
+                            .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_ID_REQUIRED));
                     return mapper.toResponse(cat);
                 })
                 .collect(Collectors.toList());

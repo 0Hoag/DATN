@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import jakarta.transaction.Transactional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductImageMapper;
 import com.fpl.datn.models.ProductImage;
 import com.fpl.datn.models.ProductVariant;
-import com.fpl.datn.models.UploadImage;
 import com.fpl.datn.repository.ProductImageRepository;
 import com.fpl.datn.repository.ProductVariantRepository;
 import com.fpl.datn.repository.UploadImageRepository;
@@ -52,7 +50,6 @@ public class ProductImageService {
         return true;
     }
 
-
     public ProductImageResponse detail(Integer id) {
         ProductImage productImage = repo.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_UPDATE_EXISTED));
@@ -60,18 +57,15 @@ public class ProductImageService {
     }
 
     public List<ProductImageResponse> list() {
-        return repo.findAll().stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+        return repo.findAll().stream().map(mapper::toResponse).collect(Collectors.toList());
     }
 
     public PageResponse<ProductImageResponse> get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repo.findAll(pageable);
 
-        List<ProductImageResponse> data = pageData.getContent().stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+        List<ProductImageResponse> data =
+                pageData.getContent().stream().map(mapper::toResponse).collect(Collectors.toList());
 
         return PageResponse.<ProductImageResponse>builder()
                 .currentPage(page)
@@ -83,8 +77,8 @@ public class ProductImageService {
     }
 
     public ProductImageResponse update(Integer id, UpdateProductImageRequest request) {
-        ProductImage productImage = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_UPDATE_EXISTED));
+        ProductImage productImage =
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_UPLOAD_ID_REQUIRED));
 
         mapper.update(productImage, request); // ✅ Ánh xạ các trường cơ bản
         productImage.setUpdatedAt(LocalDateTime.now());
@@ -92,12 +86,11 @@ public class ProductImageService {
         return mapper.toResponse(repo.save(productImage));
     }
 
-
-
-
-    public void delete(Integer id) {
-        ProductImage productImage = repo.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_DELETE_EXISTED));
-        repo.delete(productImage);
+    public void delete(List<Integer> ids) {
+        List<ProductImage> images = repo.findAllById(ids);
+        if (images.size() != ids.size()) {
+            throw new AppException(ErrorCode.PRODUCT_IMAGE_ID_REQUIRED);
+        }
+        repo.deleteAll(images);
     }
 }

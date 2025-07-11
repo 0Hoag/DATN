@@ -1,10 +1,10 @@
 package com.fpl.datn.dto.response;
 
-import lombok.*;
-import lombok.experimental.FieldDefaults;
-
 import java.math.BigDecimal;
 import java.util.List;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Data
 @NoArgsConstructor
@@ -12,13 +12,10 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DashboardResponse {
-    Long totalUsers;
-    Long totalOrders;
+    long totalCustomers;
+    long totalOrders;
     BigDecimal totalRevenue;
-    Long totalProductsSold;
-    Long totalProducts;
+    long totalProductsSold;
     List<TopProductResponse> topProducts;
-    List<ChartDataPoint> revenueChart;
-    List<ChartDataPoint> orderChart;
-    List<ChartDataPoint> productChart;
+    ChartData chartData;
 }

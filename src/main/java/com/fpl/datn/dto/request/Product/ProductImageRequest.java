@@ -2,7 +2,13 @@ package com.fpl.datn.dto.request.Product;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
 import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
@@ -13,21 +19,21 @@ import lombok.experimental.FieldDefaults;
 public class ProductImageRequest {
     Integer id;
 
-    @NotBlank(message = "Văn bản thay thế không được để trống")
+    @NotBlank(message = "PRODUCT_IMAGE_ALT_TEXT_REQUIRED")
     String altText;
 
-    @NotBlank(message = "Mô tả chi tiết không được để trống")
+    @NotBlank(message = "PRODUCT_IMAGE_DESCRIPTION_REQUIRED")
     String specDescription;
 
-    @NotNull(message = "Trạng thái ảnh đại diện không được để trống")
+    @NotNull(message = "PRODUCT_IMAGE_IS_THUMBNAIL_REQUIRED")
     Boolean isThumbnail;
 
-    @NotNull(message = "Thứ tự ảnh không được để trống")
+    @NotNull(message = "PRODUCT_IMAGE_SORT_ORDER_REQUIRED")
     Integer sortOrder;
 
-    @NotNull(message = "ID biến thể không được để trống")
+    @NotNull(message = "PRODUCT_IMAGE_VARIANT_ID_REQUIRED")
     Integer productVariantId;
 
-    @NotNull(message = "URL Ảnh upload không được để trống")
+    @NotNull(message = "PRODUCT_IMAGE_URL_REQUIRED")
     String imageUrl;
 }

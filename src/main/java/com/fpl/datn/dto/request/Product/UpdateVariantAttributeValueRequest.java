@@ -7,5 +7,5 @@ import lombok.*;
 @AllArgsConstructor
 public class UpdateVariantAttributeValueRequest {
     private Integer attributeId; // ID của thuộc tính cha (ví dụ: Color)
-    private String value;        // Giá trị cụ thể (ví dụ: Red)
+    private String value; // Giá trị cụ thể (ví dụ: Red)
 }

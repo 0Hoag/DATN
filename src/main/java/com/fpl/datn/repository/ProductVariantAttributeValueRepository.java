@@ -9,7 +9,7 @@ import com.fpl.datn.models.ProductVariantAttributeValue;
 
 @Repository
 public interface ProductVariantAttributeValueRepository extends JpaRepository<ProductVariantAttributeValue, Integer> {
-        boolean existsByProductVariantIdAndAttributeValueId(Integer variantId, Integer valueId);
+    boolean existsByProductVariantIdAndAttributeValueId(Integer variantId, Integer valueId);
 
-        List<ProductVariantAttributeValue> findAllByProductVariant_Id(Integer productVariantId);
+    List<ProductVariantAttributeValue> findAllByProductVariant_Id(Integer productVariantId);
 }

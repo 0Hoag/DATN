@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "user_vouchers")
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

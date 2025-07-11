@@ -1,8 +1,8 @@
 package com.fpl.datn.dto.response.Product;
 
-import lombok.*;
-
 import java.time.LocalDateTime;
+
+import lombok.*;
 
 @Data
 @NoArgsConstructor

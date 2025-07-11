@@ -1,6 +1,8 @@
 package com.fpl.datn.dto.response;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -15,10 +17,21 @@ import lombok.experimental.FieldDefaults;
 public class OrderResponse {
     Integer id;
     LocalDateTime createdAt;
-    String fullName;
-    String phone;
-    String note;
     String orderStatus;
+    Integer idPaymentMethod;
     String paymentMethod;
     String paymentStatus;
+    String note;
+    // Thông tin người dùng
+    Integer idAddress;
+    String address;
+    String nickname;
+    String phone;
+    OrderUserResponse user;
+    // Thồn tin Đơn hàng chi tiết
+    BigDecimal totalAmount;
+    List<OrderDetailResponse> orderDetails;
+    String PaymentUrl;
+    // voucher
+    VoucherResponse voucher;
 }

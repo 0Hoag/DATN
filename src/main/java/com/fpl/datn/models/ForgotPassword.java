@@ -1,10 +1,11 @@
 package com.fpl.datn.models;
 
+import java.util.Date;
+
 import jakarta.persistence.*;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.Date;
 
 @Entity
 @Data

@@ -49,6 +49,9 @@ public enum ErrorCode {
     RETURN_REQUEST_ALREADY_EXISTS(1208, "A return request already exists for this order", HttpStatus.BAD_REQUEST),
     ORDER_RETURN_NOT_FOUND(1209, "Order return not found", HttpStatus.BAD_REQUEST),
     ORDER_RETURN_STATUS_NOT_FOUND(1210, "Order return status not found", HttpStatus.BAD_REQUEST),
+    VNPAY_REFUND_FAILED(1210, "VNPAY REFUND FAILED", HttpStatus.BAD_REQUEST),
+    ORDER_DELETE_RECEIVED(1211, "Cannot delete an order that has already been delivered", HttpStatus.BAD_REQUEST),
+    ORDER_DELETE_PAID(1212, "Cannot delete an order that has already been paid", HttpStatus.BAD_REQUEST),
 
     // Address (1300–1399)
     ADDRESS_NOT_FOUND(1301, "Address not found", HttpStatus.BAD_REQUEST),
@@ -81,15 +84,31 @@ public enum ErrorCode {
     DUPLICATE_ATTRIBUTE_VALUE(1523, "Duplicate attribute value", HttpStatus.BAD_REQUEST),
     ATTRIBUTE_VALUE_ALREADY_EXISTS(1524, "Attribute Value EXISTED", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_UPLOAD_ID_REQUIRED(1525, "Upload image ID must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_IMAGE_DETAIL_EXISTED(1526, "Image detail existed", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_ID_REQUIRED(1526, "Image ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_NAME_REQUIRED(1528, "Product name must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_SLUG_REQUIRED(1529, "Product slug must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_DESCRIPTION_REQUIRED(1530, "Product description must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_BRAND_REQUIRED(1531, "Product brand must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_THUMBNAIL_REQUIRED(1532, "Product thumbnail must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_CONTENT_REQUIRED(1533, "Product content must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_ISHOME_REQUIRED(1534, "Product home status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_ISACTIVE_REQUIRED(1535, "Product active status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_CATEGORY_REQUIRED(1536, "Product category must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_NAME_REQUIRED(1537, "Product variant name must not be blank", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_PRICE_REQUIRED(1538, "Product variant price must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_QUANTITY_REQUIRED(1539, "Product variant quantity must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_SOLD_REQUIRED(1540, "Product variant sold must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ISACTIVE_REQUIRED(1541, "Product variant active status must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_PRODUCT_ID_REQUIRED(1542, "Product variant product ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED(
+            1543, "Product variant attribute values must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_ALT_TEXT_REQUIRED(1071, "Alt text must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_DESCRIPTION_REQUIRED(1072, "Specification description must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_IS_THUMBNAIL_REQUIRED(1073, "Thumbnail status must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_SORT_ORDER_REQUIRED(1074, "Image sort order must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_VARIANT_ID_REQUIRED(1075, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_URL_REQUIRED(1076, "Image URL must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_IMAGE_UPDATE_EXISTED(1077, "Image update existed", HttpStatus.BAD_REQUEST),
-    PRODUCT_IMAGE_DELETE_EXISTED(1078, "Image deleted existed", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ID_REQUIRED(1540, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
 
     // Cart (1600–1699)
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
@@ -111,6 +130,8 @@ public enum ErrorCode {
     INVALID_INPUT(2001, "Invalid input data", HttpStatus.BAD_REQUEST),
     INVALID_MESSAGE_KEY(2002, "Invalid message key", HttpStatus.BAD_REQUEST),
     USERID_NOT_NULL(2003, "UserId cannot be null", HttpStatus.BAD_REQUEST),
+    FULLNAME_NOT_NULL(2004, "Name cannot be null", HttpStatus.BAD_REQUEST),
+    PHONE_NOT_NULL(2005, "Phone cannot be null", HttpStatus.BAD_REQUEST),
 
     // Voucher (2100–2199)
     VOUCHER_NOT_FOUND(2101, "Voucher not found", HttpStatus.BAD_REQUEST),
@@ -127,7 +148,15 @@ public enum ErrorCode {
     CATEGORY_NAME_EXISTED(2204, "Category name already exists", HttpStatus.CONFLICT),
     CATEGORY_SLUG_EXISTED(2205, "Category slug already exists", HttpStatus.CONFLICT),
 
+    // Transactionlog(2300-2399)
+    TRANCSACTION_LOG_NOT_FOUND(2301, "Transaction log not found", HttpStatus.NOT_FOUND),
+
+    // Email(2400-2499)
+    EMAIL_OR_PASSWORD_INCORRECT(1021, "Email or Password incorrect please try again", HttpStatus.BAD_REQUEST),
+    INVALID_OTP(1022, "Invalid otp", HttpStatus.BAD_REQUEST),
+    
     // Common (2500–2599)
+    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND);
     RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),
 
     // System (7000+)
@@ -136,6 +165,7 @@ public enum ErrorCode {
     MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.BAD_REQUEST),
     UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
+
 
     int code;
     String message;

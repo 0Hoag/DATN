@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import jakarta.validation.ConstraintViolation;
 
+import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -23,6 +24,17 @@ public class GlobalException {
     UserMapper userMapper;
 
     @ExceptionHandler(value = Exception.class)
+    ResponseEntity<ApiResponse<Void>> handException(Exception exception) {
+        ErrorCode errorCode = ErrorCode.UNKNOWN_ERROR;
+        ApiResponse<Void> apiResponse = new ApiResponse<Void>();
+
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse<Void>> handRuntimeException(RuntimeException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
         ApiResponse<Void> apiResponse = new ApiResponse<Void>();
@@ -87,6 +99,16 @@ public class GlobalException {
     @ExceptionHandler(value = AccessDeniedException.class)
     ResponseEntity<ApiResponse<Void>> responseEntity(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+        return ResponseEntity.status(errorCode.getHttpStatus())
+                .body(ApiResponse.<Void>builder()
+                        .code(errorCode.getCode())
+                        .message(errorCode.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(value = InvalidDataAccessApiUsageException.class)
+    ResponseEntity<ApiResponse<Void>> responseEntity(InvalidDataAccessApiUsageException exception) {
+        ErrorCode errorCode = ErrorCode.MISSING_INPUT;
         return ResponseEntity.status(errorCode.getHttpStatus())
                 .body(ApiResponse.<Void>builder()
                         .code(errorCode.getCode())

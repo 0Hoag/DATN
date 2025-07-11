@@ -1,5 +1,7 @@
 package com.fpl.datn.mapper.Product;
 
+import org.mapstruct.*;
+
 import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
@@ -7,9 +9,10 @@ import com.fpl.datn.mapper.CategoryMapper;
 import com.fpl.datn.mapper.DateMapper;
 import com.fpl.datn.models.Category;
 import com.fpl.datn.models.Product;
-import org.mapstruct.*;
 
-@Mapper(componentModel = "spring", uses = {DateMapper.class , ProductVariantMapper.class, CategoryMapper.class})
+@Mapper(
+        componentModel = "spring",
+        uses = {DateMapper.class, ProductVariantMapper.class, CategoryMapper.class})
 public interface ProductMapper {
 
     // Entity -> Response
@@ -20,7 +23,6 @@ public interface ProductMapper {
     @Mapping(target = "category", source = "category", qualifiedByName = "mapCategoryIdToCategory")
     @Mapping(target = "productVariants", ignore = true)
     Product toProduct(ProductRequest request);
-
 
     // Update existing entity from DTO
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -38,6 +40,7 @@ public interface ProductMapper {
         category.setId(id);
         return category;
     }
+
     @Named("mapCategoryIdToCategory")
     default Category mapCategoryIdToCategory(Integer categoryId) {
         if (categoryId == null) return null;
@@ -45,5 +48,4 @@ public interface ProductMapper {
         category.setId(categoryId);
         return category;
     }
-
 }

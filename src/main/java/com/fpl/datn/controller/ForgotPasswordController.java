@@ -1,22 +1,15 @@
 package com.fpl.datn.controller;
 
+import org.springframework.web.bind.annotation.*;
+
 import com.fpl.datn.dto.ApiResponse;
-import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.*;
-import com.fpl.datn.dto.response.UserResponse;
 import com.fpl.datn.service.EmailService;
-import com.fpl.datn.service.UserService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.List;
 
 @RestController
 @RequestMapping("/forgotPassword")
@@ -44,7 +37,8 @@ public class ForgotPasswordController {
 
     // when verifyOtp success change page and call this API
     @PostMapping("/changePassword/{email}")
-    ApiResponse<String> changePassword(@PathVariable String email, @RequestBody ChangePasswordVerifySuccessRequest request) {
+    ApiResponse<String> changePassword(
+            @PathVariable String email, @RequestBody ChangePasswordVerifySuccessRequest request) {
         return ApiResponse.<String>builder()
                 .code(1000)
                 .result(emailService.changePassword(email, request))
