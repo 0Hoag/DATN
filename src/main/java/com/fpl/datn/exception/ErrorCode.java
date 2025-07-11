@@ -83,7 +83,7 @@ public enum ErrorCode {
     ORDER_STATUS_CANNOT_BE_MODIFIED(1522, "Order status cannot be modified", HttpStatus.BAD_REQUEST),
     DUPLICATE_ATTRIBUTE_VALUE(1523, "Duplicate attribute value", HttpStatus.BAD_REQUEST),
     ATTRIBUTE_VALUE_ALREADY_EXISTS(1524, "Attribute Value EXISTED", HttpStatus.BAD_REQUEST),
-    PRODUCT_IMAGE_UPLOAD_ID_REQUIRED(1525, "Upload image ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_NOT_EXISTED(1525, "Product image not existed", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_ID_REQUIRED(1526, "Image ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_NAME_REQUIRED(1528, "Product name must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_SLUG_REQUIRED(1529, "Product slug must not be blank", HttpStatus.BAD_REQUEST),
@@ -100,8 +100,7 @@ public enum ErrorCode {
     PRODUCT_VARIANT_SOLD_REQUIRED(1540, "Product variant sold must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_ISACTIVE_REQUIRED(1541, "Product variant active status must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_PRODUCT_ID_REQUIRED(1542, "Product variant product ID must not be null", HttpStatus.BAD_REQUEST),
-    PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED(
-            1543, "Product variant attribute values must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED(1543, "Product variant attribute values must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_ALT_TEXT_REQUIRED(1071, "Alt text must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_DESCRIPTION_REQUIRED(1072, "Specification description must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_IS_THUMBNAIL_REQUIRED(1073, "Thumbnail status must not be null", HttpStatus.BAD_REQUEST),
@@ -156,12 +155,10 @@ public enum ErrorCode {
     INVALID_OTP(1022, "Invalid otp", HttpStatus.BAD_REQUEST),
     
     // Common (2500–2599)
-    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND);
     RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),
 
     // System (7000+)
     CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allowed", HttpStatus.BAD_REQUEST),
-    INVALID_OTP(7778, "Invalid Otp", HttpStatus.BAD_REQUEST),
     MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.BAD_REQUEST),
     UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);

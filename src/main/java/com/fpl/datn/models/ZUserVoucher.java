@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ZUserVoucher {
     // tại sao lại để chữ Z hỏi Hoàng
     @Id

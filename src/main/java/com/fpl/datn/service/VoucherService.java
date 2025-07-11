@@ -32,7 +32,6 @@ import lombok.experimental.FieldDefaults;
 public class VoucherService {
     VoucherRepository repository;
     UserVoucherRepository userVoucherRepository;
-    UserVoucherRepository userVoucherRepository;
     VoucherMapper mapper;
 
     @Transactional
