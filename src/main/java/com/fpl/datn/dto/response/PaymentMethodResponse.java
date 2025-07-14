@@ -1,4 +1,4 @@
-package com.fpl.datn.dto.request;
+package com.fpl.datn.dto.response;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -6,12 +6,12 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+@Builder
 @Getter
 @Setter
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MailRequest {
-    String to;
-    String subject;
-    String text;
+public class PaymentMethodResponse {
+    int id;
+    String name;
+    String description;
 }

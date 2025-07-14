@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.fpl.datn.dto.ApiResponse;
-import com.fpl.datn.mapper.UserMapper;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -21,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class GlobalException {
     private static final String MIN_ATTRIBUTES = "min";
-    UserMapper userMapper;
 
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse<Void>> handException(Exception exception) {

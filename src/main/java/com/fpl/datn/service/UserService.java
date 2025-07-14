@@ -63,7 +63,7 @@ public class UserService {
         return true;
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public UserResponse Update(int id, UpdateUserRequest request) {
         var user = userRepositories
                 .findByIdAndNotDeleted(id)
@@ -89,7 +89,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepositories.save(user));
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public UserResponse Detail(int id) {
         User user = userRepositories
                 .findByIdAndNotDeleted(id)
@@ -97,7 +97,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public void Delete(int id) {
         User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -109,14 +109,14 @@ public class UserService {
         userRepositories.save(user);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public List<UserResponse> List() {
         return userRepositories.findAllActive().stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public PageResponse<UserResponse> Get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = userRepositories.findAllActive(pageable);
@@ -249,7 +249,7 @@ public class UserService {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public PageResponse<UserResponse> getDeletedUsers(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = userRepositories.findDeletedUsers(pageable);
@@ -266,7 +266,7 @@ public class UserService {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public UserResponse restoreUser(int id) {
         User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 

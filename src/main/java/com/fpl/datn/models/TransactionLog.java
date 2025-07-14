@@ -24,7 +24,7 @@ public class TransactionLog {
     private Integer type;
 
     // Note: Có typo trong schema "amout" thay vì "amount"
-    @Column(name = "amout", precision = 10, scale = 2)
+    @Column(name = "amout", precision = 19, scale = 2)
     private BigDecimal amount;
 
     private String status;

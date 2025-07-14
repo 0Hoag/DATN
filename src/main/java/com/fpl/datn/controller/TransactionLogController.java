@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fpl.datn.dto.ApiResponse;
-import com.fpl.datn.models.TransactionLog;
+import com.fpl.datn.dto.response.TransactionlogResponse;
 import com.fpl.datn.service.TransactionLogService;
 
 import lombok.AccessLevel;
@@ -22,8 +22,8 @@ public class TransactionLogController {
     TransactionLogService transactionLogService;
 
     @GetMapping
-    ApiResponse<List<TransactionLog>> GetAll() {
-        return ApiResponse.<List<TransactionLog>>builder()
+    ApiResponse<List<TransactionlogResponse>> GetAll() {
+        return ApiResponse.<List<TransactionlogResponse>>builder()
                 .result(transactionLogService.Get())
                 .build();
     }

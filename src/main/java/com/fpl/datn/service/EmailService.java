@@ -33,10 +33,10 @@ public class EmailService {
 
     public void sendSimpleMessage(MailRequest request) {
         SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(request.to());
+        message.setTo(request.getTo());
         message.setFrom("phonezone.shop11@gmail.com");
-        message.setSubject(request.subject());
-        message.setText(request.text());
+        message.setSubject(request.getSubject());
+        message.setText(request.getText());
 
         javaMailSender.send(message);
     }
