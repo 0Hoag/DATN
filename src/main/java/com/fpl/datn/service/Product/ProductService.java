@@ -1,9 +1,11 @@
 package com.fpl.datn.service.Product;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
@@ -165,5 +167,12 @@ public class ProductService {
                 .data(data)
                 .build();
     }
+
+    public List<ProductSaleResponse> getSaleProductsSimple(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductSaleResponse> pageResult = repo.findSaleProductsSimple(pageable);
+        return pageResult.getContent(); // Trả về List thay vì PageResponse
+    }
+
 
 }

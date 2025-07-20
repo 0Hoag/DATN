@@ -3,6 +3,7 @@ package com.fpl.datn.controller;
 import java.util.List;
 
 import com.cloudinary.Api;
+import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import com.fpl.datn.models.Product;
 import jakarta.validation.Valid;
 
@@ -93,7 +94,7 @@ public class ProductController {
                 .build();
     }
 
-    @GetMapping("/search-slug")
+    @GetMapping("/key-slug")
     public ApiResponse<PageResponse<ProductResponse>> searchBySlug(
             @RequestParam String keyword,
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -105,4 +106,14 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/sale")
+    public ApiResponse<List<ProductSaleResponse>> getSaleProductsSimple(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<List<ProductSaleResponse>>builder()
+                .code(1000)
+                .message("Success")
+                .result(productService.getSaleProductsSimple(page, size))
+                .build();
+    }
 }

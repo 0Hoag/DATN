@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -39,4 +40,16 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("SELECT p FROM Product p JOIN FETCH p.category WHERE p.id = :id")
     Optional<Product> findByIdWithCategory(@org.springframework.data.repository.query.Param("id") Integer id);
+
+    @Query("""
+    SELECT new com.fpl.datn.dto.response.Product.ProductSaleResponse(
+        p.id, p.name, MIN(pv.price), MIN(pv.salePrice)
+    )
+    FROM Product p
+    JOIN p.productVariants pv
+    WHERE pv.salePrice IS NOT NULL AND pv.salePrice < pv.price
+    GROUP BY p.id, p.name
+""")
+    Page<ProductSaleResponse> findSaleProductsSimple(Pageable pageable);
+
 }

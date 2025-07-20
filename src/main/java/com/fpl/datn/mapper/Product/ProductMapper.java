@@ -1,6 +1,7 @@
 package com.fpl.datn.mapper.Product;
 
 import com.fpl.datn.mapper.ProductReviewMapper;
+import com.fpl.datn.models.ProductVariant;
 import org.mapstruct.*;
 
 import com.fpl.datn.dto.request.Product.ProductRequest;
@@ -10,6 +11,9 @@ import com.fpl.datn.mapper.CategoryMapper;
 import com.fpl.datn.mapper.DateMapper;
 import com.fpl.datn.models.Category;
 import com.fpl.datn.models.Product;
+
+import java.math.BigDecimal;
+import java.util.Objects;
 
 @Mapper(
         componentModel = "spring",
@@ -48,5 +52,29 @@ public interface ProductMapper {
         Category category = new Category();
         category.setId(categoryId);
         return category;
+    }
+
+
+    // Các phương thức mặc định để tính giá
+    default BigDecimal getMinPrice(Product product) {
+        return product.getProductVariants().stream()
+                .map(ProductVariant::getPrice)
+                .filter(Objects::nonNull)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
+    default BigDecimal getMinSalePrice(Product product) {
+        return product.getProductVariants().stream()
+                .map(ProductVariant::getSalePrice)
+                .filter(Objects::nonNull)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
+
+    default BigDecimal getFinalPrice(Product product) {
+        BigDecimal minSale = getMinSalePrice(product);
+        return (minSale != null) ? minSale : getMinPrice(product);
     }
 }

@@ -1,9 +1,11 @@
 package com.fpl.datn.service.Product;
 
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
@@ -206,4 +208,20 @@ public class ProductVariantService {
 
         repo.delete(productVariant);
     }
+
+    private BigDecimal getMinPrice(List<ProductVariant> variants) {
+        return variants.stream()
+                .map(ProductVariant::getPrice)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
+    private BigDecimal getMinSalePrice(List<ProductVariant> variants) {
+        return variants.stream()
+                .map(ProductVariant::getSalePrice)
+                .filter(Objects::nonNull)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
 }
