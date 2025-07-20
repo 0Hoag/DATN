@@ -14,7 +14,10 @@ public class OrderSpecification {
             if (keyword == null || keyword.isEmpty()) {
                 return null;
             }
-            String likeKeyword = "%" + keyword.toLowerCase() + "%";
+            String likeKeyword = "%" + keyword.trim().toLowerCase() + "%";
+            if (keyword.contains("@")) {
+                return cb.like(cb.lower(root.get("user").get("email")), likeKeyword);
+            }
 
             return cb.or(
                     cb.like(cb.lower(root.get("user").get("fullName")), likeKeyword),
