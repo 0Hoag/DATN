@@ -25,7 +25,7 @@ public class ProductReviewService {
     ProductReviewRepository repository;
     ProductReviewMapper mapper;
 
-    @PreAuthorize("hasAuthority('VIEW_PRODUCT')")
+    @PreAuthorize("hasAuthority('VIEW_PRODUCT') or hasRole('ADMIN')")
     public PageResponse<ProductReviewResponse> getAll(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repository.findAll(pageable);

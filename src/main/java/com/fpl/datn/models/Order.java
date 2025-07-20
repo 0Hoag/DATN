@@ -28,7 +28,7 @@ public class Order {
     @Column(name = "payment_status")
     private String paymentStatus;
 
-    @Column(name = "total_amount", precision = 10, scale = 2)
+    @Column(name = "total_amount", precision = 19, scale = 2)
     private BigDecimal totalAmount;
 
     @Column(columnDefinition = "TEXT")

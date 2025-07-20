@@ -51,6 +51,16 @@ public class OrderController {
                 .build();
     }
 
+    @GetMapping("/user/{id}")
+    ApiResponse<PageResponse<OrderResponse>> getAll(
+            @PathVariable int id,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<OrderResponse>>builder()
+                .result(orderService.getOrderByUser(id, page, size))
+                .build();
+    }
+
     @GetMapping("/cancel/{id}")
     ApiResponse<Void> cancel(@PathVariable int id) {
         orderService.cancel(id);

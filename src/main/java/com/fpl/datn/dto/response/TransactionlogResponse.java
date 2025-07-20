@@ -13,6 +13,13 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TransactionlogResponse {
-    int id;
-    LocalDateTime createAt;
+    Integer id;
+    String status;
+    Double amount;
+    String actionType;
+    Integer orderId;
+    String message;
+    String transactionRef;
+    String transactionNo;
+    LocalDateTime createdAt;
 }

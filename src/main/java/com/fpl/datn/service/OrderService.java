@@ -126,8 +126,6 @@ public class OrderService {
         order.setTotalAmount(total);
         order.setOrderDetails(details);
         repository.save(order);
-        // gửi mail
-        sendMailService.sendInvoiceToUser(order.getId());
 
         var response = mapper.toOrderResponse(order);
         String txnRef = null;
@@ -141,6 +139,8 @@ public class OrderService {
             response.setPaymentUrl(payment.getPaymentUrl());
             txnRef = payment.getTxnRef();
         }
+        // gửi mail
+        sendMailService.sendInvoiceToUser(order.getId());
         logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef, null);
         return response;
     }
@@ -203,6 +203,7 @@ public class OrderService {
     public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) throws Exception {
         var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
         if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+
         // Nếu đã nhận hàng thì báo không thể chỉnh sửa
         if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
             throw new AppException(ErrorCode.ORDER_CANNOT_BE_MODIFIED);
@@ -227,10 +228,24 @@ public class OrderService {
             sendMailService.sendInvoiceToUserUpdateStatus(id);
         }
         var response = mapper.toOrderResponse(order);
+        // Nếu COD thì trạng thái đơn hàng RECEIED nó mới lưu vào log hoặc VNPAY mà thái đơn hàng là PAID thì nó mới lưu
         if (isValidPaymentCOD(order) || isValidPaymentVNPAY(order)) {
             logService.logPayment(order, OrderActionType.UPDATE_STATUS.getType(), response.getPaymentUrl(), null);
         }
         return response;
+    }
+
+    public PageResponse<OrderResponse> getOrderByUser(int id, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        var pageData = repository.findByUserId(id, pageable);
+        var data = pageData.stream().map(order -> mapper.toOrderResponse(order)).toList();
+        return PageResponse.<OrderResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
     }
 
     public static boolean isValidPaymentCOD(Order order) {

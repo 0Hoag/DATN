@@ -1,5 +1,6 @@
 package com.fpl.datn.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fpl.datn.dto.ApiResponse;
+import com.fpl.datn.dto.response.PaymentMethodResponse;
+import com.fpl.datn.service.PaymentMethodService;
 import com.fpl.datn.service.VnpayService;
 
 import lombok.AccessLevel;
@@ -20,6 +23,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PaymentController {
     VnpayService vnpayService;
+    PaymentMethodService methodService;
+
+    @GetMapping
+    ApiResponse<List<PaymentMethodResponse>> GetAll() {
+        return ApiResponse.<List<PaymentMethodResponse>>builder()
+                .result(methodService.getAll())
+                .build();
+    }
 
     @GetMapping("/vnpay-return")
     public ApiResponse<String> handleVnpayReturn(@RequestParam Map<String, String> params) {
