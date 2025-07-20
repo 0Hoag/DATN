@@ -1,5 +1,6 @@
 package com.fpl.datn.mapper.Product;
 
+import com.fpl.datn.mapper.ProductReviewMapper;
 import org.mapstruct.*;
 
 import com.fpl.datn.dto.request.Product.ProductRequest;
@@ -12,7 +13,7 @@ import com.fpl.datn.models.Product;
 
 @Mapper(
         componentModel = "spring",
-        uses = {DateMapper.class, ProductVariantMapper.class, CategoryMapper.class})
+        uses = {DateMapper.class, ProductVariantMapper.class, CategoryMapper.class, ProductReviewMapper.class})
 public interface ProductMapper {
 
     // Entity -> Response

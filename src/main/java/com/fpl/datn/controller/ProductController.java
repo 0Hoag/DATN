@@ -2,9 +2,12 @@ package com.fpl.datn.controller;
 
 import java.util.List;
 
+import com.cloudinary.Api;
+import com.fpl.datn.models.Product;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
@@ -36,12 +39,14 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProductResponse> Detail(@PathVariable("id") int id) {
+    public ApiResponse<ProductResponse> detail(@PathVariable("id") int id) {
         return ApiResponse.<ProductResponse>builder()
                 .code(1000)
                 .result(productService.detail(id))
                 .build();
     }
+
+
 
     @GetMapping("/List")
     public ApiResponse<List<ProductResponse>> List() {
@@ -85,6 +90,18 @@ public class ProductController {
         return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .code(1000)
                 .result(productService.search(keyword, page, size))
+                .build();
+    }
+
+    @GetMapping("/search-slug")
+    public ApiResponse<PageResponse<ProductResponse>> searchBySlug(
+            @RequestParam String keyword,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<ProductResponse>>builder()
+                .code(1000)
+                .result(productService.searchBySlug(keyword, page, size))
                 .build();
     }
 

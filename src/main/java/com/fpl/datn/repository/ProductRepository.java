@@ -30,6 +30,13 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
             + "   OR LOWER(v.sku) LIKE LOWER(CONCAT('%', :keyword, '%'))\n")
     Page<Product> searchByNameOrSku(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("""
+    SELECT p FROM Product p 
+    WHERE LOWER(p.slug) LIKE LOWER(CONCAT('%', :keyword, '%'))
+    """)
+    Page<Product> searchBySlug(@Param("keyword") String keyword, Pageable pageable);
+
+
     @Query("SELECT p FROM Product p JOIN FETCH p.category WHERE p.id = :id")
     Optional<Product> findByIdWithCategory(@org.springframework.data.repository.query.Param("id") Integer id);
 }

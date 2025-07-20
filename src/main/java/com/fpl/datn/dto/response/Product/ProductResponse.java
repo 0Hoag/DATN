@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fpl.datn.dto.response.CategoryResponse;
 
+import com.fpl.datn.dto.response.ProductReviewResponse;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -25,4 +26,5 @@ public class ProductResponse {
     Boolean isActive;
     List<ProductVariantResponse> productVariants;
     CategoryResponse category;
+    List<ProductReviewResponse> productReviews;
 }
