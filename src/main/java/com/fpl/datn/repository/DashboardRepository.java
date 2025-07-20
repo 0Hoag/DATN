@@ -2,7 +2,6 @@ package com.fpl.datn.repository;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,20 +24,22 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT COALESCE(SUM(t.amount), 0) FROM TransactionLog t WHERE t.order.paymentStatus = 'PAID'")
     BigDecimal sumTotalRevenue();
 
-    @Query("SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID' AND YEAR(od.order.createdAt) = :year")
+    @Query(
+            "SELECT COALESCE(SUM(od.quantity), 0) FROM OrderDetail od WHERE od.order.paymentStatus = 'PAID' AND YEAR(od.order.createdAt) = :year")
     long countTotalProductsSold(@Param("year") int year);
 
     @Query(
-            value = """
-        SELECT CONCAT(p.name, ' - ', pv.variant_name) AS product_name, p.thumbnail, SUM(pv.sold) AS quantity_sold, DATE_FORMAT(pv.created_at, '%m') AS date
-        FROM product_variants pv
-        JOIN products p ON pv.product_id = p.id
-        WHERE pv.is_active = 1
-        AND YEAR(pv.created_at) = :year
-        GROUP BY DATE_FORMAT(pv.created_at, '%Y-%m'), p.id, p.name, p.thumbnail, pv.id, pv.variant_name
-        ORDER BY SUM(pv.sold) DESC
-        LIMIT 10
-        """,
+            value =
+                    """
+		SELECT CONCAT(p.name, ' - ', pv.variant_name) AS product_name, p.thumbnail, SUM(pv.sold) AS quantity_sold, DATE_FORMAT(pv.created_at, '%m') AS date
+		FROM product_variants pv
+		JOIN products p ON pv.product_id = p.id
+		WHERE pv.is_active = 1
+		AND YEAR(pv.created_at) = :year
+		GROUP BY DATE_FORMAT(pv.created_at, '%Y-%m'), p.id, p.name, p.thumbnail, pv.id, pv.variant_name
+		ORDER BY SUM(pv.sold) DESC
+		LIMIT 10
+		""",
             nativeQuery = true)
     List<Object[]> findTop10ProductsSoldByYear(@Param("year") int year);
 
@@ -55,13 +56,14 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     }
 
     @Query(
-            value = """
-    SELECT DATE_FORMAT(t.created_at, '%m') AS date, 'Total Revenue' AS name, SUM(t.amout) AS value
-    FROM transaction_logs t
-    WHERE YEAR(t.created_at) = :year
-    GROUP BY DATE_FORMAT(t.created_at, '%m')
-    ORDER BY date
-    """,
+            value =
+                    """
+	SELECT DATE_FORMAT(t.created_at, '%m') AS date, 'Total Revenue' AS name, SUM(t.amout) AS value
+	FROM transaction_logs t
+	WHERE YEAR(t.created_at) = :year
+	GROUP BY DATE_FORMAT(t.created_at, '%m')
+	ORDER BY date
+	""",
             nativeQuery = true)
     List<Object[]> getRevenueChartNative(@Param("year") int year);
 
@@ -77,13 +79,14 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     }
 
     @Query(
-            value = """
-    SELECT DATE_FORMAT(o.created_at, '%m') AS date, o.order_status AS name, COUNT(o.id) AS value
-    FROM orders o
-    WHERE YEAR(o.created_at) = :year
-    GROUP BY DATE_FORMAT(o.created_at, '%m'), o.order_status
-    ORDER BY date
-    """,
+            value =
+                    """
+	SELECT DATE_FORMAT(o.created_at, '%m') AS date, o.order_status AS name, COUNT(o.id) AS value
+	FROM orders o
+	WHERE YEAR(o.created_at) = :year
+	GROUP BY DATE_FORMAT(o.created_at, '%m'), o.order_status
+	ORDER BY date
+	""",
             nativeQuery = true)
     List<Object[]> getOrderChartNative(@Param("year") int year);
 
@@ -99,15 +102,16 @@ public interface DashboardRepository extends JpaRepository<Order, Integer> {
     }
 
     @Query(
-            value = """
-    SELECT DATE_FORMAT(o.created_at, '%m') AS date, p.name, SUM(od.quantity) AS value
-    FROM order_details od
-    JOIN orders o ON od.order_id = o.id
-    JOIN products p ON od.product_id = p.id
-    WHERE YEAR(o.created_at) = :year
-    GROUP BY DATE_FORMAT(o.created_at, '%m'), p.name
-    ORDER BY date
-    """,
+            value =
+                    """
+	SELECT DATE_FORMAT(o.created_at, '%m') AS date, p.name, SUM(od.quantity) AS value
+	FROM order_details od
+	JOIN orders o ON od.order_id = o.id
+	JOIN products p ON od.product_id = p.id
+	WHERE YEAR(o.created_at) = :year
+	GROUP BY DATE_FORMAT(o.created_at, '%m'), p.name
+	ORDER BY date
+	""",
             nativeQuery = true)
     List<Object[]> getProductChartNative(@Param("year") int year);
 
