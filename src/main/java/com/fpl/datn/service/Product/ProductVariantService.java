@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -223,5 +224,23 @@ public class ProductVariantService {
                 .min(BigDecimal::compareTo)
                 .orElse(null);
     }
+    public PageResponse<ProductVariantResponse> search(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductVariant> variantPage = repo.searchVariants(keyword, pageable);
+
+        List<ProductVariantResponse> data = variantPage.getContent().stream()
+                .map(mapper::toResponse) // nếu dùng MapStruct hoặc mapper tự viết
+                .collect(Collectors.toList());
+
+        return PageResponse.<ProductVariantResponse>builder()
+                .currentPage(page)
+                .totalPages(variantPage.getTotalPages())
+                .pageSize(variantPage.getSize())
+                .totalElements(variantPage.getTotalElements())
+                .data(data)
+                .build();
+    }
+
+
 
 }

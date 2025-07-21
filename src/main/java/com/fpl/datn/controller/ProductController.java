@@ -94,17 +94,6 @@ public class ProductController {
                 .build();
     }
 
-    @GetMapping("/key-slug")
-    public ApiResponse<PageResponse<ProductResponse>> searchBySlug(
-            @RequestParam String keyword,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-
-        return ApiResponse.<PageResponse<ProductResponse>>builder()
-                .code(1000)
-                .result(productService.searchBySlug(keyword, page, size))
-                .build();
-    }
 
     @GetMapping("/sale")
     public ApiResponse<List<ProductSaleResponse>> getSaleProductsSimple(

@@ -135,25 +135,7 @@ public class ProductService {
 
     public PageResponse<ProductResponse> search(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Product> productPage = repo.searchByNameOrSku(keyword, pageable);
-        List<ProductResponse> data = productPage.getContent()
-                .stream()
-                .map(mapper::toProductResponse)
-                .collect(Collectors.toList());
-
-        return PageResponse.<ProductResponse>builder()
-                .currentPage(page)
-                .totalPages(productPage.getTotalPages())
-                .pageSize(productPage.getSize())
-                .totalElements(productPage.getTotalElements())
-                .data(data)
-                .build();
-    }
-
-    public PageResponse<ProductResponse> searchBySlug(String keyword, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Product> productPage = repo.searchBySlug(keyword, pageable);
-
+        Page<Product> productPage = repo.searchByNameOrSlug(keyword, pageable);
         List<ProductResponse> data = productPage.getContent()
                 .stream()
                 .map(mapper::toProductResponse)

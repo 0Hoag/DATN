@@ -2,6 +2,7 @@ package com.fpl.datn.controller;
 
 import java.util.List;
 
+import com.fpl.datn.dto.response.Product.ProductResponse;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.*;
@@ -74,4 +75,16 @@ public class ProductVariantController {
         productVariantService.delete(id);
         return ApiResponse.<Void>builder().code(1000).message("Delete success!").build();
     }
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<ProductVariantResponse>> searchProducts(
+            @RequestParam String keyword,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<ProductVariantResponse>>builder()
+                .code(1000)
+                .result(productVariantService.search(keyword, page, size))
+                .build();
+    }
+
 }
