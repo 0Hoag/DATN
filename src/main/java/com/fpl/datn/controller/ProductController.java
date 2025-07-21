@@ -112,7 +112,6 @@ public class ProductController {
             @RequestParam(defaultValue = "10") int size) {
         return ApiResponse.<List<ProductSaleResponse>>builder()
                 .code(1000)
-                .message("Success")
                 .result(productService.getSaleProductsSimple(page, size))
                 .build();
     }

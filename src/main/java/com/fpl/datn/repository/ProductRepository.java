@@ -43,12 +43,12 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
     @Query("""
     SELECT new com.fpl.datn.dto.response.Product.ProductSaleResponse(
-        p.id, p.name, MIN(pv.price), MIN(pv.salePrice)
+        p.id, p.name, p.slug, p.thumbnail, MIN(pv.price), MIN(pv.salePrice)
     )
     FROM Product p
     JOIN p.productVariants pv
     WHERE pv.salePrice IS NOT NULL AND pv.salePrice < pv.price
-    GROUP BY p.id, p.name
+    GROUP BY p.id, p.name, p.slug, p.thumbnail
 """)
     Page<ProductSaleResponse> findSaleProductsSimple(Pageable pageable);
 

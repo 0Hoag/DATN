@@ -38,7 +38,7 @@ public class ProductService {
     ProductMapper mapper;
     CategoryRepository cateRepo;
     ProductVariantService productVariantService;
-    ProductImageRepository imageRepo;
+    ProductReviewRepository reviewRepo;
 
     // thêm sản phẩ
     @Transactional
@@ -171,8 +171,11 @@ public class ProductService {
     public List<ProductSaleResponse> getSaleProductsSimple(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<ProductSaleResponse> pageResult = repo.findSaleProductsSimple(pageable);
-        return pageResult.getContent(); // Trả về List thay vì PageResponse
+        List<ProductSaleResponse> list = pageResult.getContent();
+        for (ProductSaleResponse item : list) {
+            Double avgRating = reviewRepo.getAverageRatingByProductId(item.getProductId());
+            item.setAverageRating(avgRating != null ? avgRating : 0.0);
+        }
+        return list;
     }
-
-
 }
