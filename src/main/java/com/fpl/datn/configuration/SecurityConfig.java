@@ -40,6 +40,7 @@ public class SecurityConfig {
         "/order/registration",
         "/pdf/**",
         "/email/**",
+        "/cart/**",
         "/order/registration"
     };
 

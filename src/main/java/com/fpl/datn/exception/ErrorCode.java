@@ -114,6 +114,7 @@ public enum ErrorCode {
 
     // Cart (1600–1699)
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
+    CART_NOT_EXISTED(2600, "Cart not exists", HttpStatus.BAD_REQUEST),
 
     // File (1700–1799)
     FILE_UPLOAD_FAILED(1701, "Failed to upload file", HttpStatus.BAD_REQUEST),
