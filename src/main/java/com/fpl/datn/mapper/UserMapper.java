@@ -20,7 +20,13 @@ import com.fpl.datn.models.User;
 
 @Mapper(
         componentModel = "spring",
-        uses = {OrderMapper.class, OrderReturnMapper.class, AddressMapper.class, UserVoucherMapper.class})
+        uses = {
+            OrderMapper.class,
+            OrderReturnMapper.class,
+            AddressMapper.class,
+            UserVoucherMapper.class,
+            CartMapper.class
+        })
 public interface UserMapper {
     User toUserRegister(RegisterRequest request);
 
