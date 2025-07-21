@@ -38,9 +38,6 @@ public class User {
     @Pattern(regexp = "^\\d{10,11}$", message = "Invalid phone number")
     private String phone;
 
-    @Column(name = "is_enable")
-    private Boolean isEnable;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

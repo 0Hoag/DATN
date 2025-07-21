@@ -1,7 +1,5 @@
 package com.fpl.datn.dto.request;
 
-import java.util.Set;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,9 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UpdateUserRequest {
-    String fullName;
-    String password;
-    Boolean isEnable;
-    Set<String> roles;
+public class DeleteRequest {
+    String reason;
 }
