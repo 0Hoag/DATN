@@ -49,8 +49,9 @@ public class EmailService {
         int otp = generateOtp();
         MailRequest mailRequest = MailRequest.builder()
                 .to(email)
-                .text("This is OTP for you Forgot Password requesst: " + otp)
-                .subject("OTP forgot password request")
+                .subject("Mã OTP khôi phục mật khẩu")
+                .text("Đây là mã OTP để bạn khôi phục mật khẩu: " + otp + "\n" +
+                        "Vui lòng không chia sẻ mã này với bất kỳ ai. Mã có hiệu lực trong vài phút.")
                 .build();
 
         ForgotPassword forgotPassword = ForgotPassword.builder()

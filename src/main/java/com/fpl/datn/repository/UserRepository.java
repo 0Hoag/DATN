@@ -21,11 +21,15 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     Optional<User> findByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
-    Page<User> findAllActive(Pageable pageable);
+    @Query("SELECT u FROM User u WHERE " +
+            "CASE WHEN :active = true THEN u.deletedAt IS NULL " +
+            "ELSE u.deletedAt IS NOT NULL END")
+    Page<User> findAll(Pageable pageable, @Param("active") boolean active);
 
-    @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL")
-    List<User> findAllActive();
+    @Query("SELECT u FROM User u WHERE " +
+            "CASE WHEN :active = true THEN u.deletedAt IS NULL " +
+            "ELSE u.deletedAt IS NOT NULL END")
+    List<User> findAll(@Param("active") boolean active);
 
     @Query("SELECT u FROM User u WHERE u.id = :id AND u.deletedAt IS NULL")
     Optional<User> findByIdAndNotDeleted(@Param("id") Integer id);
