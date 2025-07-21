@@ -23,6 +23,8 @@ public class UpdateProductVariantRequest {
     @NotNull(message = "PRODUCT_VARIANT_PRICE_REQUIRED")
     private BigDecimal price;
 
+    private BigDecimal salePrice;
+
     @NotNull(message = "PRODUCT_VARIANT_QUANTITY_REQUIRED")
     private Integer quantity;
 

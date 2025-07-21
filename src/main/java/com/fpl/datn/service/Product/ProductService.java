@@ -16,6 +16,7 @@ import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.ProductVariantRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
+import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductMapper;
@@ -36,7 +37,7 @@ public class ProductService {
     ProductMapper mapper;
     CategoryRepository cateRepo;
     ProductVariantService productVariantService;
-    ProductImageRepository imageRepo;
+    ProductReviewRepository reviewRepo;
 
     // thêm sản phẩ
     @Transactional
@@ -133,7 +134,7 @@ public class ProductService {
 
     public PageResponse<ProductResponse> search(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Product> productPage = repo.searchByNameOrSku(keyword, pageable);
+        Page<Product> productPage = repo.searchByNameOrSlug(keyword, pageable);
         List<ProductResponse> data =
                 productPage.getContent().stream().map(mapper::toProductResponse).collect(Collectors.toList());
 
@@ -144,5 +145,16 @@ public class ProductService {
                 .totalElements(productPage.getTotalElements())
                 .data(data)
                 .build();
+    }
+
+    public List<ProductSaleResponse> getSaleProductsSimple(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductSaleResponse> pageResult = repo.findSaleProductsSimple(pageable);
+        List<ProductSaleResponse> list = pageResult.getContent();
+        for (ProductSaleResponse item : list) {
+            Double avgRating = reviewRepo.getAverageRatingByProductId(item.getProductId());
+            item.setAverageRating(avgRating != null ? avgRating : 0.0);
+        }
+        return list;
     }
 }

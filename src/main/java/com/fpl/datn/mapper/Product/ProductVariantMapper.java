@@ -23,9 +23,10 @@ public interface ProductVariantMapper {
     ProductVariant toEntity(ProductVariantRequest request);
 
     // Entity → Response
-    @Mapping(target = "productId", source = "product.id") // ✅ map lại productId
-    @Mapping(target = "attributeValues", source = "attributeValues") // <- quan trọng
-    @Mapping(target = "images", source = "productImages") // ✅ map lại danh sách ảnh
+    @Mapping(target = "productId", source = "product.id")
+    @Mapping(target = "attributeValues", source = "attributeValues")
+    @Mapping(target = "images", source = "productImages")
+    @Mapping(target = "salePrice", source = "salePrice")
     ProductVariantResponse toResponse(ProductVariant productVariant);
 
     @Mapping(target = "id", ignore = true)

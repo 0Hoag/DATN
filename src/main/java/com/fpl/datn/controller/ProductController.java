@@ -11,6 +11,7 @@ import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
+import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import com.fpl.datn.service.Product.ProductService;
 
 import lombok.AccessLevel;
@@ -35,7 +36,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ApiResponse<ProductResponse> Detail(@PathVariable("id") int id) {
+    public ApiResponse<ProductResponse> detail(@PathVariable("id") int id) {
         return ApiResponse.<ProductResponse>builder()
                 .code(1000)
                 .result(productService.detail(id))
@@ -84,6 +85,15 @@ public class ProductController {
         return ApiResponse.<PageResponse<ProductResponse>>builder()
                 .code(1000)
                 .result(productService.search(keyword, page, size))
+                .build();
+    }
+
+    @GetMapping("/sale")
+    public ApiResponse<List<ProductSaleResponse>> getSaleProductsSimple(
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+        return ApiResponse.<List<ProductSaleResponse>>builder()
+                .code(1000)
+                .result(productService.getSaleProductsSimple(page, size))
                 .build();
     }
 }

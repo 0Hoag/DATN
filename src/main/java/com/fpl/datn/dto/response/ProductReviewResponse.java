@@ -24,6 +24,6 @@ public class ProductReviewResponse {
 
     // product
     int productId;
-    String producName;
+    String productName;
     String thumbnail;
 }

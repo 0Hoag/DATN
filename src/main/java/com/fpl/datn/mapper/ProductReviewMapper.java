@@ -10,7 +10,7 @@ import com.fpl.datn.models.ProductReview;
 public interface ProductReviewMapper {
     @Mapping(target = "email", source = "user.email")
     @Mapping(target = "fullName", source = "user.fullName")
-    @Mapping(target = "producName", source = "product.name")
+    @Mapping(target = "productName", source = "product.name")
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "thumbnail", source = "product.thumbnail")
     ProductReviewResponse toProductReviewResponse(ProductReview productReview);

@@ -1,13 +1,16 @@
 package com.fpl.datn.service.Product;
 
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -205,5 +208,37 @@ public class ProductVariantService {
         }
 
         repo.delete(productVariant);
+    }
+
+    private BigDecimal getMinPrice(List<ProductVariant> variants) {
+        return variants.stream()
+                .map(ProductVariant::getPrice)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
+    private BigDecimal getMinSalePrice(List<ProductVariant> variants) {
+        return variants.stream()
+                .map(ProductVariant::getSalePrice)
+                .filter(Objects::nonNull)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
+    public PageResponse<ProductVariantResponse> search(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductVariant> variantPage = repo.searchVariants(keyword, pageable);
+
+        List<ProductVariantResponse> data = variantPage.getContent().stream()
+                .map(mapper::toResponse) // nếu dùng MapStruct hoặc mapper tự viết
+                .collect(Collectors.toList());
+
+        return PageResponse.<ProductVariantResponse>builder()
+                .currentPage(page)
+                .totalPages(variantPage.getTotalPages())
+                .pageSize(variantPage.getSize())
+                .totalElements(variantPage.getTotalElements())
+                .data(data)
+                .build();
     }
 }
