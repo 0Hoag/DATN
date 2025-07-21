@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,10 +36,21 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserService {
+    JavaMailSender javaMailSender;
     UserRepository userRepositories;
     UserMapper userMapper;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+
+    public void sendSimpleMessage(MailRequest request) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(request.getTo());
+        message.setFrom("phonezone.shop11@gmail.com");
+        message.setSubject(request.getSubject());
+        message.setText(request.getText());
+
+        javaMailSender.send(message);
+    }
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public Boolean Create(UserRequest request) {
@@ -54,7 +65,6 @@ public class UserService {
 
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setIsEnable(true);
         user.setRoles(roles);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -69,22 +79,6 @@ public class UserService {
                 .findByIdAndNotDeleted(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        if (request.getEmail().equals(user.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_UNCHANGED);
-        }
-
-        if (userRepositories.existsByEmail(request.getEmail())) {
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
-        }
-
-        if (request.getPhone().equals(user.getPhone())) {
-            throw new AppException(ErrorCode.PHONE_UNCHANGED);
-        }
-
-        if (userRepositories.existsByPhone(request.getPhone())) {
-            throw new AppException(ErrorCode.PHONE_EXISTED);
-        }
-
         userMapper.updateUser(user, request);
         return userMapper.toUserResponse(userRepositories.save(user));
     }
@@ -97,29 +91,51 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
-    public void Delete(int id) {
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public void DeleteSoftOne(int id, DeleteRequest request) {
         User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getDeletedAt() != null) {
             throw new AppException(ErrorCode.USER_ALREADY_DELETED);
         }
 
+        if (request.getReason() == "") {
+            throw new AppException(ErrorCode.REQUIRED_FIELD);
+        }
+
+        MailRequest mailRequest = MailRequest.builder()
+                .to(user.getEmail())
+                .subject("Thông báo xóa tài khoản")
+                .text("Xin chào " + user.getFullName() + ",\n\n"
+                        + "Tài khoản của bạn đã bị chặn bởi quản trị viên với lý do: "
+                        + request.getReason() + ".\n"
+                        + "Nếu bạn cho rằng đây là nhầm lẫn, vui lòng liên hệ bộ phận hỗ trợ.\n\n"
+                        + "Trân trọng.")
+                .build();
+
+        sendSimpleMessage(mailRequest);
+
         user.setDeletedAt(LocalDateTime.now());
         userRepositories.save(user);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
-    public List<UserResponse> List() {
-        return userRepositories.findAllActive().stream()
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public void DeleteOne(int id) {
+        userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        userRepositories.deleteById(id);
+    }
+
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public List<UserResponse> List(boolean active) {
+        return userRepositories.findAll(active).stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
-    public PageResponse<UserResponse> Get(int page, int size) {
+    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    public PageResponse<UserResponse> Get(int page, int size, boolean active) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        var pageData = userRepositories.findAllActive(pageable);
+        var pageData = userRepositories.findAll(pageable, active);
 
         var data =
                 pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
@@ -147,7 +163,6 @@ public class UserService {
 
         User user = userMapper.toUserRegister(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setIsEnable(true);
         user.setRoles(roles);
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
@@ -220,7 +235,7 @@ public class UserService {
         return true;
     }
 
-    public PageResponse<UserResponse> search(String keyword, String roleName, int page, int size) {
+    public PageResponse<UserResponse> search(String keyword, String roleName, boolean active, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<User> pageData;
 
@@ -234,7 +249,7 @@ public class UserService {
         } else if (hasRoleName) {
             pageData = userRepositories.findByRoleName(roleName.trim(), pageable);
         } else {
-            pageData = userRepositories.findAllActive(pageable);
+            pageData = userRepositories.findAll(pageable, active);
         }
 
         var data =
@@ -271,7 +286,7 @@ public class UserService {
         User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getDeletedAt() == null) {
-            throw new AppException(ErrorCode.USER_EXITED);
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
 
         user.setDeletedAt(null);

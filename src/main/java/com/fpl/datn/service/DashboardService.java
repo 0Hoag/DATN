@@ -1,5 +1,8 @@
 package com.fpl.datn.service;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.response.*;
@@ -18,19 +21,49 @@ public class DashboardService {
 
     DashboardRepository dashboardRepository;
 
-    public DashboardResponse getShow() {
-        int month = java.time.LocalDate.now().getMonthValue();
-        int year = java.time.LocalDate.now().getYear();
+    public long getTotalUsers() {
+        return dashboardRepository.countTotalUsers();
+    }
+
+    public long getTotalOrders() {
+        return dashboardRepository.countTotalOrders();
+    }
+
+    public BigDecimal getTotalRevenue() {
+        return dashboardRepository.sumTotalRevenue();
+    }
+
+    public long getTotalProductsSold(int year) {
+        return dashboardRepository.countTotalProductsSold(year);
+    }
+
+    public List<TopProductResponse> getTopProducts(int year) {
+        return dashboardRepository.findTop10ProductsSoldByYearDto(year);
+    }
+
+    public List<ChartPointResponse> getRevenueChart(int year) {
+        return dashboardRepository.getRevenueChart(year);
+    }
+
+    public List<ChartPointIntResponse> getOrderChart(int year) {
+        return dashboardRepository.getOrderChart(year);
+    }
+
+    public List<ChartPointIntResponse> getProductChart(int year) {
+        return dashboardRepository.getProductChart(year);
+    }
+
+    public DashboardResponse getDashboardData(int year) {
         return DashboardResponse.builder()
-                .totalCustomers(dashboardRepository.countTotalUsers())
-                .totalOrders(dashboardRepository.countTotalOrders())
-                .totalRevenue(dashboardRepository.sumTotalRevenue())
-                .totalProductsSold(dashboardRepository.countTotalProductsSold())
-                .topProducts(dashboardRepository.findTop10ProductsSoldByMonthYearDto(month, year))
+                .totalCustomers(getTotalUsers())
+                .totalOrders(getTotalOrders())
+                .totalRevenue(getTotalRevenue())
+                .totalProductsSold(getTotalProductsSold(year))
+                .topProducts(getTopProducts(year))
                 .chartData(ChartData.builder()
-                        .revenueChart(dashboardRepository.getRevenueChart())
-                        .orderChart(dashboardRepository.getOrderChart())
-                        .productChart(dashboardRepository.getProductChart())
+                        .revenueChart(getRevenueChart(year))
+                        .orderChart(getOrderChart(year))
+                        .productChart(getProductChart(year))
                         .build())
                 .build();
     }

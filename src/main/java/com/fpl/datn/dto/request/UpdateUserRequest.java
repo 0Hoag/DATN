@@ -12,9 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateUserRequest {
     String fullName;
-    String email;
     String password;
-    String phone;
     Boolean isEnable;
     Set<String> roles;
 }

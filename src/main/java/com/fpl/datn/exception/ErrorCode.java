@@ -11,10 +11,6 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
-    UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.INTERNAL_SERVER_ERROR),
-    UNKNOWN_ERROR(9000, "Unknown server error", HttpStatus.INTERNAL_SERVER_ERROR),
-    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
-    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allow", HttpStatus.BAD_REQUEST),
 
     // User (1000–1099)
     USER_ALREADY_EXISTS(1001, "User already exists", HttpStatus.BAD_REQUEST),
@@ -36,10 +32,10 @@ public enum ErrorCode {
     ERROR_CREATE_USER(1016, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1017, "Error update user", HttpStatus.BAD_REQUEST),
     OLD_PASSWORD_INCORRECT(1019, "OLD_PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
-    USER_EXITED(1002, "USER EXITED", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_DELETED(1020, "USER_ALREADY_DELETED", HttpStatus.BAD_REQUEST),
     NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD(
             1020, "NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_DELETED(1021, "User already deleted", HttpStatus.BAD_REQUEST),
+    REQUIRED_FIELD(1022, "Required field", HttpStatus.BAD_REQUEST),
 
     // Permission (1100–1199)
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),
@@ -89,7 +85,7 @@ public enum ErrorCode {
     ORDER_STATUS_CANNOT_BE_MODIFIED(1522, "Order status cannot be modified", HttpStatus.BAD_REQUEST),
     DUPLICATE_ATTRIBUTE_VALUE(1523, "Duplicate attribute value", HttpStatus.BAD_REQUEST),
     ATTRIBUTE_VALUE_ALREADY_EXISTS(1524, "Attribute Value EXISTED", HttpStatus.BAD_REQUEST),
-    PRODUCT_IMAGE_UPLOAD_ID_REQUIRED(1525, "Upload image ID must not be null", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_NOT_EXISTED(1525, "Product image not existed", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_ID_REQUIRED(1526, "Image ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_NAME_REQUIRED(1528, "Product name must not be blank", HttpStatus.BAD_REQUEST),
     PRODUCT_SLUG_REQUIRED(1529, "Product slug must not be blank", HttpStatus.BAD_REQUEST),
@@ -160,8 +156,15 @@ public enum ErrorCode {
     // Email(2400-2499)
     EMAIL_OR_PASSWORD_INCORRECT(1021, "Email or Password incorrect please try again", HttpStatus.BAD_REQUEST),
     INVALID_OTP(1022, "Invalid otp", HttpStatus.BAD_REQUEST),
+
     // Common (2500–2599)
-    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND);
+    RESOURCE_NOT_FOUND(2501, "Resource not found", HttpStatus.NOT_FOUND),
+
+    // System (7000+)
+    CIRCULAR_REFERENCE_NOT_ALLOWED(7777, "Circular reference not allowed", HttpStatus.BAD_REQUEST),
+    MISSING_INPUT(8888, "Missing input", HttpStatus.BAD_REQUEST),
+    UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.BAD_REQUEST),
+    UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
 
     int code;
     String message;

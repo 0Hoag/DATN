@@ -52,7 +52,7 @@ public class ProductImageService {
 
     public ProductImageResponse detail(Integer id) {
         ProductImage productImage =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_ID_REQUIRED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_NOT_EXISTED));
         return mapper.toResponse(productImage);
     }
 
@@ -78,7 +78,7 @@ public class ProductImageService {
 
     public ProductImageResponse update(Integer id, UpdateProductImageRequest request) {
         ProductImage productImage =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_UPLOAD_ID_REQUIRED));
+                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_NOT_EXISTED));
 
         mapper.update(productImage, request); // ✅ Ánh xạ các trường cơ bản
         productImage.setUpdatedAt(LocalDateTime.now());

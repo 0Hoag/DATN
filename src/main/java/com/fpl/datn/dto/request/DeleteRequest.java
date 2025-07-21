@@ -1,4 +1,4 @@
-package com.fpl.datn.dto.response;
+package com.fpl.datn.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,9 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ChartPointIntResponse {
-    String date;
-    String name;
-    long value;
-    Integer year;
+public class DeleteRequest {
+    String reason;
 }

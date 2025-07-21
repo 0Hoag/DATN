@@ -102,11 +102,6 @@ public class ApplicationInitConfig {
                         .description("Xem danh sách & chi tiết sản phẩm")
                         .build());
 
-                var view_dashboard = permissionRepository.save(Permission.builder()
-                        .name(PredefinedPermission.VIEW_DASHBOARD)
-                        .description("Xem thống kê && doanh thu")
-                        .build());
-
                 Set<Permission> guestPermissions = Set.of(view_product);
 
                 Set<Permission> CustomerPermissions =
@@ -122,7 +117,7 @@ public class ApplicationInitConfig {
                         manager_users,
                         manager_products,
                         manager_orders);
-                Set<Permission> AdminPermissions = Set.of(assign_role, system_settings, system_backup, view_dashboard);
+                Set<Permission> AdminPermissions = Set.of(assign_role, system_settings, system_backup);
 
                 roleRepository.save(Role.builder()
                         .name(PredefinedRole.ROLE_GUEST)
