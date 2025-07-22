@@ -159,6 +159,7 @@ public class CartService {
 
         var sessionCartOpt = repository.findBySessionId(sessionId);
         if (sessionCartOpt.isEmpty()) return;
+
         Cart sessionCart = sessionCartOpt.get();
         var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         Cart userCart = repository.findByUserId(userId).orElseGet(() -> {
@@ -167,23 +168,32 @@ public class CartService {
         });
 
         for (CartItem sessionItem : sessionCart.getCartItems()) {
-            var existingItemOpt = cartItemRepository.findByCartIdAndProductVariantId(
-                    userCart.getId(), sessionItem.getProductVariant().getId());
-            if (existingItemOpt.isPresent()) {
-                CartItem existingItem = existingItemOpt.get();
-                existingItem.setQuantity(existingItem.getQuantity() + sessionItem.getQuantity());
-                cartItemRepository.save(existingItem);
-            } else {
-                // Tạo mới CartItem cho user
-                CartItem newItem = new CartItem();
-                newItem.setCart(userCart);
-                newItem.setProductVariant(sessionItem.getProductVariant());
-                newItem.setQuantity(sessionItem.getQuantity());
-                cartItemRepository.save(newItem);
-            }
+            mergeItem(sessionItem, userCart);
         }
         cartItemRepository.deleteAll(sessionCart.getCartItems());
         repository.delete(sessionCart);
+    }
+
+    private void mergeItem(CartItem sessionItem, Cart userCart) {
+        var existingItemOpt = cartItemRepository.findByCartIdAndProductVariantId(
+                userCart.getId(), sessionItem.getProductVariant().getId());
+        if (existingItemOpt.isPresent()) {
+            CartItem existingItem = existingItemOpt.get();
+
+            int stockQuantity = sessionItem.getProductVariant().getSold();
+            int requestedQuantity = existingItem.getQuantity() + sessionItem.getQuantity();
+            if (requestedQuantity > stockQuantity) {
+                existingItem.setQuantity(stockQuantity);
+            } else {
+                existingItem.setQuantity(requestedQuantity);
+            }
+        } else {
+            CartItem newItem = new CartItem();
+            newItem.setCart(userCart);
+            newItem.setProductVariant(sessionItem.getProductVariant());
+            newItem.setQuantity(sessionItem.getQuantity());
+            cartItemRepository.save(newItem);
+        }
     }
 
     @Transactional
