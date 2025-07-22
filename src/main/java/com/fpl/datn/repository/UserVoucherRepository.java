@@ -15,13 +15,13 @@ import com.fpl.datn.models.ZUserVoucher;
 public interface UserVoucherRepository extends JpaRepository<ZUserVoucher, Integer> {
 
     // ===== EXISTING METHODS =====
-
-    // ===== EXISTING METHODS =====
     Page<ZUserVoucher> findByUser_Id(int userId, Pageable pageable);
 
     boolean existsByUser_IdAndVoucher_Code(Integer userId, String code);
 
     boolean existsByVoucherId(Integer voucherId);
+
+    // ===== NEW METHODS FOR USAGE TRACKING =====
 
     // Đếm số record của user với voucher ID
     @Query("SELECT COUNT(uv) FROM ZUserVoucher uv WHERE uv.user.id = :userId AND uv.voucher.id = :voucherId")

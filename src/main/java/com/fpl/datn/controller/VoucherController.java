@@ -70,7 +70,7 @@ public class VoucherController {
     }
 
     @GetMapping("/search")
-    ApiResponse<PageResponse<VoucherResponse>> searchVoucher(
+    public ApiResponse<PageResponse<VoucherResponse>> searchVoucher(
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,

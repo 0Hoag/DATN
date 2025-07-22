@@ -8,10 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Getter
-@RequiredArgsConstructor
+@RequiredArgsConstructor // Lombok sẽ tự động tạo constructor cho các trường final
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum ErrorCode {
-
     // User (1000–1099)
     USER_ALREADY_EXISTS(1001, "User already exists", HttpStatus.BAD_REQUEST),
     USER_NOT_FOUND(1002, "User not found", HttpStatus.BAD_REQUEST),
@@ -28,7 +27,7 @@ public enum ErrorCode {
     EMAIL_UNCHANGED(1013, "Email is the same as the current one", HttpStatus.BAD_REQUEST),
     PHONE_UNCHANGED(1014, "Phone is the same as the current one", HttpStatus.BAD_REQUEST),
     EMAIL_INCORRECT(1015, "Email incorrect", HttpStatus.BAD_REQUEST),
-    PASSWORD_INCORRECT(1015, "Password is incorrect", HttpStatus.BAD_REQUEST),
+    PASSWORD_INCORRECT(1015, "Password is incorrect", HttpStatus.BAD_REQUEST), // LƯU Ý: TRÙNG MÃ VỚI EMAIL_INCORRECT
     ERROR_CREATE_USER(1016, "Error create user", HttpStatus.BAD_REQUEST),
     ERROR_UPDATE_USER(1017, "Error update user", HttpStatus.BAD_REQUEST),
     OLD_PASSWORD_INCORRECT(1019, "OLD_PASSWORD_INCORRECT", HttpStatus.BAD_REQUEST),
@@ -79,7 +78,6 @@ public enum ErrorCode {
     PRODUCT_NOT_EXISTED(1516, "Product creation failed", HttpStatus.CONFLICT),
     PRODUCT_UPDATE_NOT_EXISTED(1517, "Product update failed", HttpStatus.CONFLICT),
     PRODUCT_DELETE_NOT_EXISTED(1518, "Product delete failed", HttpStatus.CONFLICT),
-    PRODUCT_DELETE_EXISTED(1995, "Product had uses", HttpStatus.BAD_REQUEST),
     PRODUCT_REVIEW_NOT_FOUND(1519, "Product review not found", HttpStatus.BAD_REQUEST),
     VARIANT_VALUE_NOT_FOUND(1520, "Variant attribute not found", HttpStatus.CONFLICT),
     VARIANT_NOT_EXISTED(1521, "Variant not found", HttpStatus.BAD_REQUEST),
@@ -112,6 +110,16 @@ public enum ErrorCode {
     PRODUCT_IMAGE_VARIANT_ID_REQUIRED(1075, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_URL_REQUIRED(1076, "Image URL must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_ID_REQUIRED(1540, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
+
+    // THÊM CÁC ERROR CODE MỚI CHO PRODUCT REVIEW (ĐÃ CẬP NHẬT MÃ SỐ VÀ THÔNG ĐIỆP)
+    PRODUCT_INACTIVE(1527, "Product is not active", HttpStatus.BAD_REQUEST),
+    USER_NOT_PURCHASED_PRODUCT(1528, "User has not purchased this product", HttpStatus.FORBIDDEN),
+    REVIEW_ALREADY_EXISTS(1529, "User has already reviewed this product", HttpStatus.CONFLICT),
+    CANNOT_DELETE_REVIEW_WITH_REPLY(1530, "Không thể xóa bình luận đã có phản hồi", HttpStatus.BAD_REQUEST),
+    RATING_INVALID(1531, "Đánh giá phải từ 1 đến 5 sao", HttpStatus.BAD_REQUEST),
+    CONTENT_NOT_BLANK(1532, "Nội dung đánh giá không được để trống", HttpStatus.BAD_REQUEST),
+
+    PRODUCT_DELETE_EXISTED(1995, "Product had uses", HttpStatus.BAD_REQUEST),
 
     // Cart (1600–1699)
     CART_ITEM_ALREADY_EXISTS(1601, "Cart item already exists", HttpStatus.BAD_REQUEST),
@@ -170,7 +178,7 @@ public enum ErrorCode {
     UNCATEGORIZE_EXCEPTION(9999, "UNCATEGORIZE_EXCEPTION", HttpStatus.BAD_REQUEST),
     UNKNOWN_ERROR(9999, "Uncategorized exception", HttpStatus.INTERNAL_SERVER_ERROR);
 
-    int code;
-    String message;
-    HttpStatus httpStatus;
+    private final int code;
+    private final String message;
+    private final HttpStatus httpStatus; // ĐÃ SỬA: Dùng HttpStatus thay vì HttpStatusCode
 }
