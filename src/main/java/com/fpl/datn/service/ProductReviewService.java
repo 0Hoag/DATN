@@ -1,5 +1,6 @@
 package com.fpl.datn.service;
 
+import com.fpl.datn.mapper.UserMapper;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductReviewService {
     UserService userService;
+    UserMapper userMapper;
     ProductReviewRepository repository;
     ProductReviewMapper mapper;
 
@@ -46,7 +48,7 @@ public class ProductReviewService {
     }
 
     public void delete(int id) {
-        var user = userService.getMyInfo();
+        var user = userMapper.toUserResponse(userService.getMyInfo());
         var review = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
 
         if (!user.getId().equals(review.getUser().getId())

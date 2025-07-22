@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+import com.fpl.datn.models.User;
 import jakarta.validation.Valid;
 
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -68,6 +69,17 @@ public class UserController {
                 .build();
     }
 
+    // Get all user
+    @GetMapping("/getAll")
+    ApiResponse<PageResponse<UserResponse>> getAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .code(1000)
+                .result(userService.GetAll(page, size))
+                .build();
+    }
+
     @GetMapping("/{id}")
     ApiResponse<UserResponse> detail(@PathVariable("id") int id) {
         return ApiResponse.<UserResponse>builder()
@@ -85,8 +97,8 @@ public class UserController {
     }
 
     @GetMapping("/my-info")
-    ApiResponse<UserResponse> getMyInfo() {
-        return ApiResponse.<UserResponse>builder()
+    ApiResponse<User> getMyInfo() {
+        return ApiResponse.<User>builder()
                 .code(1000)
                 .result(userService.getMyInfo())
                 .build();

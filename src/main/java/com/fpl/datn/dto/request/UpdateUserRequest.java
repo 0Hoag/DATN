@@ -13,6 +13,5 @@ import lombok.experimental.FieldDefaults;
 public class UpdateUserRequest {
     String fullName;
     String password;
-    Boolean isEnable;
     Set<String> roles;
 }

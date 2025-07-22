@@ -36,8 +36,9 @@ public enum ErrorCode {
     USER_ALREADY_DELETED(1021, "User already deleted", HttpStatus.BAD_REQUEST),
     REQUIRED_FIELD(1022, "Required field", HttpStatus.BAD_REQUEST),
 
-    // Permission (1100–1199)
+    // Permission - Role (1100–1199)
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),
+    ROLE_NOT_FOUND(1102, "Role not found", HttpStatus.BAD_REQUEST),
 
     // Order (1200–1299)
     ORDER_NOT_FOUND(1201, "Order not found", HttpStatus.BAD_REQUEST),
