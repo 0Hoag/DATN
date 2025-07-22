@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,7 +56,9 @@ public class UserService {
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public Boolean Create(UserRequest request) {
-        HashSet<Role> roles = roleRepository.findAllByNameIn(request.getRoles());
+        Set<Role> roles = roleRepository
+                .findAllByNameIn(request.getRoles())
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
 
         if (userRepositories.existsByEmail(request.getEmail())) {
             throw new AppException(ErrorCode.EMAIL_EXISTED);
@@ -80,6 +84,19 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         userMapper.updateUser(user, request);
+
+        if (request.getRoles() != null && !request.getRoles().isEmpty()) {
+            Set<Role> roles = roleRepository
+                    .findAllByNameIn(request.getRoles())
+                    .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+            user.setRoles(roles);
+        }
+
+        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
+        user.setUpdatedAt(LocalDateTime.now());
+
         return userMapper.toUserResponse(userRepositories.save(user));
     }
 
@@ -91,7 +108,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public void DeleteSoftOne(int id, DeleteRequest request) {
         User user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
@@ -119,23 +136,40 @@ public class UserService {
         userRepositories.save(user);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public void DeleteOne(int id) {
         userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userRepositories.deleteById(id);
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public List<UserResponse> List(boolean active) {
         return userRepositories.findAll(active).stream()
                 .map(userMapper::toUserResponse)
                 .collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAuthority('MANAGE_USERS')")
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
     public PageResponse<UserResponse> Get(int page, int size, boolean active) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = userRepositories.findAll(pageable, active);
+
+        var data =
+                pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
+
+        return PageResponse.<UserResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('MANAGE_USERS')")
+    public PageResponse<UserResponse> GetAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        var pageData = userRepositories.findAll(pageable);
 
         var data =
                 pageData.getContent().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
@@ -171,7 +205,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public UserResponse getMyInfo() {
+    public User getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String userId = context.getAuthentication().getName();
 
@@ -179,7 +213,7 @@ public class UserService {
                 .findByIdAndNotDeleted(Integer.valueOf(userId))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        return userMapper.toUserResponse(user);
+        return user;
     }
 
     // Api client
@@ -188,14 +222,6 @@ public class UserService {
             User user = userRepositories
                     .findByIdAndNotDeleted(id)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-            if (request.getPhone().equals(user.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_UNCHANGED);
-            }
-
-            if (userRepositories.existsByPhone(request.getPhone())) {
-                throw new AppException(ErrorCode.PHONE_EXISTED);
-            }
 
             userMapper.updateProfile(user, request);
             return userMapper.toUserResponse(userRepositories.save(user));
@@ -209,7 +235,7 @@ public class UserService {
         if (request.getEmail().isEmpty()) {
             var user = getMyInfo();
 
-            if (user.getPassword().equals(passwordEncoder.encode(request.getOldPassword()))) {
+            if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
                 throw new AppException(ErrorCode.OLD_PASSWORD_INCORRECT);
             }
 
@@ -217,7 +243,9 @@ public class UserService {
                 throw new AppException(ErrorCode.NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD);
             }
 
-            user.setPassword(passwordEncoder.encode(request.getConfirmNewPassword()));
+            user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+            user.setUpdatedAt(LocalDateTime.now());
+            userRepositories.save(user);
 
             return true;
         }
@@ -226,11 +254,13 @@ public class UserService {
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_INCORRECT));
 
-        if (request.getNewPassword().equals(request.getConfirmNewPassword())) {
+        if (!request.getNewPassword().equals(request.getConfirmNewPassword())) {
             throw new AppException(ErrorCode.NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD);
         }
 
-        user.setPassword(request.getConfirmNewPassword());
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepositories.save(user);
 
         return true;
     }

@@ -79,6 +79,7 @@ public class ProductImageService {
     public ProductImageResponse update(Integer id, UpdateProductImageRequest request) {
         ProductImage productImage =
                 repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_NOT_EXISTED));
+        repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_NOT_EXISTED));
 
         mapper.update(productImage, request); // ✅ Ánh xạ các trường cơ bản
         productImage.setUpdatedAt(LocalDateTime.now());

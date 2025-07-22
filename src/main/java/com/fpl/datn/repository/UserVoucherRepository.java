@@ -15,6 +15,8 @@ import com.fpl.datn.models.ZUserVoucher;
 public interface UserVoucherRepository extends JpaRepository<ZUserVoucher, Integer> {
 
     // ===== EXISTING METHODS =====
+
+    // ===== EXISTING METHODS =====
     Page<ZUserVoucher> findByUser_Id(int userId, Pageable pageable);
 
     boolean existsByUser_IdAndVoucher_Code(Integer userId, String code);

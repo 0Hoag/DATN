@@ -11,6 +11,7 @@ import com.fpl.datn.dto.response.ProductReviewResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.ProductReviewMapper;
+import com.fpl.datn.mapper.UserMapper;
 import com.fpl.datn.repository.ProductReviewRepository;
 
 import lombok.AccessLevel;
@@ -22,6 +23,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductReviewService {
     UserService userService;
+    UserMapper userMapper;
     ProductReviewRepository repository;
     ProductReviewMapper mapper;
 
@@ -46,7 +48,7 @@ public class ProductReviewService {
     }
 
     public void delete(int id) {
-        var user = userService.getMyInfo();
+        var user = userMapper.toUserResponse(userService.getMyInfo());
         var review = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
 
         if (!user.getId().equals(review.getUser().getId())

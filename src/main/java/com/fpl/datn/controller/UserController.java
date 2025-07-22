@@ -13,6 +13,7 @@ import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.*;
 import com.fpl.datn.dto.response.UserResponse;
+import com.fpl.datn.models.User;
 import com.fpl.datn.service.UserService;
 
 import lombok.AccessLevel;
@@ -67,6 +68,17 @@ public class UserController {
                 .build();
     }
 
+    // Get all user
+    @GetMapping("/getAll")
+    ApiResponse<PageResponse<UserResponse>> getAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .code(1000)
+                .result(userService.GetAll(page, size))
+                .build();
+    }
+
     @GetMapping("/{id}")
     ApiResponse<UserResponse> detail(@PathVariable("id") int id) {
         return ApiResponse.<UserResponse>builder()
@@ -84,8 +96,8 @@ public class UserController {
     }
 
     @GetMapping("/my-info")
-    ApiResponse<UserResponse> getMyInfo() {
-        return ApiResponse.<UserResponse>builder()
+    ApiResponse<User> getMyInfo() {
+        return ApiResponse.<User>builder()
                 .code(1000)
                 .result(userService.getMyInfo())
                 .build();

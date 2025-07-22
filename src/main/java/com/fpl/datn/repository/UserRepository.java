@@ -25,6 +25,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             + "ELSE u.deletedAt IS NOT NULL END")
     Page<User> findAll(Pageable pageable, @Param("active") boolean active);
 
+    @Query("SELECT u FROM User u")
+    Page<User> findAll(Pageable pageable);
+
     @Query("SELECT u FROM User u WHERE " + "CASE WHEN :active = true THEN u.deletedAt IS NULL "
             + "ELSE u.deletedAt IS NOT NULL END")
     List<User> findAll(@Param("active") boolean active);
