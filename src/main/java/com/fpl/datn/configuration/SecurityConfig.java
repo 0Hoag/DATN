@@ -54,7 +54,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, publicEnpoint)
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, "/payment/**", "/pdf/**", "/email/**")
+                .requestMatchers(HttpMethod.GET, "/payment/**", "/pdf/**", "/cart/**", "/email/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.PUT, "/cart/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/cart/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated());

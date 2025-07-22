@@ -3,6 +3,7 @@ package com.fpl.datn.controller;
 import java.time.LocalDate;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.OrderFromCartRequest;
 import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
@@ -87,6 +89,15 @@ public class OrderController {
             throws Exception {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.create(request, httpRequest))
+                .build();
+    }
+
+    @PostMapping("/cart")
+    ApiResponse<OrderResponse> createOrderFromCart(
+            @RequestBody @Valid OrderFromCartRequest request, HttpServletRequest httpRequest, HttpSession session)
+            throws Exception {
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.createOrderFromCart(request, httpRequest, session))
                 .build();
     }
 

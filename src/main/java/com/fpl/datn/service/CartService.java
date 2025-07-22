@@ -1,13 +1,21 @@
 package com.fpl.datn.service;
 
 import java.time.LocalDate;
+import java.util.List;
+
+import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import com.fpl.datn.dto.request.AddCartRequest;
+import com.fpl.datn.dto.request.ChangeCartItemRequest;
+import com.fpl.datn.dto.response.CartItemResponse;
 import com.fpl.datn.dto.response.CartResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
+import com.fpl.datn.mapper.CartItemMapper;
 import com.fpl.datn.mapper.CartMapper;
 import com.fpl.datn.models.Cart;
 import com.fpl.datn.models.CartItem;
@@ -31,48 +39,40 @@ public class CartService {
     ProductVariantRepository productVariantRepository;
     UserRepository userRepository;
     CartMapper mapper;
+    CartItemMapper cartItemMapper;
 
     private Cart createCartForUser(Integer userId) {
         var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        Cart cart = new Cart();
-        cart.setUser(user);
-        cart.setCreatedAt(LocalDate.now());
+        var cart = Cart.builder().user(user).createdAt(LocalDate.now()).build();
         return repository.save(cart);
     }
 
     private Cart createCartForSession(String sessionId) {
-        Cart cart = new Cart();
-        cart.setSessionId(sessionId);
-        cart.setCreatedAt(LocalDate.now());
+        var cart =
+                Cart.builder().sessionId(sessionId).createdAt(LocalDate.now()).build();
         return repository.save(cart);
     }
 
-    private Integer getCurrentUserId() {
-        var auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth == null || !auth.isAuthenticated()) {
-            return null;
-        }
-        return Integer.valueOf(auth.getName());
+    public Cart getCartByUser(Integer userId) {
+        return repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
     }
 
-    public CartResponse getOrCreateCart(String sessionId) {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        // Kiểm tra nếu đã đăng nhập (không phải anonymousUser)
-        if (authentication != null
-                && authentication.isAuthenticated()
-                && !("anonymousUser".equals(authentication.getName()))) {
-            String userIdStr = authentication.getName();
-            Integer userId = Integer.valueOf(userIdStr);
-
-            return mapper.toCartResponse(repository.findByUserId(userId).orElseGet(() -> createCartForUser(userId)));
-        }
-
-        // Nếu chưa đăng nhập, dùng sessionId
-        return mapper.toCartResponse(
-                repository.findBySessionId(sessionId).orElseGet(() -> createCartForSession(sessionId)));
+    public Cart getCartBySession(String sessionId) {
+        return repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
     }
 
-    public void addToCart(Integer cartId, Integer variantId, Integer quantity) {
+    public CartResponse getOrCreateCart(HttpSession session) {
+        String sessionId = session.getId();
+        Integer userId = extractUserIdFromSecurityContext();
+        return userId != null
+                ? mapper.toCartResponse(repository.findByUserId(userId).orElseGet(() -> createCartForUser(userId)))
+                : mapper.toCartResponse(
+                        repository.findBySessionId(sessionId).orElseGet(() -> createCartForSession(sessionId)));
+    }
+
+    public void addToCart(AddCartRequest request) {
+        Integer cartId = request.getCartId();
+        Integer variantId = request.getVariantId();
         var cart = repository.findById(cartId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
         var variant = productVariantRepository
                 .findById(variantId)
@@ -88,7 +88,108 @@ public class CartService {
                             .build();
                     return newItem;
                 });
-        cartItems.setQuantity(cartItems.getQuantity() + quantity);
+        cartItems.setQuantity(cartItems.getQuantity() + request.getQuantity());
         cartItemRepository.save(cartItems);
+    }
+
+    public List<CartItemResponse> getCart(HttpSession session) {
+        String sessionId = session.getId();
+        Integer userId = extractUserIdFromSecurityContext();
+        Cart cart = (userId == null)
+                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
+                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+
+        return cart.getCartItems().stream()
+                .map(cartItem -> cartItemMapper.toCartItemResponse(cartItem))
+                .toList();
+    }
+
+    public Integer extractUserIdFromSecurityContext() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        String name = authentication.getName();
+        if ("anonymousUser".equals(name)) {
+            return null;
+        }
+        return Integer.valueOf(name);
+    }
+
+    @Transactional
+    public CartItemResponse changeCartItemQuantity(HttpSession session, ChangeCartItemRequest request) {
+        String sessionId = session.getId();
+        Integer userId = extractUserIdFromSecurityContext();
+        Integer variantId = request.getVariantId();
+        Integer quantity = request.getQuantity();
+        Cart cart = (userId == null)
+                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
+                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+        CartItem cartItem = cartItemRepository
+                .findByCartIdAndProductVariantId(cart.getId(), variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
+        if (quantity <= 0) {
+            cartItemRepository.delete(cartItem); // Xoá nếu = 0
+        } else {
+            cartItem.setQuantity(quantity); // Gán trực tiếp số lượng mới
+            cartItemRepository.save(cartItem);
+        }
+        return cartItemMapper.toCartItemResponse(cartItem);
+    }
+
+    @Transactional
+    public void delete(HttpSession session, Integer variantId) {
+        String sessionId = session.getId();
+        Integer userId = extractUserIdFromSecurityContext();
+        Cart cart = (userId == null)
+                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
+                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+        CartItem cartItem = cartItemRepository
+                .findByCartIdAndProductVariantId(cart.getId(), variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
+        cartItemRepository.delete(cartItem);
+    }
+
+    @Transactional
+    public void mergeSessionCartToUser(HttpSession session) {
+        String sessionId = session.getId();
+        Integer userId = extractUserIdFromSecurityContext();
+        if (userId == null) return;
+
+        var sessionCartOpt = repository.findBySessionId(sessionId);
+        if (sessionCartOpt.isEmpty()) return;
+        Cart sessionCart = sessionCartOpt.get();
+        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        Cart userCart = repository.findByUserId(userId).orElseGet(() -> {
+            var c = Cart.builder().createdAt(LocalDate.now()).user(user).build();
+            return repository.save(c);
+        });
+
+        for (CartItem sessionItem : sessionCart.getCartItems()) {
+            var existingItemOpt = cartItemRepository.findByCartIdAndProductVariantId(
+                    userCart.getId(), sessionItem.getProductVariant().getId());
+            if (existingItemOpt.isPresent()) {
+                CartItem existingItem = existingItemOpt.get();
+                existingItem.setQuantity(existingItem.getQuantity() + sessionItem.getQuantity());
+                cartItemRepository.save(existingItem);
+            } else {
+                // Tạo mới CartItem cho user
+                CartItem newItem = new CartItem();
+                newItem.setCart(userCart);
+                newItem.setProductVariant(sessionItem.getProductVariant());
+                newItem.setQuantity(sessionItem.getQuantity());
+                cartItemRepository.save(newItem);
+            }
+        }
+        cartItemRepository.deleteAll(sessionCart.getCartItems());
+        repository.delete(sessionCart);
+    }
+
+    @Transactional
+    public void clearCart(Cart cart) {
+        cartItemRepository.deleteAll(cart.getCartItems());
+        cart.getCartItems().clear();
+        repository.save(cart);
     }
 }
