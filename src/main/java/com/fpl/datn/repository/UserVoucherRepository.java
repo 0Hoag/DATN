@@ -52,5 +52,4 @@ public interface UserVoucherRepository extends JpaRepository<ZUserVoucher, Integ
 
     // Các phương thức khác của bạn (nếu có)
     List<ZUserVoucher> findByUserIdAndIsUsed(Integer userId, Boolean isUsed);
-
 }

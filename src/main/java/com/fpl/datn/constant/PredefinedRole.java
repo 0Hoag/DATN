@@ -10,5 +10,6 @@ public class PredefinedRole {
     public static final String ROLE_ADMIN =
             "ADMIN"; // `ASSIGN_ROLE`, `SYSTEM_SETTINGS`, `SYSTEM_BACKUP`, `VIEW_DASHBOARD`
     public static final String ROLE_USER = "USER";
+
     private PredefinedRole() {}
 }

@@ -1,10 +1,11 @@
 package com.fpl.datn.mapper;
 
-import com.fpl.datn.dto.response.ZUserVoucherResponse;
-import com.fpl.datn.models.ZUserVoucher;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
+
+import com.fpl.datn.dto.response.ZUserVoucherResponse;
+import com.fpl.datn.models.ZUserVoucher;
 
 @Mapper(componentModel = "spring")
 public interface UserVoucherMapper {

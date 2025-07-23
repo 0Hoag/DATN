@@ -33,6 +33,7 @@ public class Voucher {
 
     private Integer quantity;
     private String type;
+
     @Column(name = "usage_count")
     // để usage bị lỗi thg Lol Tiến
     private Integer usageCount;
