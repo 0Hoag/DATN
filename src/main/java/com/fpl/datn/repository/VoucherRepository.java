@@ -13,7 +13,13 @@ import com.fpl.datn.models.Voucher;
 
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
-
+    // Phương thức mới cần thêm vào
+    Page<Voucher> findByIsActiveTrueAndStartAtBeforeAndEndAtAfterAndIdNotIn(
+            LocalDateTime startAt,
+            LocalDateTime endAt,
+            List<Integer> ids,
+            Pageable pageable
+    );
     // Tìm voucher theo code
     Optional<Voucher> findByCode(String code);
 

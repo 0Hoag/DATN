@@ -1,11 +1,12 @@
 package com.fpl.datn.models;
 
 import jakarta.persistence.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "user_vouchers")
@@ -14,12 +15,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ZUserVoucher {
-    // tại sao lại để chữ Z hỏi Hoàng
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    // Relationships
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -27,4 +26,11 @@ public class ZUserVoucher {
     @ManyToOne
     @JoinColumn(name = "voucher_id")
     private Voucher voucher;
+
+    @Column(name = "is_used", nullable = false)
+    private Boolean isUsed;
+
+    // Thêm columnDefinition để đặt giá trị mặc định là CURRENT_TIMESTAMP
+    @Column(name = "assigned_at", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime assignedAt;
 }
