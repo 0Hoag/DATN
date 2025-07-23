@@ -1,8 +1,10 @@
 package com.fpl.datn.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.cloudinary.Api;
+import com.fpl.datn.dto.request.Product.ProductFilterRequest;
 import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import com.fpl.datn.models.Product;
 import jakarta.validation.Valid;
@@ -104,4 +106,16 @@ public class ProductController {
                 .result(productService.getSaleProductsSimple(page, size))
                 .build();
     }
+    @GetMapping("/filter")
+    public ResponseEntity<List<ProductResponse>> filterProducts(
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice
+    ) {
+        List<ProductResponse> result = productService.filterProducts(categoryId, minPrice, maxPrice);
+        return ResponseEntity.ok(result);
+    }
+
+
+
 }

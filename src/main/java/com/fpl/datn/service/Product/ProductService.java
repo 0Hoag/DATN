@@ -5,12 +5,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import com.fpl.datn.dto.request.Product.ProductFilterRequest;
 import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -160,4 +162,26 @@ public class ProductService {
         }
         return list;
     }
+    public List<ProductResponse> filterProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
+        return repo.findAll().stream()
+                .filter(product -> categoryId == null || product.getCategory().getId().equals(categoryId))
+                .filter(product -> {
+                    BigDecimal minVariantPrice = product.getProductVariants().stream()
+                            .map(ProductVariant::getSalePrice)
+                            .filter(Objects::nonNull)
+                            .min(BigDecimal::compareTo)
+                            .orElse(BigDecimal.ZERO);
+
+                    boolean withinMin = (minPrice == null || minVariantPrice.compareTo(minPrice) >= 0);
+                    boolean withinMax = (maxPrice == null || minVariantPrice.compareTo(maxPrice) <= 0);
+
+                    return withinMin && withinMax;
+                })
+                .map(mapper::toProductResponse)
+                .toList();
+    }
+
+
+
+
 }
