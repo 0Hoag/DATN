@@ -41,80 +41,39 @@ public class CartService {
     CartMapper mapper;
     CartItemMapper cartItemMapper;
 
-    private Cart createCartForUser(Integer userId) {
-        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        var cart = Cart.builder().user(user).createdAt(LocalDate.now()).build();
-        return repository.save(cart);
-    }
-
-    private Cart createCartForSession(String sessionId) {
-        var cart =
-                Cart.builder().sessionId(sessionId).createdAt(LocalDate.now()).build();
-        return repository.save(cart);
-    }
-
-    public Cart getCartByUser(Integer userId) {
-        return repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
-    }
-
-    public Cart getCartBySession(String sessionId) {
-        return repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
-    }
-
-    public CartResponse getOrCreateCart(HttpSession session) {
-        String sessionId = session.getId();
-        Integer userId = extractUserIdFromSecurityContext();
-        return userId != null
-                ? mapper.toCartResponse(repository.findByUserId(userId).orElseGet(() -> createCartForUser(userId)))
-                : mapper.toCartResponse(
-                        repository.findBySessionId(sessionId).orElseGet(() -> createCartForSession(sessionId)));
-    }
-
-    public void addToCart(AddCartRequest request) {
-        Integer cartId = request.getCartId();
+    public CartResponse addToCart(AddCartRequest request, HttpSession session) {
         Integer variantId = request.getVariantId();
-        var cart = repository.findById(cartId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+
+        Cart cart = getOrCreateCart(session);
+
         var variant = productVariantRepository
                 .findById(variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTED));
+
         CartItem cartItems = cartItemRepository
-                .findByCartIdAndProductVariantId(cartId, variantId)
-                .orElseGet(() -> {
-                    CartItem newItem = CartItem.builder()
-                            .cart(cart)
-                            .productVariant(variant)
-                            .quantity(0)
-                            .price(variant.getPrice())
-                            .build();
-                    return newItem;
-                });
+                .findByCartIdAndProductVariantId(cart.getId(), variantId)
+                .orElseGet(() -> CartItem.builder()
+                        .cart(cart)
+                        .productVariant(variant)
+                        .quantity(0)
+                        .price(variant.getPrice())
+                        .build());
+
         cartItems.setQuantity(cartItems.getQuantity() + request.getQuantity());
         cartItemRepository.save(cartItems);
+        return mapper.toCartResponse(cart);
     }
 
-    public List<CartItemResponse> getCart(HttpSession session) {
+    public List<CartItemResponse> getCartItems(HttpSession session) {
         String sessionId = session.getId();
         Integer userId = extractUserIdFromSecurityContext();
         Cart cart = (userId == null)
                 ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
                 : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
-
-        return cart.getCartItems().stream()
+        var cartItems = cartItemRepository.findByCartId(cart.getId());
+        return cartItems.stream()
                 .map(cartItem -> cartItemMapper.toCartItemResponse(cartItem))
                 .toList();
-    }
-
-    public Integer extractUserIdFromSecurityContext() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-
-        String name = authentication.getName();
-        if ("anonymousUser".equals(name)) {
-            return null;
-        }
-        return Integer.valueOf(name);
     }
 
     @Transactional
@@ -163,8 +122,8 @@ public class CartService {
         Cart sessionCart = sessionCartOpt.get();
         var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         Cart userCart = repository.findByUserId(userId).orElseGet(() -> {
-            var c = Cart.builder().createdAt(LocalDate.now()).user(user).build();
-            return repository.save(c);
+            var cart = Cart.builder().createdAt(LocalDate.now()).user(user).build();
+            return repository.save(cart);
         });
 
         for (CartItem sessionItem : sessionCart.getCartItems()) {
@@ -172,6 +131,41 @@ public class CartService {
         }
         cartItemRepository.deleteAll(sessionCart.getCartItems());
         repository.delete(sessionCart);
+    }
+
+    @Transactional
+    public void clearCart(Cart cart) {
+        cartItemRepository.deleteAll(cart.getCartItems());
+        cart.getCartItems().clear();
+        repository.save(cart);
+    }
+
+    public Cart getOrCreateCart(HttpSession session) {
+        String sessionId = session.getId();
+        Integer userId = extractUserIdFromSecurityContext();
+        return userId != null
+                ? repository.findByUserId(userId).orElseGet(() -> createCartForUser(userId))
+                : repository.findBySessionId(sessionId).orElseGet(() -> createCartForSession(sessionId));
+    }
+
+    public Cart getCartByUser(Integer userId) {
+        return repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+    }
+
+    public Cart getCartBySession(String sessionId) {
+        return repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+    }
+
+    private Cart createCartForUser(Integer userId) {
+        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var cart = Cart.builder().user(user).createdAt(LocalDate.now()).build();
+        return repository.save(cart);
+    }
+
+    private Cart createCartForSession(String sessionId) {
+        var cart =
+                Cart.builder().sessionId(sessionId).createdAt(LocalDate.now()).build();
+        return repository.save(cart);
     }
 
     private void mergeItem(CartItem sessionItem, Cart userCart) {
@@ -196,10 +190,16 @@ public class CartService {
         }
     }
 
-    @Transactional
-    public void clearCart(Cart cart) {
-        cartItemRepository.deleteAll(cart.getCartItems());
-        cart.getCartItems().clear();
-        repository.save(cart);
+    public Integer extractUserIdFromSecurityContext() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        String name = authentication.getName();
+        if ("anonymousUser".equals(name)) {
+            return null;
+        }
+        return Integer.valueOf(name);
     }
 }

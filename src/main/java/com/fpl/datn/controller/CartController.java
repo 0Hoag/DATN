@@ -31,19 +31,11 @@ import lombok.experimental.FieldDefaults;
 public class CartController {
     CartService cartService;
 
-    @PostMapping
-    ApiResponse<CartResponse> getOrCreateCart(HttpSession session) {
-
-        return ApiResponse.<CartResponse>builder()
-                .result(cartService.getOrCreateCart(session))
-                .build();
-    }
-
     @PostMapping("/add")
-    ApiResponse<CartResponse> addtoCart(@RequestBody AddCartRequest request) {
-        cartService.addToCart(request);
+    ApiResponse<CartResponse> addtoCart(@RequestBody AddCartRequest request, HttpSession session) {
+
         return ApiResponse.<CartResponse>builder()
-                .message("đã thêm sản phâm vào giỏ hàng")
+                .result(cartService.addToCart(request, session))
                 .build();
     }
 
@@ -58,7 +50,7 @@ public class CartController {
     @GetMapping
     ApiResponse<List<CartItemResponse>> getCart(HttpSession session) {
         return ApiResponse.<List<CartItemResponse>>builder()
-                .result(cartService.getCart(session))
+                .result(cartService.getCartItems(session))
                 .build();
     }
 
