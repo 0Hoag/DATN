@@ -32,6 +32,7 @@ public class Voucher {
     private BigDecimal minOrderValue;
 
     private Integer quantity;
+    private String type;
 
     @Column(name = "usage_count")
     // để usage bị lỗi thg Lol Tiến

@@ -1,6 +1,7 @@
 package com.fpl.datn.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,4 +39,17 @@ public interface UserVoucherRepository extends JpaRepository<ZUserVoucher, Integ
     // Lấy danh sách voucher của user
     @Query("SELECT uv FROM ZUserVoucher uv WHERE uv.user.id = :userId")
     List<ZUserVoucher> findAllByUserId(@Param("userId") Integer userId);
+
+    /// Phương thức để đếm số lượng voucher đã được sử dụng toàn cầu cho một voucher cụ thể
+    @Query("SELECT COUNT(zuv) FROM ZUserVoucher zuv WHERE zuv.voucher.id = :voucherId AND zuv.isUsed = true")
+    long countUsedVouchersByVoucherId(@Param("voucherId") Integer voucherId);
+
+    // ĐÃ SỬA: Lấy danh sách ID của các voucher mà người dùng đã sử dụng (isUsed = true)
+    @Query("SELECT zuv.voucher.id FROM ZUserVoucher zuv WHERE zuv.user.id = :userId AND zuv.isUsed = true")
+    List<Integer> findFullyUsedVoucherIdsByUserId(@Param("userId") Integer userId);
+    // Phương thức mới cần thêm vào
+    Optional<ZUserVoucher> findByUserIdAndVoucherId(Integer userId, Integer voucherId);
+
+    // Các phương thức khác của bạn (nếu có)
+    List<ZUserVoucher> findByUserIdAndIsUsed(Integer userId, Boolean isUsed);
 }
