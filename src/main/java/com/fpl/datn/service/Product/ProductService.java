@@ -1,5 +1,6 @@
 package com.fpl.datn.service.Product;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -156,5 +157,25 @@ public class ProductService {
             item.setAverageRating(avgRating != null ? avgRating : 0.0);
         }
         return list;
+    }
+
+    public List<ProductResponse> filterProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
+        return repo.findAll().stream()
+                .filter(product ->
+                        categoryId == null || product.getCategory().getId().equals(categoryId))
+                .filter(product -> {
+                    BigDecimal minVariantPrice = product.getProductVariants().stream()
+                            .map(ProductVariant::getSalePrice)
+                            .filter(Objects::nonNull)
+                            .min(BigDecimal::compareTo)
+                            .orElse(BigDecimal.ZERO);
+
+                    boolean withinMin = (minPrice == null || minVariantPrice.compareTo(minPrice) >= 0);
+                    boolean withinMax = (maxPrice == null || minVariantPrice.compareTo(maxPrice) <= 0);
+
+                    return withinMin && withinMax;
+                })
+                .map(mapper::toProductResponse)
+                .toList();
     }
 }

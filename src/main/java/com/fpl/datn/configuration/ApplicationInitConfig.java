@@ -103,7 +103,6 @@ public class ApplicationInitConfig {
                         .build());
 
                 Set<Permission> guestPermissions = Set.of(view_product);
-
                 Set<Permission> CustomerPermissions =
                         Set.of(view_product, track_order, create_review, buy_product, view_order);
                 Set<Permission> ShiftStaff =

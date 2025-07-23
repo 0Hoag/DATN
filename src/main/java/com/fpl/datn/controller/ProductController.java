@@ -1,9 +1,11 @@
 package com.fpl.datn.controller;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import jakarta.validation.Valid;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
@@ -95,5 +97,14 @@ public class ProductController {
                 .code(1000)
                 .result(productService.getSaleProductsSimple(page, size))
                 .build();
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<List<ProductResponse>> filterProducts(
+            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice) {
+        List<ProductResponse> result = productService.filterProducts(categoryId, minPrice, maxPrice);
+        return ResponseEntity.ok(result);
     }
 }
