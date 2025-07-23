@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.response.ChartPointIntResponse;
 import com.fpl.datn.dto.response.ChartPointResponse;
-import com.fpl.datn.dto.response.DashboardResponse;
 import com.fpl.datn.dto.response.TopProductResponse;
 import com.fpl.datn.service.DashboardService;
 
@@ -45,57 +44,48 @@ public class DashboardController {
 
     @GetMapping("/total-revenue")
     public ApiResponse<BigDecimal> getTotalRevenue() {
-        return ApiResponse.<BigDecimal>builder()
-                .code(1000)
-                .result(dashboardService.getTotalRevenue())
-                .build();
+        BigDecimal totalRevenue = dashboardService.getTotalRevenue();
+        System.out.println("Tổng doanh thu: " + totalRevenue);
+        return ApiResponse.<BigDecimal>builder().code(1000).result(totalRevenue).build();
     }
 
     @GetMapping("/total-products-sold")
-    public ApiResponse<Long> getTotalProductsSold(@RequestParam("year") int year) {
+    public ApiResponse<Long> getTotalProductsSold() {
         return ApiResponse.<Long>builder()
                 .code(1000)
-                .result(dashboardService.getTotalProductsSold(year))
+                .result(dashboardService.getTotalProductsSold())
                 .build();
     }
 
     @GetMapping("/top-products")
-    public ApiResponse<List<TopProductResponse>> getTopProducts(@RequestParam("year") int year) {
+    public ApiResponse<List<TopProductResponse>> getTopProducts(@RequestParam int year) {
         return ApiResponse.<List<TopProductResponse>>builder()
                 .code(1000)
                 .result(dashboardService.getTopProducts(year))
                 .build();
     }
 
-    @GetMapping("/chart/revenue")
-    public ApiResponse<List<ChartPointResponse>> getRevenueChart(@RequestParam("year") int year) {
+    @GetMapping("/monthly-revenue")
+    public ApiResponse<List<ChartPointResponse>> getMonthlyRevenue() {
         return ApiResponse.<List<ChartPointResponse>>builder()
                 .code(1000)
-                .result(dashboardService.getRevenueChart(year))
+                .result(dashboardService.getMonthlyRevenueThisYear())
                 .build();
     }
 
-    @GetMapping("/chart/orders")
-    public ApiResponse<List<ChartPointIntResponse>> getOrderChart(@RequestParam("year") int year) {
+    @GetMapping("/monthly-product-sold")
+    public ApiResponse<List<ChartPointIntResponse>> getMonthlyProductSold() {
         return ApiResponse.<List<ChartPointIntResponse>>builder()
                 .code(1000)
-                .result(dashboardService.getOrderChart(year))
+                .result(dashboardService.getMonthlyProductSold())
                 .build();
     }
 
-    @GetMapping("/chart/products")
-    public ApiResponse<List<ChartPointIntResponse>> getProductChart(@RequestParam("year") int year) {
+    @GetMapping("/monthly-order")
+    public ApiResponse<List<ChartPointIntResponse>> getMonthlyOrder() {
         return ApiResponse.<List<ChartPointIntResponse>>builder()
                 .code(1000)
-                .result(dashboardService.getProductChart(year))
-                .build();
-    }
-
-    @GetMapping
-    public ApiResponse<DashboardResponse> getDashboardData(@RequestParam("year") int year) {
-        return ApiResponse.<DashboardResponse>builder()
-                .code(1000)
-                .result(dashboardService.getDashboardData(year))
+                .result(dashboardService.getMonthlyOrderCount())
                 .build();
     }
 }

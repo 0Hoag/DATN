@@ -9,8 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChartPointIntResponse {
-    String date;
-    String name;
-    long value;
-    Integer year;
+    Integer month;
+    Long value;
 }

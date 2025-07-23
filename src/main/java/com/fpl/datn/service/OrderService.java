@@ -413,6 +413,7 @@ public class OrderService {
                         .productVariant(variant)
                         .quantity(response.getQuantity())
                         .price(variant.getPrice())
+                        .createdAt(LocalDateTime.now())
                         .build();
                 details.add(detail);
             }
