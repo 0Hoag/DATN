@@ -13,7 +13,6 @@ import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.*;
 import com.fpl.datn.dto.response.UserResponse;
-import com.fpl.datn.models.User;
 import com.fpl.datn.service.UserService;
 
 import lombok.AccessLevel;
@@ -96,8 +95,8 @@ public class UserController {
     }
 
     @GetMapping("/my-info")
-    ApiResponse<User> getMyInfo() {
-        return ApiResponse.<User>builder()
+    ApiResponse<UserResponse> getMyInfo() {
+        return ApiResponse.<UserResponse>builder()
                 .code(1000)
                 .result(userService.getMyInfo())
                 .build();

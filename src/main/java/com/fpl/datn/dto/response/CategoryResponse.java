@@ -21,6 +21,7 @@ public class CategoryResponse {
     LocalDateTime updatedAt;
     // Relationships - Self-referencing for parent-child categories
     Integer parent;
+    String nameParent;
     List<String> children;
     List<String> products;
 }
