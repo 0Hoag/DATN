@@ -22,6 +22,6 @@ public class CategoryResponse {
     // Relationships - Self-referencing for parent-child categories
     Integer parent;
     String nameParent;
-    List<String> children;
+    List<ChildrenResponse> children;
     List<String> products;
 }
