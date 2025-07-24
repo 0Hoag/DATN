@@ -166,26 +166,20 @@ public class ProductService {
         }
         return list;
     }
-    public List<ProductResponse> filterProducts(Integer categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
-        return repo.findAll().stream()
-                .filter(product -> categoryId == null || product.getCategory().getId().equals(categoryId))
-                .filter(product -> {
-                    BigDecimal minVariantPrice = product.getProductVariants().stream()
-                            .map(ProductVariant::getSalePrice)
-                            .filter(Objects::nonNull)
-                            .min(BigDecimal::compareTo)
-                            .orElse(BigDecimal.ZERO);
-
-                    boolean withinMin = (minPrice == null || minVariantPrice.compareTo(minPrice) >= 0);
-                    boolean withinMax = (maxPrice == null || minVariantPrice.compareTo(maxPrice) <= 0);
-
-                    return withinMin && withinMax;
-                })
-                .map(mapper::toProductResponse)
-                .toList();
+    public Page<ProductResponse> filterProducts(
+            Integer categoryId,
+            List<String> brands,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            int page,
+            int size
+    ) {
+        if (brands != null && brands.isEmpty()) {
+            brands = null;
+        }
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Product> products = repo.filterProducts(categoryId, brands, minPrice, maxPrice, pageable);
+        return products.map(mapper::toProductResponse);
     }
-
-
-
 
 }

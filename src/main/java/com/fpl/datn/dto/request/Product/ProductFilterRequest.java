@@ -13,6 +13,8 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductFilterRequest {
     private Integer categoryId;
+    private String brand;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
+
 }

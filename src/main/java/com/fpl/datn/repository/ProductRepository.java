@@ -47,15 +47,21 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 """)
     Page<ProductSaleResponse> findSaleProductsSimple(Pageable pageable);
 
-    @Query("SELECT p FROM Product p WHERE " +
-            "(:categoryId IS NULL OR p.category.id = :categoryId) AND " +
-            "(:minPrice IS NULL OR EXISTS (" +
-            "   SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice >= :minPrice)) AND " +
-            "(:maxPrice IS NULL OR EXISTS (" +
-            "   SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice <= :maxPrice))")
-    List<Product> filterProducts(@Param("categoryId") Integer categoryId,
-                                 @Param("minPrice") BigDecimal minPrice,
-                                 @Param("maxPrice") BigDecimal maxPrice);
+    @Query("SELECT DISTINCT p FROM Product p " +
+            "WHERE (:categoryId IS NULL OR p.category.id = :categoryId) " +
+            "AND ((:brands IS NULL OR p.brand IN :brands)) " +
+            "AND (:minPrice IS NULL OR EXISTS (" +
+            "    SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice >= :minPrice)) " +
+            "AND (:maxPrice IS NULL OR EXISTS (" +
+            "    SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice <= :maxPrice))")
+    Page<Product> filterProducts(
+            @Param("categoryId") Integer categoryId,
+            @Param("brands") List<String> brands,
+            @Param("minPrice") BigDecimal minPrice,
+            @Param("maxPrice") BigDecimal maxPrice,
+            Pageable pageable
+    );
+
     Optional<Product> findBySlug(String slug);
 
 }
