@@ -203,7 +203,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
-    public User getMyInfo() {
+    public UserResponse getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String userId = context.getAuthentication().getName();
 
@@ -211,7 +211,7 @@ public class UserService {
                 .findByIdAndNotDeleted(Integer.valueOf(userId))
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        return user;
+        return userMapper.toUserResponse(userRepositories.save(user));
     }
 
     // Api client
@@ -231,7 +231,9 @@ public class UserService {
     // Api client and ...
     public Boolean changePassword(ChangePasswordRequest request) {
         if (request.getEmail().isEmpty()) {
-            var user = getMyInfo();
+            var u = getMyInfo();
+            var user = userRepositories.findById(u.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
                 throw new AppException(ErrorCode.OLD_PASSWORD_INCORRECT);

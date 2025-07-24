@@ -48,7 +48,7 @@ public class ProductReviewService {
     }
 
     public void delete(int id) {
-        var user = userMapper.toUserResponse(userService.getMyInfo());
+        var user = userService.getMyInfo();
         var review = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
 
         if (!user.getId().equals(review.getUser().getId())
