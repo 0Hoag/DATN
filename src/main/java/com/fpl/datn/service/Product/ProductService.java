@@ -97,7 +97,11 @@ public class ProductService {
         Product product = repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         return mapper.toProductResponse(product);
     }
-
+    // xem chi tiết sản phẩm bằng slug
+    public ProductResponse detailbySlug(String slug) {
+        Product product = repo.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        return mapper.toProductResponse(product);
+    }
     // xem danh sách sản phẩm
     public List<ProductResponse> list() {
         return repo.findAll().stream().map(mapper::toProductResponse).collect(Collectors.toList());

@@ -56,5 +56,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> filterProducts(@Param("categoryId") Integer categoryId,
                                  @Param("minPrice") BigDecimal minPrice,
                                  @Param("maxPrice") BigDecimal maxPrice);
+    Optional<Product> findBySlug(String slug);
 
 }
