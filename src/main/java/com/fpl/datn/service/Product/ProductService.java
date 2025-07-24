@@ -166,7 +166,7 @@ public class ProductService {
         }
         return list;
     }
-    public Page<ProductResponse> filterProducts(
+    public Page<ProductSaleResponse> filterProducts(
             Integer categoryId,
             List<String> brands,
             BigDecimal minPrice,
@@ -177,9 +177,10 @@ public class ProductService {
         if (brands != null && brands.isEmpty()) {
             brands = null;
         }
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Product> products = repo.filterProducts(categoryId, brands, minPrice, maxPrice, pageable);
-        return products.map(mapper::toProductResponse);
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductSaleResponse> products = repo.filterProducts(categoryId, brands, minPrice, maxPrice, pageable);
+        return products;
     }
+
 
 }

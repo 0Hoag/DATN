@@ -113,17 +113,17 @@ public class ProductController {
                 .build();
     }
     @GetMapping("/filter")
-    public ApiResponse<PageResponse<ProductResponse>> filterProducts(
+    public ApiResponse<PageResponse<ProductSaleResponse>> filterProducts(
             @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) List<String> brands, // ?brands=Apple&brands=Samsung
+            @RequestParam(required = false) List<String> brands,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<ProductResponse> result = productService.filterProducts(categoryId, brands, minPrice, maxPrice, page, size);
+        Page<ProductSaleResponse> result = productService.filterProducts(categoryId, brands, minPrice, maxPrice, page, size);
 
-        PageResponse<ProductResponse> pageResponse = PageResponse.<ProductResponse>builder()
+        PageResponse<ProductSaleResponse> pageResponse = PageResponse.<ProductSaleResponse>builder()
                 .currentPage(result.getNumber())
                 .totalPages(result.getTotalPages())
                 .pageSize(result.getSize())
@@ -131,7 +131,7 @@ public class ProductController {
                 .data(result.getContent())
                 .build();
 
-        return ApiResponse.<PageResponse<ProductResponse>>builder()
+        return ApiResponse.<PageResponse<ProductSaleResponse>>builder()
                 .code(1000)
                 .result(pageResponse)
                 .build();

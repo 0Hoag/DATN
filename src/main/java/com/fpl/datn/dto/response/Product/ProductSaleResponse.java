@@ -17,14 +17,4 @@ public class ProductSaleResponse {
     private String imageUrl;
     private Double averageRating;
 
-    public ProductSaleResponse(Integer productId, String name, String slug, String imageUrl,
-                               BigDecimal minOriginPrice, BigDecimal minSalePrice) {
-        this.productId = productId;
-        this.name = name;
-        this.slug = slug;
-        this.imageUrl = imageUrl;
-        this.minOriginPrice = minOriginPrice;
-        this.minSalePrice = minSalePrice;
-    }
-
 }

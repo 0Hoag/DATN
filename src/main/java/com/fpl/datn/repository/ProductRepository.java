@@ -47,14 +47,25 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 """)
     Page<ProductSaleResponse> findSaleProductsSimple(Pageable pageable);
 
-    @Query("SELECT DISTINCT p FROM Product p " +
-            "WHERE (:categoryId IS NULL OR p.category.id = :categoryId) " +
-            "AND ((:brands IS NULL OR p.brand IN :brands)) " +
-            "AND (:minPrice IS NULL OR EXISTS (" +
-            "    SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice >= :minPrice)) " +
-            "AND (:maxPrice IS NULL OR EXISTS (" +
-            "    SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice <= :maxPrice))")
-    Page<Product> filterProducts(
+    @Query("""
+    SELECT new com.fpl.datn.dto.response.Product.ProductSaleResponse(
+        p.id,
+        p.name,
+        p.slug,
+        (SELECT MIN(pv.price) FROM ProductVariant pv WHERE pv.product = p),
+        (SELECT MIN(pv.salePrice) FROM ProductVariant pv WHERE pv.product = p),
+        p.thumbnail,
+        (SELECT AVG(r.rating) FROM ProductReview r WHERE r.product = p)
+    )
+    FROM Product p
+    WHERE (:categoryId IS NULL OR p.category.id = :categoryId)
+      AND (:brands IS NULL OR p.brand IN :brands)
+      AND (:minPrice IS NULL OR EXISTS (
+           SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice >= :minPrice))
+      AND (:maxPrice IS NULL OR EXISTS (
+           SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice <= :maxPrice))
+""")
+    Page<ProductSaleResponse> filterProducts(
             @Param("categoryId") Integer categoryId,
             @Param("brands") List<String> brands,
             @Param("minPrice") BigDecimal minPrice,
