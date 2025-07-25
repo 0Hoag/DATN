@@ -4,6 +4,12 @@ export const ProductService = {
     fetchListProduct: (params) => {
         return axiosCall.get(API.LIST_PRODUCT, params);
     },
+    fetchListProductSale: (params) => {
+        return axiosCall.get(API.LIST_PRODUCT_SALE, params);
+    },
+    fetchListProductBySlugCategory: (slugCategory,params) => {
+        return axiosCall.get(`${API.LIST_PRODUCT_BY_SLUG_CATEGORY}/${slugCategory}`, params);
+    },
     createProduct: (params) => {
         return axiosCall.post(API.CREATE_PRODUCT, params);
     },
@@ -15,6 +21,9 @@ export const ProductService = {
     },
     detailProduct: (id) => {
         return axiosCall.get(`${API.DETAIL_PRODUCT}/${id}`);
+    },
+    detailProductBySlug: (id) => {
+        return axiosCall.get(`${API.DETAIL_PRODUCT_BY_SLUG}/${id}`);
     },
     searchProduct: (params) => {
         return axiosCall.get(API.SEARCH_PRODUCT, params);

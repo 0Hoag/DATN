@@ -1,6 +1,8 @@
 <template>
   <!-- Main Container -->
-  <div class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light">
+  <div
+    class="container-fluid vh-100 d-flex align-items-center justify-content-center bg-light"
+  >
     <div class="row w-100">
       <div class="col-md-4 mx-auto">
         <div class="card shadow">
@@ -8,28 +10,108 @@
             <!-- Header -->
             <div class="text-center mb-4">
               <div class="mb-3">
-                <i class="fas fa-key text-primary" style="font-size: 3rem;"></i>
+                <i class="fas fa-key text-primary" style="font-size: 3rem"></i>
               </div>
               <h2 class="card-title fw-bold text-primary">Quên mật khẩu</h2>
-              <p class="text-muted">
-                Nhập email của bạn và chúng tôi sẽ gửi link đặt lại mật khẩu
+              <p class="text-muted" v-if="!isSuccess && !isResetPassword">
+                Nhập email của bạn và chúng tôi sẽ gửi mã OTP đặt lại mật khẩu
               </p>
             </div>
 
             <!-- Success Message -->
-            <div v-if="isSuccess" class="alert alert-success text-center" role="alert">
+            <div v-if="isSuccess" class="text-center" role="alert">
               <i class="fas fa-check-circle me-2"></i>
-              <strong>Thành công!</strong><br>
-              Chúng tôi đã gửi link đặt lại mật khẩu đến email của bạn.
+              <strong>Thành công!</strong><br />
+              Chúng tôi đã gửi mã OTP đặt lại mật khẩu đến email của bạn.
+              <form class="mt-3" @submit.prevent="verifyOtp">
+                <input
+                  type="text"
+                  class="form-control mt-2"
+                  placeholder="Nhập mã OTP"
+                  v-model="otpCode"
+                  :class="{ 'is-invalid': errors.otpCode }"
+                  required
+                />
+                <div v-if="errors.otpCode" class="invalid-feedback">
+                  {{ errors.otpCode }}
+                </div>
+                <button type="submit" class="btn btn-primary mt-2" :disabled="isLoading">
+                  <span
+                    v-if="isLoading"
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
+                  <i v-else class="fas fa-paper-plane me-2"></i>
+                  {{ isLoading ? "Đang xác nhận OTP" : "Xác nhận mã OTP" }}
+                </button>
+                <button type="button" class="btn btn-secondary mt-2" @click="resetOtp">
+                  <span
+                    v-if="isLoadingResetOtp"
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
+                  <i v-else class="fas fa-paper-plane me-2"></i>
+                  {{ isLoadingResetOtp ? "Đang gửi" : "Gửi lại OTP" }}
+                </button>
+              </form>
+            </div>
+            <!-- Reset password -->
+            <div v-else-if="isResetPassword" class="" role="alert">
               <div class="mt-3">
-                <button class="btn btn-outline-primary" @click="resetForm">
-                  Gửi lại email khác
+                <div class="mb-3">
+                  <label for="newPassword">Mật khẩu mới:</label>
+                  <input
+                    id="newPassword"
+                    type="password"
+                    class="form-control mt-2"
+                    :class="{ 'is-invalid': errors.newPassword }"
+                    placeholder="Nhập mật khẩu mới"
+                    v-model="newPassword"
+                    required
+                  />
+                  <div v-if="errors.newPassword" class="invalid-feedback d-block">
+                    {{ errors.newPassword }}
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="confirmNewPassword">Xác nhận mật khẩu</label>
+                  <input
+                    id="confirmNewPassword"
+                    type="password"
+                    class="form-control mt-2"
+                    placeholder="Xác nhận mật khẩu mới"
+                    v-model="confirmNewPassword"
+                    :class="{ 'is-invalid': errors.confirmNewPassword }"
+                    required
+                  />
+                  <div v-if="errors.confirmNewPassword" class="invalid-feedback">
+                    {{ errors.confirmNewPassword }}
+                  </div>
+                </div>
+                <button
+                  class="btn btn-primary mt-2"
+                  @click="handleResetPassword"
+                  :disabled="isLoading"
+                >
+                  Gửi
                 </button>
               </div>
+              <div class="alert alert-success text-center mt-2" v-if="isRessetSuccess">
+                <i class="fas fa-check-circle me-2"></i>
+                Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập bằng mật khẩu mới.
+              </div>
+              <div class="text-center">
+                <router-link
+                  :to="{ name: 'user-login' }"
+                  class="text-decoration-none text-primary"
+                >
+                  <i class="fas fa-arrow-left me-2"></i>
+                  Quay lại đăng nhập
+                </router-link>
+              </div>
             </div>
-
             <!-- Form -->
-            <form v-else @submit.prevent="handleForgotPassword">
+            <form v-else @submit.prevent="verifyEmail">
               <!-- Email Input -->
               <div class="mb-4">
                 <label for="email" class="form-label fw-semibold">
@@ -49,7 +131,7 @@
                 </div>
                 <div class="form-text">
                   <i class="fas fa-info-circle me-1"></i>
-                  Chúng tôi sẽ gửi link đặt lại mật khẩu đến email này
+                  Chúng tôi sẽ gửi mã OTP đặt lại mật khẩu đến email này
                 </div>
               </div>
 
@@ -60,15 +142,22 @@
                   class="btn btn-primary btn-lg"
                   :disabled="isLoading"
                 >
-                  <span v-if="isLoading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                  <span
+                    v-if="isLoading"
+                    class="spinner-border spinner-border-sm me-2"
+                    role="status"
+                  ></span>
                   <i v-else class="fas fa-paper-plane me-2"></i>
-                  {{ isLoading ? 'Đang gửi...' : 'Gửi link đặt lại mật khẩu' }}
+                  {{ isLoading ? "Đang gửi..." : "Gửi mã đặt lại mật khẩu" }}
                 </button>
               </div>
 
               <!-- Back to Login -->
               <div class="text-center">
-                <router-link :to="{ name: 'Login' }" class="text-decoration-none text-primary">
+                <router-link
+                  :to="{ name: 'user-login' }"
+                  class="text-decoration-none text-primary"
+                >
                   <i class="fas fa-arrow-left me-2"></i>
                   Quay lại đăng nhập
                 </router-link>
@@ -82,108 +171,220 @@
             </div>
           </div>
         </div>
-
-        <!-- Additional Info Card -->
-        <div class="card mt-4 border-0 bg-transparent">
-          <div class="card-body text-center">
-            <h6 class="text-muted mb-3">
-              <i class="fas fa-shield-alt me-2"></i>
-              Bảo mật & An toàn
-            </h6>
-            <div class="row text-center">
-              <div class="col-4">
-                <i class="fas fa-lock text-primary mb-2" style="font-size: 1.5rem;"></i>
-                <small class="d-block text-muted">Bảo mật</small>
-              </div>
-              <div class="col-4">
-                <i class="fas fa-clock text-primary mb-2" style="font-size: 1.5rem;"></i>
-                <small class="d-block text-muted">Nhanh chóng</small>
-              </div>
-              <div class="col-4">
-                <i class="fas fa-user-shield text-primary mb-2" style="font-size: 1.5rem;"></i>
-                <small class="d-block text-muted">Tin cậy</small>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ForgotPasswordService } from "@/api/service/ForgotPassword";
+import router from "@/router";
+import { ref } from "vue";
+import { toast } from "vue3-toastify";
 
 // Form data
-const email = ref('')
-
+const email = ref("");
+const otpCode = ref("");
+const newPassword = ref("");
+const confirmNewPassword = ref("");
 // State management
-const isLoading = ref(false)
-const isSuccess = ref(false)
-const generalError = ref('')
+const isLoading = ref(false);
+const isRessetSuccess = ref(false);
+const isLoadingResetOtp = ref(false);
+const isSuccess = ref(false);
+const isResetPassword = ref(false);
+const generalError = ref("");
 
 // Form validation errors
 const errors = ref({
-  email: ''
-})
+  email: "",
+  otpCode: "",
+  confirmNewPassword: "",
+  newPassword: "",
+});
 
 // Validate email
 const validateEmail = () => {
-  errors.value.email = ''
-  
+  errors.value.email = "";
+
   if (!email.value.trim()) {
-    errors.value.email = 'Vui lòng nhập địa chỉ email'
-    return false
+    errors.value.email = "Vui lòng nhập địa chỉ email";
+    return false;
   }
-  
+
   // Email regex validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email.value)) {
-    errors.value.email = 'Vui lòng nhập địa chỉ email hợp lệ'
-    return false
+    errors.value.email = "Vui lòng nhập địa chỉ email hợp lệ";
+    return false;
   }
-  
-  return true
-}
+
+  return true;
+};
 
 // Handle forgot password
 const handleForgotPassword = async () => {
   // Clear previous errors
-  generalError.value = ''
-  
+  generalError.value = "";
+
   // Validate email
   if (!validateEmail()) {
-    return
+    return;
   }
-  
+
   try {
-    isLoading.value = true
-    
+    isLoading.value = true;
+
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     // Here you would typically call your forgot password API
-    console.log('Forgot password for email:', email.value)
-    
+    console.log("Forgot password for email:", email.value);
+
     // Success
-    isSuccess.value = true
-    
+    isSuccess.value = true;
   } catch (error) {
-    generalError.value = 'Có lỗi xảy ra. Vui lòng thử lại sau.'
-    console.error('Forgot password error:', error)
+    generalError.value = "Có lỗi xảy ra. Vui lòng thử lại sau.";
+    console.error("Forgot password error:", error);
   } finally {
-    isLoading.value = false
+    isLoading.value = false;
   }
-}
+};
 
 // Reset form to send another email
 const resetForm = () => {
-  email.value = ''
-  isSuccess.value = false
-  generalError.value = ''
-  errors.value.email = ''
-}
+  email.value = "";
+  isSuccess.value = false;
+  generalError.value = "";
+  errors.value.email = "";
+};
 
+const verifyEmail = async () => {
+  // Reset errors
+  errors.value.email = "";
+  try {
+    isLoading.value = true;
+    // Validate email
+    if (!validateEmail()) {
+      return false;
+    }
+
+    const res = await ForgotPasswordService.verifyEmail(email.value);
+
+    isSuccess.value = true;
+  } catch (error) {
+    errors.value.email =
+      error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
+    // isLoading.value = false;
+  } finally {
+    isLoading.value = false;
+  }
+};
+const resetOtp = async () => {
+  // Reset errors
+  errors.value.email = "";
+  try {
+    isLoadingResetOtp.value = true;
+    // Validate email
+    if (!validateEmail()) {
+      return false;
+    }
+
+    const res = await ForgotPasswordService.verifyEmail(email.value);
+
+    isSuccess.value = true;
+  } catch (error) {
+    errors.value.email =
+      error.response?.data?.message || "Có lỗi xảy ra. Vui lòng thử lại sau.";
+    // isLoadingResetOtp.value = false;
+  } finally {
+    isLoadingResetOtp.value = false;
+  }
+};
+const verifyOtp = async () => {
+  // Reset errors
+  errors.value.email = "";
+  try {
+    isLoading.value = true;
+    // Validate email
+    if (!validateEmail()) {
+      return false;
+    }
+
+    const res = await ForgotPasswordService.verifyOtp(otpCode.value, email.value);
+    if (res.code == 1000) {
+      isResetPassword.value = true;
+      isSuccess.value = false;
+      otpCode.value = "";
+      errors.otpCode.value = "";
+    }
+  } catch (error) {
+    errors.value.otpCode = error.response?.data?.message;
+    // isLoading.value = false;
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+function validateForm() {
+  let valid = true;
+  errors.value.newPassword = "";
+  errors.value.confirmNewPassword = "";
+
+  const regexPassword = /^(?=.*[A-Z]).{8,}$/;
+
+  if (!newPassword.value.trim()) {
+    errors.value.newPassword = "Vui lòng nhập mật khẩu mới";
+    valid = false;
+  } else if (!regexPassword.test(newPassword.value)) {
+    errors.value.newPassword = "Mật khẩu mới ít nhất 8 ký tự và 1 chữ in hoa";
+    valid = false;
+  }
+
+  if (!confirmNewPassword.value.trim()) {
+    errors.value.confirmNewPassword = "Vui lòng xác nhận mật khẩu mới";
+    valid = false;
+  } else if (newPassword.value !== confirmNewPassword.value) {
+    errors.value.confirmNewPassword = "Mật khẩu xác nhận không khớp";
+    valid = false;
+  }
+
+  return valid;
+}
+const handleResetPassword = async () => {
+  // Reset errors
+  errors.value.email = "";
+  errors.value.otpCode = "";
+  errors.value.confirmNewPassword = "";
+
+  // Validate form
+  if (!validateForm()) {
+    return;
+  }
+
+  try {
+    isLoading.value = true;
+    const res = await ForgotPasswordService.resetPassword(email.value, {
+      newPassword: newPassword.value,
+      confirmNewPassword: confirmNewPassword.value,
+    });
+
+    if (res.code == 1000) {
+      isRessetSuccess.value = true;
+      isSuccess.value = false;
+      otpCode.value = "";
+      newPassword.value = "";
+      confirmNewPassword.value = "";
+      errors.otpCode.value = "";
+      errors.newPassword.value = "";
+      errors.confirmNewPassword.value = "";
+    }
+  } catch (error) {
+    errors.value.confirmNewPassword = error.response?.data?.message;
+  } finally {
+    isLoading.value = false;
+  }
+};
 
 </script>
 

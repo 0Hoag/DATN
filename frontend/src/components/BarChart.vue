@@ -1,10 +1,18 @@
 <template>
-  <Bar  :data="chartData" :options="chartOptions"></Bar>
+  <Bar :data="chartData" :options="chartOptions"></Bar>
 </template>
 <script setup>
 import { ref } from "vue";
 import { Bar } from "vue-chartjs";
-import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from "chart.js";
+import {
+  Chart as ChartJS,
+  Title,
+  Tooltip,
+  Legend,
+  BarElement,
+  CategoryScale,
+  LinearScale,
+} from "chart.js";
 
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
@@ -18,5 +26,4 @@ const props = defineProps({
     required: true,
   },
 });
-
 </script>

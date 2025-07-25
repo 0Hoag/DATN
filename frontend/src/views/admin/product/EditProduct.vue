@@ -88,7 +88,7 @@
             <input type="checkbox" class="form-check-input" id="showHome" v-model="productModel.isHome" />
           </div>
 
-          <button class="btn btn-primary" type="button" @click="submitFormEdit">Lưu</button>
+          <button class="btn btn-primary" type="button" @click="submitFormEdit" v-if="hasScope(['ROLE_ADMIN','ROLE_MANAGER'])">Lưu</button>
         </div>
       </div>
     </div>
@@ -108,7 +108,7 @@
               <template #header>
                 <div class="d-flex justify-content-between">
                   <strong>{{ variant.title }}</strong>
-                  <a-button type="primary" danger @click="removeVariant(variant)">Xóa</a-button>
+                  <a-button type="primary" danger @click="removeVariant(variant)" v-if="hasScope(['ROLE_ADMIN','ROLE_MANAGER'])">Xóa</a-button>
                 </div>
               </template>
               <div class="row g-3">
@@ -138,6 +138,10 @@
                 <div class="col-md-6">
                   <label>Giá</label>
                   <input v-model="variant.price" type="number" class="form-control" required />
+                </div>
+                <div class="col-md-6">
+                  <label>Giá khuyến mãi</label>
+                  <input v-model="variant.salePrice" type="number" class="form-control" required />
                 </div>
                 <div class="col-md-6">
                   <label>Tồn kho</label>
@@ -215,7 +219,9 @@
   import { AttributeService } from "@/api/service/AttributeService";
   import { ImageService } from "@/api/service/ImageService";
   import Modal from "@/components/Modal.vue";
+import { useAuth } from "@/composable/useAuth";
 
+  const { hasScope } = useAuth();
   const addVariantModalRef = ref(null);
   const modal2 = ref();
 
@@ -587,6 +593,7 @@
       return {
         title,
         price: 0,
+        salePrice: 0,
         variantName: "",
         quantity: 0,
         sold: 0,

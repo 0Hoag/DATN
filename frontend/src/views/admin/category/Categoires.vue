@@ -4,7 +4,12 @@ import { ref, computed, watch, onMounted } from "vue";
 import Modal from "@/components/Modal.vue";
 import { toast } from "vue3-toastify";
 import { CategoryService } from "@/api/service/CategoryService";
-import { handleError, hideLoading, showLoading, showPromtDelete } from "@/api/functions/common";
+import {
+  handleError,
+  hideLoading,
+  showLoading,
+  showPromtDelete,
+} from "@/api/functions/common";
 
 const keyword = ref("");
 const timer = ref(null);
@@ -30,7 +35,7 @@ const categoryData = ref({
   slug: "",
   parent: null,
   description: "",
-  isHome: false,
+  isShow: false,
 });
 
 const errors = ref({
@@ -43,9 +48,16 @@ const addModalRef = ref(null);
 const editModalRef = ref(null);
 
 // Reset trang về 1 mỗi khi keyword thay đổi
-watch(keyword, () => {
-  pagination.value.current = 1;
-});
+watch(
+  () => pagination.value.current,
+  () => {
+    if (keyword.value.trim()) {
+      searchList();
+    } else {  
+      fetchListCategory();
+    }
+  }
+);
 
 // tư động tạo slug dựa trên tên
 watch(
@@ -57,8 +69,42 @@ watch(
 
 async function fetchListCategory() {
   try {
-    const response = await CategoryService.fetchListCategory();
-    const rawList = response.result;
+    const response = await CategoryService.fetchListCategory({
+      page: pagination.value.current,
+      size: pagination.value.pageSize,
+    });
+    // const rawList = response.result;
+
+    // // Tạo Map để tra cứu nhanh
+    // const idToNameMap = new Map();
+    // rawList.forEach((cat) => {
+    //   idToNameMap.set(cat.id, cat.name);
+    // });
+
+    // // Thêm parentName
+    // listCategory.value = rawList.map((cat) => ({
+    //   ...cat,
+    //   parentName: cat.parent ? idToNameMap.get(cat.parent) || null : null,
+    // }));
+    // pagination.value.total = listCategory.value.length;
+    listCategory.value = response.result.data;
+    pagination.value.total = response.result.totalElements;
+
+  } catch (error) {
+    toast.error("Lỗi khi tải danh sách danh mục");
+    console.log(error);
+  }
+}
+async function searchList() {
+  try {
+    showLoading();
+    const response = await CategoryService.searchCategory({
+      keyword: keyword.value.trim(),
+      page: pagination.value.current,
+      size: pagination.value.pageSize,
+    });
+
+    const rawList = response.result.data;
 
     // Tạo Map để tra cứu nhanh
     const idToNameMap = new Map();
@@ -71,13 +117,27 @@ async function fetchListCategory() {
       ...cat,
       parentName: cat.parent ? idToNameMap.get(cat.parent) || null : null,
     }));
-    pagination.value.total = listCategory.value.length;
+    pagination.value.total = response.result.totalElements;
   } catch (error) {
-    toast.error("Lỗi khi tải danh sách danh mục");
-    console.log(error);
+    toast.error("Lỗi khi tìm kiếm danh mục");
+  } finally {
+    hideLoading();
   }
 }
 
+async function handleSearch() {
+  if (timer.value) clearTimeout(timer.value);
+
+  timer.value = setTimeout(async () => {
+    pagination.value.current = 1;
+
+    if (!keyword.value.trim()) {
+      await fetchListCategory(); // Gọi API fetch bình thường
+    } else {
+      await searchList(); // Gọi API search
+    }
+  }, 1000); // debounce 1000ms
+}
 const openAddModal = () => {
   resetForm();
   addModalRef.value?.open();
@@ -119,9 +179,17 @@ function getFormAdd() {
 }
 
 function validateForm() {
-  const existedName = listCategory.value.some((item) => item.name.toLowerCase() === categoryData.value.name.trim().toLowerCase() && item.id !== categoryData.value.id);
+  const existedName = listCategory.value.some(
+    (item) =>
+      item.name.toLowerCase() === categoryData.value.name.trim().toLowerCase() &&
+      item.id !== categoryData.value.id
+  );
   errors.value.name = existedName ? "Tên danh mục đã tồn tại" : "";
-  const existedSlug = listCategory.value.some((item) => item.slug.toLowerCase() === categoryData.value.slug.trim().toLowerCase() && item.id !== categoryData.value.id);
+  const existedSlug = listCategory.value.some(
+    (item) =>
+      item.slug.toLowerCase() === categoryData.value.slug.trim().toLowerCase() &&
+      item.id !== categoryData.value.id
+  );
   errors.value.slug = existedSlug ? "Đường dẫn tĩnh đã tồn tại" : "";
 
   return !!(errors.value.name || errors.value.slug);
@@ -187,20 +255,10 @@ const resetForm = () => {
     slug: "",
     parent: null,
     description: "",
-    isHome: false,
+    isShow: false,
   };
   (errors.value.name = ""), (errors.value.slug = "");
 };
-
-//bounce search
-function onInput(event) {
-  const val = event.target.value;
-  if (timer.value) clearTimeout(timer.value);
-  timer.value = setTimeout(() => {
-    keyword.value = val;
-    pagination.value.current = 1;
-  }, 1000);
-}
 
 function generateSlug(text) {
   return text
@@ -213,23 +271,6 @@ function generateSlug(text) {
     .replace(/\s+/g, "-") // thay khoảng trắng bằng -
     .replace(/-+/g, "-"); // gộp nhiều dấu - liên tiếp
 }
-
-function handlePageChange(page, pageSize) {
-  pagination.value.current = page;
-  pagination.value.pageSize = pageSize;
-}
-// Lọc danh sách theo từ khóa
-const filteredList = computed(() => {
-  if (!keyword.value) return listCategory.value;
-  return listCategory.value.filter((item) => item.name.toLowerCase().includes(keyword.value.toLowerCase()));
-});
-
-// Phân trang
-const filterPagination = computed(() => {
-  const start = (pagination.value.current - 1) * pagination.value.pageSize;
-  const end = start + pagination.value.pageSize;
-  return filteredList.value.slice(start, end);
-});
 
 onMounted(() => {
   fetchListCategory();
@@ -245,7 +286,14 @@ onMounted(() => {
     </button>
   </div>
   <div class="d-flex justify-content-end">
-    <input type="text" class="form-control w-25" placeholder="Tìm kiếm danh mục..." :value="keyword" @input="onInput" />
+    <input
+      type="text"
+      class="form-control w-25"
+      placeholder="Tìm kiếm danh mục..."
+      v-model="keyword"
+      @input="handleSearch"
+      @keydown.enter="handleSearch"
+    />
   </div>
   <table class="table table-hover text-center align-middle my-3">
     <thead>
@@ -258,11 +306,13 @@ onMounted(() => {
       </tr>
     </thead>
     <tbody>
-      <tr v-for="(category, index) in filterPagination" :key="index">
-        <td scope="row">{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</td>
+      <tr v-for="(category, index) in listCategory" :key="index">
+        <td scope="row">
+          {{ (pagination.current - 1) * pagination.pageSize + index + 1 }}
+        </td>
         <td>{{ category.name }}</td>
         <td>{{ category.slug }}</td>
-        <td>{{ category.parentName ?? "Không có danh mục cha" }}</td>
+        <td>{{ category.nameParent ?? "Không có danh mục cha" }}</td>
         <td>
           <button class="btn btn-primary mx-2" @click="openEditModal(category)">
             <font-awesome-icon icon="pen-to-square" />
@@ -273,16 +323,25 @@ onMounted(() => {
         </td>
       </tr>
 
-      <tr v-if="filterPagination.length === 0">
+      <tr v-if="listCategory.length === 0">
         <td colspan="5" class="text-center py-4">
-          <font-awesome-icon icon="circle-exclamation" size="2x" class="text-secondary mb-2" />
+          <font-awesome-icon
+            icon="circle-exclamation"
+            size="2x"
+            class="text-secondary mb-2"
+          />
           <div>Không có dữ liệu</div>
         </td>
       </tr>
     </tbody>
   </table>
   <div class="d-flex justify-content-end mt-3">
-    <a-pagination v-model:current="pagination.current" :total="pagination.total" simple :page-size="pagination.pageSize" @change="handlePageChange" />
+    <a-pagination
+      v-model:current="pagination.current"
+      :total="pagination.total"
+      simple
+      :page-size="pagination.pageSize"
+    />
   </div>
 
   <!-- Add modal -->
@@ -320,17 +379,31 @@ onMounted(() => {
           <label for="parentModalAdd" class="form-label fw-bold">Danh mục cha</label>
           <select class="form-select" id="parentModalAdd" v-model="categoryData.parent">
             <option :value="null">Chọn danh mục</option>
-            <option :value="category.id" v-for="category in listCategory" :key="category.id">
+            <option
+              :value="category.id"
+              v-for="category in listCategory"
+              :key="category.id"
+            >
               {{ category.name }}
             </option>
           </select>
         </div>
         <div class="mb-3">
           <label for="descriptionModalAdd" class="form-label fw-bold">Mô tả</label>
-          <textarea class="form-control" placeholder="Mô tả" id="descriptionModalAdd" v-model="categoryData.description"></textarea>
+          <textarea
+            class="form-control"
+            placeholder="Mô tả"
+            id="descriptionModalAdd"
+            v-model="categoryData.description"
+          ></textarea>
         </div>
         <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="isHomeModalAdd" v-model="categoryData.isHome" />
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="isHomeModalAdd"
+            v-model="categoryData.isShow"
+          />
           <label class="form-check-label" for="isHomeModalAdd">Hiển thị trang home</label>
         </div>
         <div class="d-flex justify-content-end">
@@ -375,18 +448,36 @@ onMounted(() => {
           <label for="parentModalEdit" class="form-label fw-bold">Danh mục cha</label>
           <select class="form-select" id="parentModalEdit" v-model="categoryData.parent">
             <option :value="null">Chọn danh mục</option>
-            <option :value="category.id" v-for="category in listCategory.filter(item => item.id != categoryData.id)" :key="category.id">
+            <option
+              :value="category.id"
+              v-for="category in listCategory.filter(
+                (item) => item.id != categoryData.id
+              )"
+              :key="category.id"
+            >
               {{ category.name }}
             </option>
           </select>
         </div>
         <div class="mb-3">
           <label for="descriptionModalEdit" class="form-label fw-bold">Mô tả</label>
-          <textarea class="form-control" placeholder="Mô tả" id="descriptionModalEdit" v-model="categoryData.description"></textarea>
+          <textarea
+            class="form-control"
+            placeholder="Mô tả"
+            id="descriptionModalEdit"
+            v-model="categoryData.description"
+          ></textarea>
         </div>
         <div class="mb-3 form-check">
-          <input type="checkbox" class="form-check-input" id="isHomeModalEdit" v-model="categoryData.isHome" />
-          <label class="form-check-label" for="isHomeModalEdit">Hiển thị trang home</label>
+          <input
+            type="checkbox"
+            class="form-check-input"
+            id="isHomeModalEdit"
+            v-model="categoryData.isShow"
+          />
+          <label class="form-check-label" for="isHomeModalEdit"
+            >Hiển thị trang home</label
+          >
         </div>
         <div class="d-flex justify-content-end">
           <button type="submit" class="btn btn-primary mx-2">Lưu</button>

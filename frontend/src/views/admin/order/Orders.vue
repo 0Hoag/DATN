@@ -8,32 +8,53 @@
   </div>
   <div class="d-flex justify-content-between">
     <div class="btn-group mb-3">
-      <button class="btn" :class="{ 'btn-primary': activeType === 'ALL', 'btn-outline-primary': activeType !== 'ALL' }" @click="activeType = 'ALL'">Tất cả</button>
-      <button class="btn" :class="{ 'btn-primary': activeType === 'PENDING', 'btn-outline-primary': activeType !== 'PENDING' }" @click="activeType = 'PENDING'">
+      <button class="btn" :class="{
+        'btn-primary': activeType === 'ALL',
+        'btn-outline-primary': activeType !== 'ALL',
+      }" @click="activeType = 'ALL'">
+        Tất cả
+      </button>
+      <button class="btn" :class="{
+        'btn-primary': activeType === 'PENDING',
+        'btn-outline-primary': activeType !== 'PENDING',
+      }" @click="activeType = 'PENDING'">
         Chờ xác nhận
       </button>
-      <button class="btn" :class="{ 'btn-primary': activeType === 'CONFIRMED', 'btn-outline-primary': activeType !== 'CONFIRMED' }" @click="activeType = 'CONFIRMED'">
+      <button class="btn" :class="{
+        'btn-primary': activeType === 'CONFIRMED',
+        'btn-outline-primary': activeType !== 'CONFIRMED',
+      }" @click="activeType = 'CONFIRMED'">
         Đã xác nhận
       </button>
-      <button class="btn" :class="{ 'btn-primary': activeType === 'SHIPPED', 'btn-outline-primary': activeType !== 'SHIPPED' }" @click="activeType = 'SHIPPED'">
+      <button class="btn" :class="{
+        'btn-primary': activeType === 'SHIPPED',
+        'btn-outline-primary': activeType !== 'SHIPPED',
+      }" @click="activeType = 'SHIPPED'">
         Đang giao
       </button>
-      <button class="btn" :class="{ 'btn-primary': activeType === 'DELIVERED', 'btn-outline-primary': activeType !== 'DELIVERED' }" @click="activeType = 'DELIVERED'">
+      <button class="btn" :class="{
+        'btn-primary': activeType === 'DELIVERED',
+        'btn-outline-primary': activeType !== 'DELIVERED',
+      }" @click="activeType = 'DELIVERED'">
         Đã giao
       </button>
-      <button class="btn" :class="{ 'btn-primary': activeType === 'CANCELLED', 'btn-outline-primary': activeType !== 'CANCELLED' }" @click="activeType = 'CANCELLED'">
+      <button class="btn" :class="{
+        'btn-primary': activeType === 'RECEIED',
+        'btn-outline-primary': activeType !== 'RECEIED',
+      }" @click="activeType = 'RECEIED'">
+        Đã nhận
+      </button>
+      <button class="btn" :class="{
+        'btn-primary': activeType === 'CANCELLED',
+        'btn-outline-primary': activeType !== 'CANCELLED',
+      }" @click="activeType = 'CANCELLED'">
         Đã hủy
       </button>
     </div>
-  <div class="d-flex justify-content-end">
-  <input
-   type="text"
-   class="form-control w-100"
-   placeholder="Tìm kiếm đơn hàng.."
-   @input="handleSearch"
-   v-model="searchKeyword"
-  />
- </div>
+    <div class="d-flex justify-content-end">
+      <input type="text" class="form-control w-100" placeholder="Tìm kiếm đơn hàng.." @input="handleSearch"
+        v-model="searchKeyword" />
+    </div>
   </div>
 
   <table class="table table-hover text-center align-middle my-3">
@@ -57,13 +78,31 @@
         <td>{{ order.paymentStatus }}</td>
         <td>{{ order.createdAt }}</td>
         <td>
-          <button class="btn btn-success mx-2" v-if="order.orderStatus === 'PENDING'" @click="updateStatusOrder(order)">
+          <button class="btn btn-success mx-2" v-if="order.orderStatus === 'PENDING'" @click="updateStatusOrder(order)"
+            title="Xác nhận đơn hàng">
             <font-awesome-icon icon="check" />
           </button>
-          <router-link class="btn btn-primary mx-2" :to="{ name: 'order-edit', params: { id: order.id } }">
+          <button class="btn btn-danger mx-2" v-if="order.orderStatus === 'PENDING'" @click="cancelOrder(order)"
+            title="Hủy đơn hàng">
+            <font-awesome-icon icon="xmark" />
+          </button>
+          <button class="btn btn-warning mx-2" v-if="order.orderStatus === 'CONFIRMED'"
+            @click="updateStatusShiped(order)" title="Xác nhận giao hàng">
+            <font-awesome-icon icon="truck" />
+          </button>
+          <button class="btn btn-success mx-2" v-if="order.orderStatus === 'SHIPPED'"
+            @click="updateStatusDeliverd(order)" title="Xác nhận giao thành công">
+            <font-awesome-icon icon="check" />
+          </button>
+          <button class="btn btn-success mx-2" v-if="order.orderStatus === 'DELIVERED'"
+            @click="updateStatusReceived(order)" title="Xác nhận đơn hàng đã nhận">
+            <font-awesome-icon icon="box" />
+          </button>
+          <router-link class="btn btn-primary mx-2" :to="{ name: 'order-edit', params: { id: order.id } }"
+            title="Chỉnh sửa">
             <font-awesome-icon icon="pen-to-square" />
           </router-link>
-          <button class="btn btn-danger mx-2" @click="showModalDelete(order)">
+          <button class="btn btn-danger mx-2" @click="showModalDelete(order)" v-if="order.orderStatus === 'CANCELLED'">
             <font-awesome-icon icon="trash" />
           </button>
         </td>
@@ -77,23 +116,28 @@
     </tbody>
   </table>
   <div class="d-flex justify-content-end mt-3">
-    <a-pagination v-model:current="pagination.current" :total="pagination.total" simple :page-size="pagination.pageSize" />
+    <a-pagination v-model:current="pagination.current" :total="pagination.total" simple
+      :page-size="pagination.pageSize" />
   </div>
 </template>
 <script setup>
-import { handleError, hideLoading, showLoading, showPromtDelete } from "@/api/functions/common";
+import {
+  handleError,
+  hideLoading,
+  showLoading,
+  showPromtDelete,
+} from "@/api/functions/common";
 import { OrderService } from "@/api/service/OrderService";
 import { onBeforeMount, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
 // tìm kiếm
 const searchKeyword = ref("");
 const timer = ref(null);
-const startDate = ref(null)
-const endDate = ref(null)
-const orderStatus = ref(null)
-const paymentSatus = ref(null)
-const sort = ref(true)
-
+const startDate = ref(null);
+const endDate = ref(null);
+const orderStatus = ref(null);
+const paymentSatus = ref(null);
+const sort = ref(true);
 
 const activeType = ref("ALL");
 
@@ -113,7 +157,9 @@ async function fetchList() {
     if (activeType.value === "ALL") {
       list.value = response.result.data;
     } else {
-      list.value = response.result.data.filter((item) => item.orderStatus === activeType.value);
+      list.value = response.result.data.filter(
+        (item) => item.orderStatus === activeType.value
+      );
     }
     pagination.value.total = response.result.totalElements; // Phân trang: cập nhật tổng số phần tử trên trang
     console.log(list.value);
@@ -138,7 +184,6 @@ async function searchList() {
 
     list.value = response.result.data;
     pagination.value.total = response.result.totalElements;
-
   } catch (error) {
     toast.error("Lỗi khi tìm kiếm dữ liệu");
   } finally {
@@ -146,26 +191,89 @@ async function searchList() {
   }
 }
 
- async function handleSearch() {
+async function handleSearch() {
   if (timer.value) clearTimeout(timer.value);
 
   timer.value = setTimeout(async () => {
-   pagination.value.current = 1;
+    pagination.value.current = 1;
 
-   if (!searchKeyword.value.trim()) {
-    await fetchList(); // Gọi API fetch bình thường
-   } else {
-    await searchList(); // Gọi API search
-   }
-  }, 1000); // debounce 
- }
+    if (!searchKeyword.value.trim()) {
+      await fetchList(); // Gọi API fetch bình thường
+    } else {
+      await searchList(); // Gọi API search
+    }
+  }, 1000); // debounce
+}
 
+async function updateStatusShiped(order) {
+  try {
+    showLoading();
+
+    await OrderService.updateStatus(order.id, {
+      orderStatus: "SHIPPED",
+      paymentStatus: order.paymentStatus,
+    });
+    toast.success("Cập nhật trạng thái đơn hàng thành công!");
+    await fetchList();
+  } catch (error) {
+    toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+    hideLoading();
+  }
+}
+async function updateStatusDeliverd(order) {
+  try {
+    showLoading();
+
+    await OrderService.updateStatus(order.id, {
+      orderStatus: "DELIVERED",
+      paymentStatus: order.paymentStatus,
+    });
+    toast.success("Cập nhật trạng thái đơn hàng thành công!");
+    await fetchList();
+  } catch (error) {
+    toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+    hideLoading();
+  }
+}
+async function updateStatusReceived(order) {
+  try {
+    showLoading();
+
+    await OrderService.updateStatus(order.id, {
+      orderStatus: "RECEIED",
+      paymentStatus: "PAID",
+    });
+    toast.success("Cập nhật trạng thái đơn hàng thành công!");
+    await fetchList();
+  } catch (error) {
+    toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+    hideLoading();
+  }
+}
 async function updateStatusOrder(order) {
   try {
     showLoading();
 
-    await OrderService.updateStatus(order.id, { orderStatus: "CONFIRMED", paymentStatus: order.paymentStatus });
+    await OrderService.updateStatus(order.id, {
+      orderStatus: "CONFIRMED",
+      paymentStatus: order.paymentStatus,
+    });
     toast.success("Cập nhật trạng thái đơn hàng thành công!");
+    await fetchList();
+  } catch (error) {
+    toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+    hideLoading();
+  }
+}
+async function cancelOrder(order) {
+  try {
+    showLoading();
+    await OrderService.cancelOrder(order.id);
+    toast.success("Hủy đơn hàng thành công!");
     await fetchList();
   } catch (error) {
     toast.error("Lỗi khi tìm kiếm dữ liệu");
@@ -193,11 +301,14 @@ async function submitFormDelete(order) {
   }
 }
 
-
 watch(
   () => pagination.value.current,
   () => {
-    fetchList();
+    if (searchKeyword.value.trim()) {
+      searchList();
+    } else {  
+      fetchList();
+    }
   }
 );
 

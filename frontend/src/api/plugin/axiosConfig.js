@@ -1,8 +1,12 @@
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "vue3-toastify";
+const instance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true, // ✅ Gửi cookie cho mọi request
+});
 
-axios.interceptors.request.use(
+instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
 
@@ -44,7 +48,7 @@ axios.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-axios.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => {
     return response;
   },
@@ -62,4 +66,4 @@ axios.interceptors.response.use(
     return Promise.reject(error);
   }
 );
-export default axios;
+export default instance;

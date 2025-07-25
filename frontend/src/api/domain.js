@@ -1,3 +1,5 @@
+import Register from "@/views/user/Register.vue";
+
 const DOMAIN = "http://localhost:8080/datn/";
 
 export const API = {
@@ -6,18 +8,25 @@ export const API = {
   LOGOUT: DOMAIN + "auth/logout",
 
   // Account
-  LIST_ACCOUNT: DOMAIN + "users",
+
+  LIST_ACCOUNT: DOMAIN + "users/getAll",
+  LIST_ACCOUNT_FOR_ORDER: DOMAIN + "users",
   CREATE_ACCOUNT: DOMAIN + "users/create",
   UPDATE_ACCOUNT: DOMAIN + "users",
+  UPDATE_PROFILE: DOMAIN + "users/profile",
   DELETE_ACCOUNT: DOMAIN + "users",
   DETAIL_ACCOUNT: DOMAIN + "users",
   SEARCH_USER: DOMAIN + "users/search",
+  MY_INFO: DOMAIN + "users/my-info",
+  CHANGE_PASSWORD: DOMAIN + "users/password",
+  REGISTER: DOMAIN + "users/registration",
   // Category
+  GET_CATEGORY: DOMAIN + "category/Get",
   LIST_CATEGORY: DOMAIN + "category/List",
   CREATE_CATEGORY: DOMAIN + "category/",
   UPDATE_CATEGORY: DOMAIN + "category",
   DELETE_CATEGORY: DOMAIN + "category",
-
+  SEARCH_CATEGORY: DOMAIN + "category/search",
   // Attribute
   LIST_ATTRIBUTE: DOMAIN + "variantattribute/List",
   CREATE_ATTRIBUTE: DOMAIN + "variantattribute/",
@@ -44,7 +53,8 @@ export const API = {
   UPDATE_STATUS: DOMAIN + "order/status",
   DETAIL_ORDER: DOMAIN + "order",
   SEARCH_ORDER: DOMAIN + "order/search",
-
+  CANCEL_ORDER: DOMAIN + "order/cancel",
+  LIST_ORDER_BY_USER: DOMAIN + 'order/user',
   // order return
   LIST_ORDER_RETURN: DOMAIN + "order-return",
   CREATE_ORDER_RETURN: DOMAIN + "order-return",
@@ -53,10 +63,13 @@ export const API = {
 
   // Product
   LIST_PRODUCT: DOMAIN + "product/Get",
+  LIST_PRODUCT_SALE: DOMAIN + 'product/sale',
+  LIST_PRODUCT_BY_SLUG_CATEGORY: DOMAIN + 'product/category',
   CREATE_PRODUCT: DOMAIN + "product/",
   UPDATE_PRODUCT: DOMAIN + "product",
   DELETE_PRODUCT: DOMAIN + "product",
   DETAIL_PRODUCT: DOMAIN + "product",
+  DETAIL_PRODUCT_BY_SLUG: DOMAIN + "product/detail",
   SEARCH_PRODUCT: DOMAIN + "product/search",
 
   // Product variant
@@ -80,6 +93,32 @@ export const API = {
   DELETE_ROLE: DOMAIN + "roles/list",
 
   // Adress
-  LIST_ADDRESS_BY_USER: DOMAIN +  "address",
-  CREATE_ADDRESS_BY_USER: DOMAIN +  "address",
+  LIST_ADDRESS_BY_USER: DOMAIN + "address",
+  CREATE_ADDRESS_BY_USER: DOMAIN + "address",
+  DELETE_ADDRESS_BY_USER: DOMAIN + "address",
+
+  //forgot password
+  VERIFY_EMAIL: DOMAIN + "forgotPassword/verifyMail",
+  VERIFY_OTP: DOMAIN + "forgotPassword/verifyOtp",
+  RESET_PASSWORD: DOMAIN + "forgotPassword/changePassword",
+
+  // dashboard
+  TOTAL_USER: DOMAIN + "dashboard/total-users",
+  TOTAL_ORDER: DOMAIN + "dashboard/total-orders",
+  TOTAL_REVENUE: DOMAIN + "dashboard/total-revenue",
+  TOTAL_PRODUCT_SOLD: DOMAIN + "dashboard/total-products-sold",
+  TOP_PRODUCT: DOMAIN + "dashboard/top-products",
+  CHART_REVENUE: DOMAIN + "dashboard/monthly-revenue",
+  CHART_ORDER: DOMAIN + "dashboard/monthly-order",
+  CHART_PRODUCT: DOMAIN + "dashboard/monthly-product-sold",
+
+  // cart
+  GET_SESSTION_CART: DOMAIN + 'cart',
+  ADD_CART: DOMAIN + 'cart/add',
+  UPDATE_CART: DOMAIN + 'cart/update',
+  DELETE_ITEM: DOMAIN + 'cart',
+
+  // payment
+  GET_PAYMENT_METHOD: DOMAIN + 'payment',
+  VNPAY_RETURN: DOMAIN + 'payment/vnpay-return'
 };

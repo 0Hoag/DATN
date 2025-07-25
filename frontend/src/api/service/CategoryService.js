@@ -2,6 +2,9 @@ import { API } from "../domain";
 import { axiosCall } from "../plugin/axios";
 export const CategoryService = {
   fetchListCategory: (params) => {
+    return axiosCall.get(API.GET_CATEGORY, params);
+  },
+  fetchListCategoryForUser: (params) => {
     return axiosCall.get(API.LIST_CATEGORY, params);
   },
   createCategory: (params) => {
@@ -13,5 +16,8 @@ export const CategoryService = {
 
   deleteCategory: (id) => {
     return axiosCall.delete(`${API.DELETE_CATEGORY}/${id}`);
+  },
+   searchCategory: (params) => {
+    return axiosCall.get(API.SEARCH_CATEGORY, params);
   },
 };

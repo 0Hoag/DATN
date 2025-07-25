@@ -66,23 +66,48 @@
         <!-- Tên tự nhập -->
         <div class="col-sm-12 mb-3" v-if="selectedAddress === ''">
           <label for="customFullname" class="form-label fw-bold">Tên người nhận</label>
-          <a-input id="customFullname" v-model:value="customFullname" placeholder="Nhập tên người nhận..." style="width: 100%" />
+          <a-input
+            id="customFullname"
+            v-model:value="customFullname"
+            placeholder="Nhập tên người nhận..."
+            style="width: 100%"
+          />
         </div>
         <!-- Số điện thoại tự nhập -->
         <div class="col-sm-12 mb-3" v-if="selectedAddress === ''">
-          <label for="customPhone" class="form-label fw-bold">Số điện thoại người nhận</label>
-          <a-input id="customPhone" v-model:value="customPhone" placeholder="Nhập số điện thoại..." style="width: 100%" />
+          <label for="customPhone" class="form-label fw-bold"
+            >Số điện thoại người nhận</label
+          >
+          <a-input
+            id="customPhone"
+            v-model:value="customPhone"
+            placeholder="Nhập số điện thoại..."
+            style="width: 100%"
+          />
         </div>
         <!-- Địa chỉ tự nhập -->
         <div class="col-sm-12 mb-3" v-if="selectedAddress === ''">
-          <label for="customAddress" class="form-label fw-bold">Nhập địa chỉ người nhận</label>
-          <a-input id="customAddress" v-model:value="customAddress" placeholder="Nhập địa chỉ cụ thể..." style="width: 100%" />
+          <label for="customAddress" class="form-label fw-bold"
+            >Nhập địa chỉ người nhận</label
+          >
+          <a-input
+            id="customAddress"
+            v-model:value="customAddress"
+            placeholder="Nhập địa chỉ cụ thể..."
+            style="width: 100%"
+          />
         </div>
 
         <!-- Ghi chú -->
         <div class="col-sm-12 mb-3">
           <label for="note" class="form-label fw-bold">Ghi chú</label>
-          <a-textarea id="note" v-model:value="note" placeholder="Ghi chú..." style="width: 100%" allow-clear />
+          <a-textarea
+            id="note"
+            v-model:value="note"
+            placeholder="Ghi chú..."
+            style="width: 100%"
+            allow-clear
+          />
         </div>
       </div>
     </div>
@@ -152,14 +177,20 @@
         <!-- Một sản phẩm -->
         <div class="col" v-for="(product, index) in listProduct" :key="index">
           <div class="card h-100">
-            <img :src="product.images.find((img) => img.isThumbnail === true)?.imageUrl" class="card-img-top" alt="..." />
+            <img
+              :src="product.images.find((img) => img.isThumbnail === true)?.imageUrl"
+              class="card-img-top"
+              alt="..."
+            />
             <div class="card-body text-center">
               <p class="card-text">{{ product.variantName }}</p>
               <p class="card-text text-danger">{{ product.price }}</p>
               <p class="card-text">
                 <strong>Còn lại:</strong> <span>{{ product.quantity }}</span>
               </p>
-              <button class="btn btn-primary" @click="addProductToCart(product)">Thêm</button>
+              <button class="btn btn-primary" @click="addProductToCart(product)">
+                Thêm
+              </button>
             </div>
           </div>
         </div>
@@ -168,254 +199,306 @@
       </div>
       <!-- Phân trang -->
       <div class="d-flex justify-content-center mt-3">
-        <a-pagination v-model:current="pagination.current" :total="pagination.total" simple :page-size="pagination.pageSize" />
+        <a-pagination
+          v-model:current="pagination.current"
+          :total="pagination.total"
+          simple
+          :page-size="pagination.pageSize"
+        />
       </div>
     </div>
   </div>
 
   <!-- Nút lưu -->
   <div class="d-flex justify-content-start mt-3">
-    <button class="btn btn-primary" type="button" @click="submitFormAdd">Lưu</button>
+    <button class="btn btn-primary" type="button" @click="showConfirmCreateOrder">Lưu</button>
   </div>
 </template>
 
 <script setup>
-  import { handleError, hideLoading, showLoading } from "@/api/functions/common";
-  import { AccountService } from "@/api/service/AccountService";
-  import { OrderService } from "@/api/service/OrderService";
-  import { ProductService } from "@/api/service/ProductService";
-  import { computed, onMounted, ref, watch } from "vue";
-  import { toast } from "vue3-toastify";
-  // Dữ liệu khách hàng
-  const customer = ref([
-    { value: "jack", label: "Jack" },
-    { value: "lucy", label: "Lucy" },
-    { value: "tom", label: "Tom" },
-  ]);
+import {
+  handleError,
+  hideLoading,
+  showLoading,
+  showPromtConfirm,
+} from "@/api/functions/common";
+import { AccountService } from "@/api/service/AccountService";
+import { OrderService } from "@/api/service/OrderService";
+import { PaymentService } from "@/api/service/PaymentService";
+import { ProductService } from "@/api/service/ProductService";
+import { computed, onMounted, ref, watch } from "vue";
+import { toast } from "vue3-toastify";
+// Dữ liệu khách hàng
+const customer = ref([
+  { value: "jack", label: "Jack" },
+  { value: "lucy", label: "Lucy" },
+  { value: "tom", label: "Tom" },
+]);
 
-  // Dữ liệu địa chỉ (bao gồm option tự nhập)
-  const address = ref([{ value: "", label: "Tự nhập địa chỉ" }]);
+// Dữ liệu địa chỉ (bao gồm option tự nhập)
+const address = ref([{ value: "", label: "Tự nhập địa chỉ" }]);
 
-  // Dữ liệu phương thức thanh toán
-  const paymentMethod = ref([
-    { value: "1", label: "Thanh toán khi nhận hàng" },
-    { value: "2", label: "Thanh toán qua VNPay" },
-  ]);
-  // Dữ liệu trạng thái đơn hàng
-  const orderStatus = ref([
-    { value: "PENDING", label: "Chờ xác nhận" },
-    { value: "CONFIRMED", label: "Đã xác nhận" },
-    { value: "SHIPPED", label: "Đã giao" },
-    { value: "DELIVERED", label: "Đã nhận" },
-    { value: "CANCELLED", label: "Đã hủy" },
-  ]);
+// Dữ liệu phương thức thanh toán
+const paymentMethod = ref([
+  { value: "1", label: "Thanh toán khi nhận hàng" },
+  { value: "2", label: "Thanh toán qua VNPay" },
+]);
+// Dữ liệu trạng thái đơn hàng
+const orderStatus = ref([
+  { value: "PENDING", label: "Chờ xác nhận" },
+  { value: "CONFIRMED", label: "Đã xác nhận" },
+  { value: "SHIPPED", label: "Đang giao" },
+  { value: "DELIVERED", label: "Đã giao" },
+  { value: "RECEIED", label: "Đã nhận" },
+  { value: "CANCELLED", label: "Đã hủy" },
+]);
 
-  const listUser = ref([]);
-  const listProduct = ref([]);
+const listUser = ref([]);
+const listProduct = ref([]);
 
-  const cart = ref([]);
+const cart = ref([]);
 
-  // Biến riêng cho mỗi select
-  const selectedCustomer = ref(undefined);
-  const selectedAddress = ref(null);
-  const selectedPaymentMethod = ref("1");
-  const selectedOrderStatus = ref("PENDING");
-  const customAddress = ref(""); // input khi người dùng tự nhập
-  const customPhone = ref(""); // input khi người dùng tự nhập
-  const customFullname = ref(""); // input khi người dùng tự nhập
-  const note = ref(""); // input khi người dùng tự nhập
-  const pagination = ref({
-    current: 1,
-    pageSize: 5,
-    total: 0,
-  });
-  // Filter và handler
-  const onChangeCustomer = (value) => {
-    console.log("Khách hàng:", value);
-  };
+// Biến riêng cho mỗi select
+const selectedCustomer = ref(undefined);
+const selectedAddress = ref(null);
+const selectedPaymentMethod = ref("1");
+const selectedOrderStatus = ref("PENDING");
+const customAddress = ref(""); // input khi người dùng tự nhập
+const customPhone = ref(""); // input khi người dùng tự nhập
+const customFullname = ref(""); // input khi người dùng tự nhập
+const note = ref(""); // input khi người dùng tự nhập
+const pagination = ref({
+  current: 1,
+  pageSize: 5,
+  total: 0,
+});
 
-  const onChangeAddress = (value) => {
-    console.log("Địa chỉ:", value);
-  };
-  const onChangePaymentMethod = (value) => {
-    console.log("Địa chỉ:", value);
-  };
-  const onChangeOrderStatus = (value) => {
-    console.log("Địa chỉ:", value);
-  };
+const timer = ref(null);
+const keyword = ref("");
 
-  const filterCustomer = (input, option) => option.value.toLowerCase().includes(input.toLowerCase());
+// Filter và handler
+const onChangeCustomer = (value) => {
+  console.log("Khách hàng:", value);
+};
 
-  const filterAddress = (input, option) => option.value.toLowerCase().includes(input.toLowerCase());
+const onChangeAddress = (value) => {
+  console.log("Địa chỉ:", value);
+};
+const onChangePaymentMethod = (value) => {
+  console.log("Địa chỉ:", value);
+};
 
-  const filterAPaymentMethod = (input, option) => option.value.toLowerCase().includes(input.toLowerCase());
+const onChangeOrderStatus = (value) => {
+  console.log("Địa chỉ:", value);
+};
 
-  const filterOrderStatus = (input, option) => option.value.toLowerCase().includes(input.toLowerCase());
+const filterCustomer = (input, option) =>
+  option.value.toLowerCase().includes(input.toLowerCase());
 
-  async function fecthListUser() {
-    try {
-      showLoading();
-      const response = await AccountService.fetchListAccount();
+const filterAddress = (input, option) =>
+  option.value.toLowerCase().includes(input.toLowerCase());
 
-      listUser.value = response.result.filter((user) => user.roles.some((role) => role.name === "CUSTOMER"));
-      customer.value = listUser.value.map((item) => ({ value: item.id, label: item.fullName, address: item.addresses }));
-      // address.value = listUser.value.map((item) => ({ value: item.addresses.id, label: item.addresses.fullName }));
-      pagination.value.total = listUser.value.length;
-      console.log(listUser.value);
-      console.log(customer.value);
-    } catch (error) {
-      toast.error("Lỗi khi tải dữ liệu");
-      console.log(error);
-    } finally {
-      hideLoading();
-    }
+const filterAPaymentMethod = (input, option) =>
+  option.value.toLowerCase().includes(input.toLowerCase());
+
+const filterOrderStatus = (input, option) =>
+  option.value.toLowerCase().includes(input.toLowerCase());
+
+async function fecthListUser() {
+  try {
+    showLoading();
+    const response = await AccountService.fetchListAccountForOrder();
+
+    listUser.value = response.result.filter((user) =>
+      user.roles.some((role) => role.name === "CUSTOMER")
+    );
+    customer.value = listUser.value.map((item) => ({
+      value: item.id,
+      label: item.fullName,
+      address: item.addresses,
+    }));
+    // address.value = listUser.value.map((item) => ({ value: item.addresses.id, label: item.addresses.fullName }));
+    pagination.value.total = listUser.value.length;
+    console.log(listUser.value);
+    console.log(customer.value);
+  } catch (error) {
+    toast.error("Lỗi khi tải dữ liệu");
+    console.log(error);
+  } finally {
+    hideLoading();
   }
-  async function fetchList() {
-    try {
-      const response = await ProductService.fetchListProductVariant({ page: pagination.value.current, size: pagination.value.pageSize });
-      listProduct.value = response.result.data;
-      pagination.value.total = response.result.totalElements;
-      console.log(listProduct.value);
-    } catch (error) {
-      console.log(error);
-    }
+}
+async function fetchListProduct() {
+  try {
+    const response = await ProductService.fetchListProductVariant({
+      page: pagination.value.current,
+      size: pagination.value.pageSize,
+    });
+    listProduct.value = response.result.data;
+    pagination.value.total = response.result.totalElements;
+    console.log(listProduct.value);
+  } catch (error) {
+    console.log(error);
+  }
+}
+async function fetchPaymentMethods() {
+  try {
+    const response = await PaymentService.fetchPaymentMethods();
+    paymentMethod.value = response.result.map(item => ({
+      value: item.id,
+      label: item.description
+    }));
+  } catch (error) {
+    console.log(error);
+  }
+}
+function addProductToCart(product) {
+  const existingProduct = cart.value.find((item) => item.id === product.id);
+
+  if (product.quantity === 0) {
+    toast.info("Sản phẩm đã hết hàng");
+    return;
   }
 
-  function addProductToCart(product) {
-    const existingProduct = cart.value.find((item) => item.id === product.id);
+  if (existingProduct && existingProduct.quantity >= product.quantity) {
+    toast.info("Số lượng sản phẩm không đủ");
+    return;
+  }
+  if (existingProduct) {
+    existingProduct.quantity++;
+  } else {
+    const total = product.price * product.quantity;
+    cart.value.push({
+      id: product.id,
+      name: product.variantName,
+      price: product.price,
+      quantity: 1,
+      total,
+      maxQuantity: product.quantity,
+    });
+  }
+  console.log("cart", cart.value);
+}
+function formatCurrency(value) {
+  return value?.toLocaleString("vi-VN") + " ₫";
+}
 
-    if (product.quantity === 0) {
-      toast.info("Sản phẩm đã hết hàng");
-      return;
-    }
+function handleQuantityChange(item) {
+  // Nếu người dùng nhập nhỏ hơn 1 thì gán về 1
+  if (item.quantity < 1) {
+    item.quantity = 1;
+  }
 
-    if (existingProduct && existingProduct.quantity >= product.quantity) {
-      toast.info("Số lượng sản phẩm không đủ");
-      return;
+  // Nếu người dùng nhập lớn hơn tồn kho thì gán về tồn kho
+  if (item.quantity > item.maxQuantity) {
+    item.quantity = item.maxQuantity;
+    toast.info("Số lượng vượt quá tồn kho");
+  }
+
+  // Cập nhật lại thành tiền
+  item.total = item.quantity * item.price;
+}
+
+function getFormAdd() {
+  return {
+    userId: selectedCustomer.value,
+    addressId: selectedAddress.value ?? null,
+    paymentMethodId: selectedPaymentMethod.value,
+    orderStatus: selectedOrderStatus.value,
+    voucherId: null,
+    note: note.value,
+    inputAddress: customAddress.value,
+    inputFullname: customFullname.value,
+    inputPhone: customPhone.value,
+    items: cart.value.map((item) => ({
+      productVariantId: item.id,
+      quantity: item.quantity,
+    })),
+  };
+}
+function validateForm() {
+  let errorMessage = "";
+  if (!selectedCustomer.value) {
+    errorMessage = "Vui lòng chọn khách hàng";
+  } else if (!selectedPaymentMethod.value) {
+    errorMessage = "Vui lòng chọn phương thức thanh toán";
+  } else if (!selectedOrderStatus.value) {
+    errorMessage = "Vui lòng chọn trạng thái đơn hàng";
+  } else if (!cart.value.length) {
+    errorMessage = "Vui lòng chọn sản phẩm";
+  }
+  if (errorMessage) {
+    toast.error(errorMessage);
+    return false;
+  }
+  return true;
+}
+function showConfirmCreateOrder() {
+  showPromtConfirm(
+    " Xác nhận thông tin đã chính xác.",
+    () => {
+      submitFormAdd();
     }
-    if (existingProduct) {
-      existingProduct.quantity++;
+  );
+}
+async function submitFormAdd() {
+  try {
+    showLoading();
+    if (!validateForm()) return;
+
+    console.log(getFormAdd());
+    await OrderService.createOrder(getFormAdd());
+    toast.success("Thêm đơn hàng thành công!");
+    resetForm();
+  } catch (error) {
+    handleError(error);
+  } finally {
+    hideLoading();
+  }
+}
+function resetForm() {
+  selectedCustomer.value = undefined;
+  selectedAddress.value = undefined;
+  selectedPaymentMethod.value = "1";
+  selectedOrderStatus.value = "PENDING";
+  customAddress.value = "";
+  note.value = "";
+  cart.value = [];
+}
+watch(
+  () => selectedCustomer.value,
+  (newVal) => {
+    const selected = customer.value.find((cus) => cus.value === newVal);
+    if (selected && Array.isArray(selected.address)) {
+      address.value = [
+        { value: "", label: "Tự nhập" },
+        ...selected.address.map((addr) => ({
+          value: addr.id,
+          label: addr.addressLine,
+        })),
+      ];
     } else {
-      const total = product.price * product.quantity;
-      cart.value.push({
-        id: product.id,
-        name: product.variantName,
-        price: product.price,
-        quantity: 1,
-        total,
-        maxQuantity: product.quantity,
-      });
+      address.value = [{ value: "", label: "Tự nhập" }];
     }
-    console.log("cart", cart.value);
   }
-  function formatCurrency(value) {
-    return value?.toLocaleString("vi-VN") + " ₫";
-  }
+);
 
-  function handleQuantityChange(item) {
-    // Nếu người dùng nhập nhỏ hơn 1 thì gán về 1
-    if (item.quantity < 1) {
-      item.quantity = 1;
-    }
+watch(
+  cart,
+  (newCart) => {
+    newCart.forEach((item) => {
+      item.total = item.quantity * item.price;
+    });
+  },
+  { deep: true }
+);
 
-    // Nếu người dùng nhập lớn hơn tồn kho thì gán về tồn kho
-    if (item.quantity > item.maxQuantity) {
-      item.quantity = item.maxQuantity;
-      toast.info("Số lượng vượt quá tồn kho");
-    }
-
-    // Cập nhật lại thành tiền
-    item.total = item.quantity * item.price;
-  }
-  function getFormAdd() {
-    return {
-      userId: selectedCustomer.value,
-      addressId: selectedAddress.value ?? null,
-      paymentMethodId: selectedPaymentMethod.value,
-      orderStatus: selectedOrderStatus.value,
-      voucherId: null,
-      note: note.value,
-      inputAddress: customAddress.value,
-      inputFullname: customFullname.value,
-      inputPhone: customPhone.value,
-      items: cart.value.map((item) => ({
-        productVariantId: item.id,
-        quantity: item.quantity,
-      })),
-    };
-  }
-  function validateForm() {
-    let errorMessage = "";
-    if (!selectedCustomer.value) {
-      errorMessage = "Vui lòng chọn khách hàng";
-    } else if (!selectedPaymentMethod.value) {
-      errorMessage = "Vui lòng chọn phương thức thanh toán";
-    } else if (!selectedOrderStatus.value) {
-      errorMessage = "Vui lòng chọn trạng thái đơn hàng";
-    } else if (!cart.value.length) {
-      errorMessage = "Vui lòng chọn sản phẩm";
-    }
-    if (errorMessage) {
-      toast.error(errorMessage);
-      return false;
-    }
-    return true;
-  }
-  async function submitFormAdd() {
-    try {
-      showLoading();
-      if (!validateForm()) return;
-
-      console.log(getFormAdd());
-      await OrderService.createOrder(getFormAdd());
-      toast.success("Thêm đơn hàng thành công!");
-      resetForm();
-    } catch (error) {
-      handleError(error);
-    } finally {
-      hideLoading();
-    }
-  }
-  function resetForm() {
-    selectedCustomer.value = undefined;
-    selectedAddress.value = undefined;
-    selectedPaymentMethod.value = "1";
-    selectedOrderStatus.value = "PENDING";
-    customAddress.value = "";
-    note.value = "";
-    cart.value = [];
-  }
-  watch(
-    () => selectedCustomer.value,
-    (newVal) => {
-      const selected = customer.value.find((cus) => cus.value === newVal);
-      if (selected && Array.isArray(selected.address)) {
-        address.value = [
-          { value: "", label: "Tự nhập" },
-          ...selected.address.map((addr) => ({
-            value: addr.id,
-            label: addr.addressLine,
-          })),
-        ];
-      } else {
-        address.value = [{ value: "", label: "Tự nhập" }];
-      }
-    }
-  );
-
-  watch(
-    cart,
-    (newCart) => {
-      newCart.forEach((item) => {
-        item.total = item.quantity * item.price;
-      });
-    },
-    { deep: true }
-  );
-
-  const totalCart = computed(() => cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0));
-  onMounted(() => {
-    fecthListUser();
-    fetchList();
-  });
+const totalCart = computed(() =>
+  cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
+);
+onMounted(() => {
+  fecthListUser();
+  fetchListProduct();
+  fetchPaymentMethods();
+});
 </script>

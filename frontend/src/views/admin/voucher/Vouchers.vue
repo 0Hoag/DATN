@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Quản lý voucher</h1>
-    <button class="btn btn-success p-2 fs-5" @click="openModalAdd">
+    <button class="btn btn-success p-2 fs-5" @click="openModalAdd" v-if="hasScope(['ROLE_ADMIN','ROLE_MANAGER'])">
       <font-awesome-icon icon="plus" />
       Thêm voucher
     </button>
@@ -35,7 +35,7 @@
           <button class="btn btn-primary mx-2" @click="openModalEdit(voucher)">
             <font-awesome-icon icon="pen-to-square" />
           </button>
-          <button class="btn btn-danger" @click="openModalDelete(voucher)">
+          <button class="btn btn-danger" @click="openModalDelete(voucher)" v-if="hasScope(['ROLE_ADMIN','ROLE_MANAGER'])">
             <font-awesome-icon icon="trash" />
           </button>
         </td>
@@ -131,7 +131,7 @@
           </div>
 
           <div class="col-12 d-flex justify-content-end">
-            <button type="submit" class="btn btn-primary">Lưu</button>
+            <button type="submit" class="btn btn-primary" v-if="hasScope(['ROLE_ADMIN','ROLE_MANAGER'])">Lưu</button>
             <button type="button" class="btn btn-secondary" @click="closeModal">Hủy</button>
           </div>
         </div>
@@ -146,6 +146,8 @@ import Modal from "@/components/Modal.vue";
 import { onBeforeMount, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
 import dayjs from "dayjs";
+import { useAuth } from "@/composable/useAuth";
+const {hasScope} = useAuth();
 const voucherModel = ref({
   code: "", // Mã giảm giá
   description: "", // Mô tả
@@ -343,7 +345,11 @@ async function searchList() {
 watch(
   () => pagination.value.current,
   () => {
-    fetchList();
+    if (searchKeyword.value.trim()) {
+      searchList();
+    } else {
+      fetchList();
+    }
   }
 );
 

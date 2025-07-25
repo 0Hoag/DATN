@@ -14,6 +14,7 @@
    class="form-control w-25"
    placeholder="Tìm kiếm sản phẩm.."
    @input="handleSearch"
+   @keydown.enter="handleSearch"
    v-model="searchKeyword"
   />
  </div>
@@ -35,7 +36,7 @@
    <tr v-for="(product, index) in list" :key="index">
     <td>{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</td>
     <td>
-     <img :src="product.thumbnail" alt="" width="150" height="100" />
+     <img :src="product.thumbnail " alt="" width="150" height="100" />
     </td>
     <td>{{ product.name }}</td>
     <td>{{ product.category.name }}</td>
@@ -47,7 +48,7 @@
      <router-link class="btn btn-primary mx-2" :to="{ name: 'product-edit', params: { id: product.id } }">
       <font-awesome-icon icon="pen-to-square" />
      </router-link>
-     <button class="btn btn-danger" @click="showModalDelete(product)">
+     <button class="btn btn-danger" @click="showModalDelete(product)" v-if="hasScope(['ROLE_ADMIN','ROLE_MANAGER'])"> 
       <font-awesome-icon icon="trash" />
      </button>
     </td>
@@ -74,8 +75,11 @@
  import { handleError, hideLoading, showLoading, showPromtDelete } from "@/api/functions/common";
 
  import { ProductService } from "@/api/service/ProductService";
+import { useAuth } from "@/composable/useAuth";
  import { onBeforeMount, ref, watch } from "vue";
  import { toast } from "vue3-toastify";
+
+ const { hasScope } = useAuth();
  // search
  const searchKeyword = ref("");
  const timer = ref(null);
@@ -156,7 +160,11 @@
  watch(
   () => pagination.value.current,
   () => {
-   fetchList();
+    if (searchKeyword.value.trim()) {
+      searchList();
+    } else {
+      fetchList();
+    }
   }
  );
  onBeforeMount(async () => {

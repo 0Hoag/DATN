@@ -4,40 +4,54 @@ import user from "./user";
 import auth from "./auth";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "vue3-toastify";
-const routes = [...admin, ...user, ...auth];
+const routes = [...admin, ...user, ...auth,
+    { path: '/forbidden', name: 'Forbidden', component: () => import('@/views/Page403.vue') },
+   {
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/PageNotFound.vue'),
+  },
+];
 const router = createRouter({
- history: createWebHistory(),
- routes,
+  history: createWebHistory(),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    // Nếu có vị trí lưu, quay lại vị trí đó (hữu ích khi bấm nút "quay lại")
+    if (savedPosition) {
+      return savedPosition;
+    } else {
+      // Mặc định scroll về đầu trang
+      return { top: 0 };
+    }
+  },
 });
-
 router.beforeEach((to, from) => {
- const token = localStorage.getItem("token");
- const isAuthenticated = !!token;
+  const token = localStorage.getItem("token");
+  const isAuthenticated = !!token;
 
- const isAdminRoute = to.path.startsWith("/admin");
+  const isAdminRoute = to.path.startsWith("/admin");
 
- if (isAdminRoute && !isAuthenticated) {
-  return { name: "Login" };
- }
-
- let roles = [];
- if (token) {
-  try {
-   const decoded = jwtDecode(token);
-   roles = decoded.scope?.split(" ") || [];
-  } catch (e) {
-   console.error("Token invalid");
-   return { name: "Login" };
+  if (isAdminRoute && !isAuthenticated && to.name !== "login-admin") {
+    return { name: "Login" };
   }
- }
+
+  let roles = [];
+  if (token) {
+    try {
+      const decoded = jwtDecode(token);
+      roles = decoded.scope?.split(" ") || [];
+    } catch (e) {
+      console.error("Token invalid");
+      return { name: "login-admin" };
+    }
+  }
 
   const allowedRoles = to.meta.allowedRoles || [];
-  if (
-    allowedRoles.length > 0 &&
-    !allowedRoles.some((role) => roles.includes(role))
-  ) {
+  if (allowedRoles.length > 0 && !allowedRoles.some((role) => roles.includes(role))) {
     toast.error("Bạn không có quyền truy cập trang này."); // 👈 thông báo toast
-    return { name: "Login" }; // hoặc return { name: "NotAuthorized" };
+    return { name: "Forbidden" }; // hoặc return { name: "NotAuthorized" };
   }
+
+  document.title = to.meta.title || "Website của bạn";
 });
 export default router;

@@ -11,7 +11,7 @@
       <div class="d-flex align-items-center gap-3 fs-5">
         <div class="d-flex align-items-center gap-2">
           <font-awesome-icon icon="user" />
-          <span>Admin</span>
+          <span>{{ store.userInfo?.fullName }}</span>
         </div>
         <div class="d-flex align-items-center gap-2" style="cursor: pointer">
           <font-awesome-icon icon="arrow-right-from-bracket" />
@@ -23,17 +23,20 @@
 </template>
 
 <script setup>
-import { AccountService } from "@/api/service/AccountService";
+import { useAuth } from "@/composable/useAuth";
+import { useUserStore } from "@/store/userStore";
+import { onMounted, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 
-const handleLogout = () => {
-  try {
-    AccountService.logout();
-    localStorage.removeItem("token");
-    router.push("/login");
-  } catch (error) {
-    console.log(error);
-  }
+const {  logout } = useAuth();
+const store = useUserStore();
+
+const handleLogout = async () => {
+  await logout();
+  router.push("/admin/login");
 };
+
+
+
 </script>
