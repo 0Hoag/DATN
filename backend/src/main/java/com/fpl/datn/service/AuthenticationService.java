@@ -3,9 +3,14 @@ package com.fpl.datn.service;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.StringJoiner;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,7 +28,12 @@ import com.fpl.datn.models.InvalidatedToken;
 import com.fpl.datn.models.User;
 import com.fpl.datn.repository.InvalidatedRepository;
 import com.fpl.datn.repository.UserRepository;
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.JWSVerifier;
+import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -79,6 +89,9 @@ public class AuthenticationService {
 
         var token = generateToken(user);
 
+        var auth = new UsernamePasswordAuthenticationToken(user.getId().toString(), null, new ArrayList<>());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+
         return AuthenticationResponse.builder().token(token).authenticated(true).build();
     }
 
@@ -124,7 +137,7 @@ public class AuthenticationService {
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getId().toString())
-                .issuer("devteria.com")
+                .issuer("phonezone.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(valid_duration, ChronoUnit.SECONDS).toEpochMilli()))

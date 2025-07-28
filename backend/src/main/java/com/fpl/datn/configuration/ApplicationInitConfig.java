@@ -11,9 +11,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.fpl.datn.constant.PredefinedPermission;
 import com.fpl.datn.constant.PredefinedRole;
+import com.fpl.datn.models.PaymentMethod;
 import com.fpl.datn.models.Permission;
 import com.fpl.datn.models.Role;
 import com.fpl.datn.models.User;
+import com.fpl.datn.repository.PaymentMethodRepository;
 import com.fpl.datn.repository.PermissionRepository;
 import com.fpl.datn.repository.RoleRepository;
 import com.fpl.datn.repository.UserRepository;
@@ -43,7 +45,10 @@ public class ApplicationInitConfig {
             value = "datasource.driverClassName",
             havingValue = "com.mysql.cj.jdbc.Driver")
     ApplicationRunner applicationRunner(
-            UserRepository userRepository, RoleRepository roleRepository, PermissionRepository permissionRepository) {
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            PermissionRepository permissionRepository,
+            PaymentMethodRepository paymentMethodRepository) {
         log.info("Initializing application.....");
         return args -> {
             if (userRepository.findByEmail(ADMIN_EMAIL).isEmpty()) {
@@ -102,13 +107,7 @@ public class ApplicationInitConfig {
                         .description("Xem danh sách & chi tiết sản phẩm")
                         .build());
 
-                var view_dashboard = permissionRepository.save(Permission.builder()
-                        .name(PredefinedPermission.VIEW_DASHBOARD)
-                        .description("Xem thống kê && doanh thu")
-                        .build());
-
                 Set<Permission> guestPermissions = Set.of(view_product);
-
                 Set<Permission> CustomerPermissions =
                         Set.of(view_product, track_order, create_review, buy_product, view_order);
                 Set<Permission> ShiftStaff =
@@ -122,7 +121,7 @@ public class ApplicationInitConfig {
                         manager_users,
                         manager_products,
                         manager_orders);
-                Set<Permission> AdminPermissions = Set.of(assign_role, system_settings, system_backup, view_dashboard);
+                Set<Permission> AdminPermissions = Set.of(assign_role, system_settings, system_backup);
 
                 roleRepository.save(Role.builder()
                         .name(PredefinedRole.ROLE_GUEST)
@@ -165,6 +164,17 @@ public class ApplicationInitConfig {
                         .build();
 
                 userRepository.save(user);
+
+                paymentMethodRepository.save(PaymentMethod.builder()
+                        .name("COD")
+                        .description("Thanh toán bằng tiền mặt")
+                        .build());
+
+                paymentMethodRepository.save(PaymentMethod.builder()
+                        .name("VNPAY")
+                        .description("Thanh toán bằng VNPAY")
+                        .build());
+
                 log.warn("admin user has been created with default password: admin, please change it");
             }
             log.info("Application initialization completed .....");

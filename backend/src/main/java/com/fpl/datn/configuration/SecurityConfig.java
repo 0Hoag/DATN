@@ -25,6 +25,9 @@ public class SecurityConfig {
 
     private final String[] publicEnpoint = {
         "/users/registration",
+        "/forgotPassword/verifyMail/*",
+        "/forgotPassword/verifyOtp/*/*",
+        "/forgotPassword/changePassword/*",
         "/auth/token",
         "/auth/introspect",
         "/auth/logout",
@@ -35,6 +38,10 @@ public class SecurityConfig {
         "/cartItem/addCart/{userId}",
         "/selectProduct/registration",
         "/order/registration",
+        "/pdf/**",
+        "/email/**",
+        "/cart/**",
+        "/order/registration"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -47,7 +54,18 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.authorizeHttpRequests(request -> request.requestMatchers(HttpMethod.POST, publicEnpoint)
                 .permitAll()
-                .requestMatchers(HttpMethod.GET, "/payment/**")
+                .requestMatchers(
+                        HttpMethod.GET,
+                        "/payment/**",
+                        "/pdf/**",
+                        "/cart/**",
+                        "/email/**",
+                        "/category/**",
+                        "/product/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.PUT, "/cart/**", "/users/profile/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.DELETE, "/cart/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated());

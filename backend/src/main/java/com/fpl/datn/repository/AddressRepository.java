@@ -9,5 +9,7 @@ import com.fpl.datn.models.Address;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Integer> {
+    List<Address> findByIsDeleteFalseAndUser_Id(int id);
+
     List<Address> findByUser_Id(int id);
 }

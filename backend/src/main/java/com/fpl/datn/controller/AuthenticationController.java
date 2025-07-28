@@ -2,6 +2,8 @@ package com.fpl.datn.controller;
 
 import java.text.ParseException;
 
+import jakarta.servlet.http.HttpSession;
+
 import org.springframework.web.bind.annotation.*;
 
 import com.fpl.datn.dto.ApiResponse;
@@ -12,6 +14,7 @@ import com.fpl.datn.dto.request.RefreshRequest;
 import com.fpl.datn.dto.response.AuthenticationResponse;
 import com.fpl.datn.dto.response.IntrospectResponse;
 import com.fpl.datn.service.AuthenticationService;
+import com.fpl.datn.service.CartService;
 import com.nimbusds.jose.JOSEException;
 
 import lombok.AccessLevel;
@@ -24,12 +27,16 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationController {
     AuthenticationService authenticationService;
+    CartService cartService;
 
     @PostMapping("/token")
-    ApiResponse<AuthenticationResponse> getToken(@RequestBody AuthenticationRequest request) {
+    ApiResponse<AuthenticationResponse> getToken(@RequestBody AuthenticationRequest request, HttpSession session) {
+        var response = authenticationService.authenticated(request);
+
+        cartService.mergeSessionCartToUser(session);
         return ApiResponse.<AuthenticationResponse>builder()
                 .code(1000)
-                .result(authenticationService.authenticated(request))
+                .result(response)
                 .build();
     }
 

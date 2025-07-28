@@ -1,5 +1,6 @@
 package com.fpl.datn.controller;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,7 +30,7 @@ public class VoucherController {
     VoucherService voucherService;
 
     @GetMapping
-    ApiResponse<PageResponse<VoucherResponse>> getAll(
+    public ApiResponse<PageResponse<VoucherResponse>> getAll(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "true") boolean desc) {
@@ -39,34 +40,37 @@ public class VoucherController {
     }
 
     @GetMapping("/{id}")
-    ApiResponse<VoucherResponse> getVoucher(@PathVariable int id) {
+    public ApiResponse<VoucherResponse> getVoucher(@PathVariable int id) {
         return ApiResponse.<VoucherResponse>builder()
                 .result(voucherService.getVoucher(id))
                 .build();
     }
 
     @PostMapping
-    ApiResponse<VoucherResponse> createVoucher(@RequestBody VoucherRequest request) {
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ApiResponse<VoucherResponse> create(@RequestBody VoucherRequest request) {
         return ApiResponse.<VoucherResponse>builder()
                 .result(voucherService.create(request))
                 .build();
     }
 
     @PutMapping("/{id}")
-    ApiResponse<VoucherResponse> updateVoucher(@PathVariable int id, @RequestBody UpdateVoucherRequest request) {
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ApiResponse<VoucherResponse> update(@PathVariable int id, @RequestBody UpdateVoucherRequest request) {
         return ApiResponse.<VoucherResponse>builder()
                 .result(voucherService.update(id, request))
                 .build();
     }
 
     @DeleteMapping("/{id}")
-    ApiResponse<Void> deleteVoucher(@PathVariable int id) {
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ApiResponse<Void> delete(@PathVariable int id) {
         voucherService.delete(id);
         return ApiResponse.<Void>builder().message("Delete Success!").build();
     }
 
     @GetMapping("/search")
-    ApiResponse<PageResponse<VoucherResponse>> searchVoucher(
+    public ApiResponse<PageResponse<VoucherResponse>> searchVoucher(
             @RequestParam String keyword,
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size,
@@ -75,4 +79,63 @@ public class VoucherController {
                 .result(voucherService.search(keyword, page, size, desc))
                 .build();
     }
+
+    // API mới để quản lý voucher hết hạn
+    @GetMapping("/expired/count")
+    public ApiResponse<Long> getExpiredVouchersCount() {
+        return ApiResponse.<Long>builder()
+                .result(voucherService.countExpiredVouchers())
+                .message("Số lượng voucher hết hạn")
+                .build();
+    }
+
+    @PostMapping("/update-expired")
+    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
+    public ApiResponse<Void> updateExpiredVouchers() {
+        voucherService.updateExpiredVouchers();
+        return ApiResponse.<Void>builder()
+                .message("Đã cập nhật trạng thái voucher hết hạn!")
+                .build();
+    }
+
+    @GetMapping("/expiring")
+    public ApiResponse<PageResponse<VoucherResponse>> getExpiringVouchers(
+            @RequestParam(required = false, defaultValue = "7") int days,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<VoucherResponse>>builder()
+                .result(voucherService.getExpiringVouchers(days, page, size))
+                .message("Danh sách voucher sắp hết hạn trong " + days + " ngày")
+                .build();
+    }
+
+    @GetMapping("/available")
+    public ApiResponse<PageResponse<VoucherResponse>> getAvailableVouchers(
+            @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
+
+        return ApiResponse.<PageResponse<VoucherResponse>>builder()
+                .result(voucherService.getAvailableForUser(page, size))
+                .build();
+    }
+
+    //    @PostMapping("/{id}/save")
+    //    @PreAuthorize("hasRole('USER')")
+    //    public ApiResponse<String> saveVoucher(@PathVariable int id, @AuthenticationPrincipal UserPrincipal user) {
+    //        voucherService.saveVoucherForUser(id, user.getId());
+    //        return ApiResponse.<String>builder()
+    //                .message("Đã lưu voucher vào tài khoản")
+    //                .build();
+    //    }
+    //
+    //    @GetMapping("/user/saved")
+    //    @PreAuthorize("hasRole('USER')")
+    //    public ApiResponse<PageResponse<VoucherResponse>> getSavedVouchers(
+    //            @AuthenticationPrincipal UserPrincipal user,
+    //            @RequestParam(defaultValue = "1") int page,
+    //            @RequestParam(defaultValue = "10") int size) {
+    //
+    //        return ApiResponse.<PageResponse<VoucherResponse>>builder()
+    //                .result(voucherService.getSavedVouchers(user.getId(), page, size))
+    //                .build();
+    //    }
 }

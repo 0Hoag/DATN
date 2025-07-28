@@ -25,7 +25,7 @@ public class OrderReturn {
     @Column(columnDefinition = "TEXT")
     private String reason;
 
-    @Column(name = "refund_amount", precision = 10, scale = 2)
+    @Column(name = "refund_amount", precision = 19, scale = 2)
     private BigDecimal refundAmount;
 
     @Column(name = "payment_method")

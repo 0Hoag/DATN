@@ -1,6 +1,7 @@
 package com.fpl.datn.models;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
@@ -27,6 +28,9 @@ public class OrderDetail {
 
     @Column(precision = 10, scale = 2)
     private BigDecimal discount;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     // Relationships
     @ManyToOne

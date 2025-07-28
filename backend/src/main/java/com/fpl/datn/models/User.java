@@ -38,17 +38,20 @@ public class User {
     @Pattern(regexp = "^\\d{10,11}$", message = "Invalid phone number")
     private String phone;
 
-    @Column(name = "is_enable")
-    private Boolean isEnable;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @ManyToMany
     Set<Role> roles;
+
+    @OneToOne(mappedBy = "user")
+    ForgotPassword forgotPassword;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Address> addresses;

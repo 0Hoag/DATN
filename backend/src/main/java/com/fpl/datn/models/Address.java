@@ -26,6 +26,8 @@ public class Address {
 
     private String phone;
 
+    private Boolean isDelete;
+
     @Column(name = "address_line")
     private String addressLine;
 

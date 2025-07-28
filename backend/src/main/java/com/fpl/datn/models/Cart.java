@@ -1,15 +1,17 @@
 package com.fpl.datn.models;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
 @Table(name = "carts")
 @Data
 @NoArgsConstructor
@@ -23,7 +25,7 @@ public class Cart {
     private String sessionId;
 
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     // Relationships
     @ManyToOne

@@ -15,12 +15,15 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateProductVariantRequest {
+    private Integer id;
 
     @NotBlank(message = "PRODUCT_VARIANT_NAME_REQUIRED")
     private String variantName;
 
     @NotNull(message = "PRODUCT_VARIANT_PRICE_REQUIRED")
     private BigDecimal price;
+
+    private BigDecimal salePrice;
 
     @NotNull(message = "PRODUCT_VARIANT_QUANTITY_REQUIRED")
     private Integer quantity;
@@ -31,8 +34,8 @@ public class UpdateProductVariantRequest {
     @NotNull(message = "PRODUCT_VARIANT_ISACTIVE_REQUIRED")
     private Boolean isActive;
 
-
-    private List<Integer> attributeValueIds;
+    //    @NotNull(message = "PRODUCT_VARIANT_ATTRIBUTE_VALUE_IDS_REQUIRED")
+    //    private List<Integer> attributeValueIds;
 
     private List<ProductImageRequest> images;
 }

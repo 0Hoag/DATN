@@ -20,4 +20,5 @@ public class OrderDetailResponse {
     String name;
     // tên biến thể sản phẩm
     String variantName;
+    String imageUrl;
 }

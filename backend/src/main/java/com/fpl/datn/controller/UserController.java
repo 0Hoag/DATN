@@ -46,22 +46,35 @@ public class UserController {
     }
 
     @GetMapping
-    ApiResponse<List<UserResponse>> list() {
+    ApiResponse<List<UserResponse>> list(
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active) {
         var authenticated = SecurityContextHolder.getContext().getAuthentication();
         authenticated.getAuthorities().stream().forEach(grantedAuthority -> log.info(grantedAuthority.getAuthority()));
         return ApiResponse.<List<UserResponse>>builder()
                 .code(1000)
-                .result(userService.List())
+                .result(userService.List(active))
                 .build();
     }
 
     @GetMapping("/get")
     ApiResponse<PageResponse<UserResponse>> get(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active) {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .code(1000)
+                .result(userService.Get(page, size, active))
+                .build();
+    }
+
+    // Get all user
+    @GetMapping("/getAll")
+    ApiResponse<PageResponse<UserResponse>> getAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<UserResponse>>builder()
                 .code(1000)
-                .result(userService.Get(page, size))
+                .result(userService.GetAll(page, size))
                 .build();
     }
 
@@ -105,9 +118,20 @@ public class UserController {
                 .build();
     }
 
+    // delete soft default call api there!
     @DeleteMapping("/{id}")
-    ApiResponse<String> delete(@PathVariable int id) {
-        userService.Delete(id);
+    ApiResponse<String> delete(@PathVariable int id, @RequestBody DeleteRequest request) {
+        userService.DeleteSoftOne(id, request);
+        return ApiResponse.<String>builder()
+                .code(1000)
+                .message("User has been delete")
+                .build();
+    }
+
+    // delete real
+    @DeleteMapping("/deleteOne/{id}")
+    ApiResponse<String> deleteOne(@PathVariable int id) {
+        userService.DeleteOne(id);
         return ApiResponse.<String>builder()
                 .code(1000)
                 .message("User has been delete")
@@ -117,11 +141,31 @@ public class UserController {
     @GetMapping("/search")
     public ApiResponse<PageResponse<UserResponse>> searchUser(
             @RequestParam String keyword,
+            @RequestParam(value = "role") String roleName,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(value = "active", required = false, defaultValue = "true") boolean active) {
+        return ApiResponse.<PageResponse<UserResponse>>builder()
+                .code(1000)
+                .result(userService.search(keyword, roleName, active, page, size))
+                .build();
+    }
+
+    @GetMapping("/get/deleted")
+    public ApiResponse<PageResponse<UserResponse>> getDeleted(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<UserResponse>>builder()
                 .code(1000)
-                .result(userService.search(keyword, page, size))
+                .result(userService.getDeletedUsers(page, size))
+                .build();
+    }
+
+    @PostMapping("/restore/{id}")
+    public ApiResponse<UserResponse> restoreUser(@PathVariable int id) {
+        return ApiResponse.<UserResponse>builder()
+                .code(1000)
+                .result(userService.restoreUser(id))
                 .build();
     }
 }

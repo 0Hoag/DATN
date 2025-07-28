@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 
 import org.springframework.data.domain.PageRequest;
@@ -18,9 +19,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.OrderFromCartRequest;
 import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
@@ -34,6 +34,7 @@ import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.OrderMapper;
 import com.fpl.datn.models.Address;
+import com.fpl.datn.models.Cart;
 import com.fpl.datn.models.Order;
 import com.fpl.datn.models.OrderDetail;
 import com.fpl.datn.models.Voucher;
@@ -65,6 +66,8 @@ public class OrderService {
     TransactionLogService logService;
     VnpayService vnpayService;
     MomoService momoService;
+    SendMailService sendMailService;
+    CartService cartService;
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ORDER')")
     public PageResponse<OrderResponse> getAll(int page, int size, boolean isDesc) {
@@ -82,13 +85,13 @@ public class OrderService {
     }
 
     public OrderResponse getOrder(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        var order = getValidOrder(id);
         return mapper.toOrderResponse(order);
     }
 
     public PageResponse<OrderResponse> search(
             String keyword,
+            String userId,
             String orderStatus,
             String paymentStatus,
             LocalDate startDate,
@@ -99,6 +102,7 @@ public class OrderService {
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         Specification<Order> spec = OrderSpecification.hasFullName(keyword)
+                .and(OrderSpecification.hasIdUser(userId))
                 .and(OrderSpecification.hasOrderStatus(orderStatus))
                 .and(OrderSpecification.hasPaymentStatus(paymentStatus))
                 .and(OrderSpecification.createAtBetween(startDate, endDate));
@@ -114,8 +118,7 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest)
-            throws JsonMappingException, JsonProcessingException {
+    public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest) throws Exception {
         var order = prepareOrder(request);
         var details = processOrderItems(order, request.getItems(), false);
 
@@ -128,6 +131,11 @@ public class OrderService {
         order.setTotalAmount(total);
         order.setOrderDetails(details);
         repository.save(order);
+
+        return preparePaymentAndLog(order, httpRequest);
+    }
+
+    private OrderResponse preparePaymentAndLog(Order order, HttpServletRequest httpRequest) throws Exception {
         var response = mapper.toOrderResponse(order);
         String txnRef = null;
         if (isVnpay(order)) {
@@ -140,14 +148,47 @@ public class OrderService {
             response.setPaymentUrl(payment.getPaymentUrl());
             txnRef = payment.getTxnRef();
         }
+        sendMailService.sendInvoiceToUser(order.getId());
         logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef, null);
         return response;
     }
 
     @Transactional
+    public OrderResponse createOrderFromCart(
+            OrderFromCartRequest request, HttpServletRequest httpRequest, HttpSession session) throws Exception {
+        Integer userId = cartService.extractUserIdFromSecurityContext();
+        // Lấy giỏ hàng
+        Cart cart =
+                (userId == null) ? cartService.getCartBySession(session.getId()) : cartService.getCartByUser(userId);
+        List<OrderItemResponse> items = cart.getCartItems().stream()
+                .map(cartItem -> OrderItemResponse.builder()
+                        .productVariantId(cartItem.getProductVariant().getId())
+                        .quantity(cartItem.getQuantity())
+                        .build())
+                .toList();
+        if (items.isEmpty()) throw new AppException(ErrorCode.CART_EMPTY);
+        OrderRequest fullRequest = OrderRequest.builder()
+                .userId(userId)
+                .addressId(request.getAddressId())
+                .inputAddress(request.getInputAddress())
+                .inputFullname(request.getInputFullname())
+                .inputPhone(request.getInputPhone())
+                .paymentMethodId(request.getPaymentMethodId())
+                .orderStatus(request.getOrderStatus())
+                .paymentStatus(request.getPaymentStatus())
+                .voucherId(request.getVoucherId())
+                .note(request.getNote())
+                .items(items)
+                .build();
+        OrderResponse response = create(fullRequest, httpRequest);
+        // Xoá giỏ hàng sau khi tạo đơn thành công
+        cartService.clearCart(cart);
+        return response;
+    }
+
+    @Transactional
     public OrderResponse update(int id, UpdateOrderRequest request, HttpServletRequest httpRequest) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        var order = getValidOrder(id);
         mapper.toUpdateOrder(order, request);
         if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
             var address = addressRepository
@@ -170,8 +211,7 @@ public class OrderService {
 
     @Transactional
     public void delete(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        var order = getValidOrder(id);
         if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
             throw new AppException(ErrorCode.ORDER_DELETE_RECEIVED);
         if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription()))
@@ -183,11 +223,24 @@ public class OrderService {
         logService.logPayment(order, OrderActionType.DELETE.getType(), null, null);
     }
 
+    @Transactional
+    public void cancel(int id) {
+        var order = getValidOrder(id);
+        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
+            restoreInventory(order);
+            order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
+            repository.save(order);
+            logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
+            return;
+        }
+        throw new AppException(ErrorCode.ORDER_DELETE_PAID);
+    }
+
     // Update trạng thái đơn hàng và Trạng thái thanh toán;
     @Transactional
-    public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        if (repository.existsByIdAndIsDeleteTrue(id)) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+    public OrderResponse updateOrderStatus(int id, OrderStatusRequest request) throws Exception {
+        var order = getValidOrder(id);
+
         // Nếu đã nhận hàng thì báo không thể chỉnh sửa
         if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription()))
             throw new AppException(ErrorCode.ORDER_CANNOT_BE_MODIFIED);
@@ -208,11 +261,35 @@ public class OrderService {
 
         order.setUpdatedAt(LocalDateTime.now());
         repository.save(order);
+        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.SHIPPED.getDescription())) {
+            sendMailService.sendInvoiceToUserUpdateStatus(id);
+        }
         var response = mapper.toOrderResponse(order);
+        // Nếu COD thì trạng thái đơn hàng RECEIED nó mới lưu vào log hoặc VNPAY mà thái đơn hàng là PAID thì nó mới lưu
         if (isValidPaymentCOD(order) || isValidPaymentVNPAY(order)) {
             logService.logPayment(order, OrderActionType.UPDATE_STATUS.getType(), response.getPaymentUrl(), null);
         }
         return response;
+    }
+
+    private Order getValidOrder(int id) {
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        if (Boolean.TRUE.equals(order.getIsDelete())) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        return order;
+    }
+
+    public PageResponse<OrderResponse> getOrderByUser(int id, int page, int size, Boolean isDesc) {
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        var pageData = repository.findByUserId(id, pageable);
+        var data = pageData.stream().map(order -> mapper.toOrderResponse(order)).toList();
+        return PageResponse.<OrderResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
     }
 
     public static boolean isValidPaymentCOD(Order order) {
@@ -304,7 +381,7 @@ public class OrderService {
     }
 
     // Xử lí hoàn hàng tồn kho
-    private void restoreInventory(Order order) {
+    public void restoreInventory(Order order) {
         if (order.getOrderDetails() != null) {
             for (OrderDetail detail : order.getOrderDetails()) {
                 var variant = detail.getProductVariant();
@@ -339,6 +416,7 @@ public class OrderService {
                         .productVariant(variant)
                         .quantity(response.getQuantity())
                         .price(variant.getPrice())
+                        .createdAt(LocalDateTime.now())
                         .build();
                 details.add(detail);
             }

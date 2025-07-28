@@ -1,5 +1,8 @@
 package com.fpl.datn.mapper.Product;
 
+import java.math.BigDecimal;
+import java.util.Objects;
+
 import org.mapstruct.*;
 
 import com.fpl.datn.dto.request.Product.ProductRequest;
@@ -7,12 +10,14 @@ import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
 import com.fpl.datn.mapper.CategoryMapper;
 import com.fpl.datn.mapper.DateMapper;
+import com.fpl.datn.mapper.ProductReviewMapper;
 import com.fpl.datn.models.Category;
 import com.fpl.datn.models.Product;
+import com.fpl.datn.models.ProductVariant;
 
 @Mapper(
         componentModel = "spring",
-        uses = {DateMapper.class, ProductVariantMapper.class, CategoryMapper.class})
+        uses = {DateMapper.class, ProductVariantMapper.class, CategoryMapper.class, ProductReviewMapper.class})
 public interface ProductMapper {
 
     // Entity -> Response
@@ -47,5 +52,27 @@ public interface ProductMapper {
         Category category = new Category();
         category.setId(categoryId);
         return category;
+    }
+
+    // Các phương thức mặc định để tính giá
+    default BigDecimal getMinPrice(Product product) {
+        return product.getProductVariants().stream()
+                .map(ProductVariant::getPrice)
+                .filter(Objects::nonNull)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
+    default BigDecimal getMinSalePrice(Product product) {
+        return product.getProductVariants().stream()
+                .map(ProductVariant::getSalePrice)
+                .filter(Objects::nonNull)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+    }
+
+    default BigDecimal getFinalPrice(Product product) {
+        BigDecimal minSale = getMinSalePrice(product);
+        return (minSale != null) ? minSale : getMinPrice(product);
     }
 }

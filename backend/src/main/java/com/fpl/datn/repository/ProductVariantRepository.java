@@ -2,6 +2,8 @@ package com.fpl.datn.repository;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,4 +20,13 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     List<ProductVariant> findVariantsByProductId(@Param("productId") Integer productId);
 
     boolean existsBySkuAndIdNot(String sku, Integer id);
+
+    @Query(
+            """
+	SELECT pv
+	FROM ProductVariant pv
+	WHERE LOWER(pv.variantName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+	OR LOWER(pv.sku) LIKE LOWER(CONCAT('%', :keyword, '%'))
+""")
+    Page<ProductVariant> searchVariants(@Param("keyword") String keyword, Pageable pageable);
 }

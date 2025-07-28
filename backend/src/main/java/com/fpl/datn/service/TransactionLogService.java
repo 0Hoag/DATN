@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fpl.datn.dto.response.TransactionlogResponse;
+import com.fpl.datn.mapper.TransactionLogMapper;
 import com.fpl.datn.models.Order;
 import com.fpl.datn.models.OrderReturn;
 import com.fpl.datn.models.TransactionLog;
@@ -21,16 +23,18 @@ import lombok.experimental.FieldDefaults;
 public class TransactionLogService {
     TransactionLogRepository repository;
     PaymentMethodRepository methodRepository;
+    TransactionLogMapper mapper;
 
-    public List<TransactionLog> Get() {
-        return repository.findAll();
+    public List<TransactionlogResponse> Get() {
+        var response = repository.findAll();
+        return response.stream().map(log -> mapper.toLogResponse(log)).toList();
     }
 
     public void logPayment(Order order, String acctionType, String transactionRef, String transactionNo) {
         var orderlog = TransactionLog.builder()
                 .amount(order.getTotalAmount())
                 .createdAt(LocalDateTime.now())
-                .message(acctionType + " ORDER " + order.getId())
+                .message(acctionType + order.getId())
                 .transactionRef(transactionRef)
                 .transactionNo(transactionNo)
                 .status(order.getOrderStatus())
@@ -50,7 +54,7 @@ public class TransactionLogService {
         var orderlog = TransactionLog.builder()
                 .amount(orderReturn.getRefundAmount())
                 .createdAt(LocalDateTime.now())
-                .message(acctionType + " ORDER RETURN " + orderReturn.getId())
+                .message(acctionType + orderReturn.getId())
                 .actionType(acctionType)
                 .transactionNo(transactionNo)
                 .transactionRef(txnRef)

@@ -534,6 +534,9 @@ onMounted(async () => {
                   <a class="nav-link" href="#" @click.prevent> Hoàn thành </a>
                 </li>
                 <li class="nav-item">
+                  <a class="nav-link" href="#" @click.prevent> Đã nhận hàng </a>
+                </li>
+                <li class="nav-item">
                   <a class="nav-link" href="#" @click.prevent> Đã hủy </a>
                 </li>
               </ul>
@@ -605,6 +608,7 @@ onMounted(async () => {
                           >
                             Xem chi tiết
                           </button>
+                          
                         </div>
                       </div>
                     </div>
@@ -880,9 +884,15 @@ onMounted(async () => {
               <p><strong>Mã đơn hàng:</strong> #{{ selectedOrder?.id }}</p>
               <p><strong>Ngày đặt:</strong> {{ formatDate(selectedOrder?.createdAt) }}</p>
               <p>
-                <strong>Trạng thái:</strong>
+                <strong>Trạng thái đơn hàng:</strong>
                 <span class="fw-bold text-uppercase text-success">
                   {{ selectedOrder?.orderStatus }}
+                </span>
+              </p>
+              <p>
+                <strong>Trạng thái Thanh toán:</strong>
+                <span class="fw-bold text-uppercase text-success">
+                  {{ selectedOrder?.paymentStatus }}
                 </span>
               </p>
             </div>

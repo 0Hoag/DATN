@@ -3,6 +3,7 @@ package com.fpl.datn.controller;
 import java.time.LocalDate;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.OrderFromCartRequest;
 import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
@@ -53,9 +53,27 @@ public class OrderController {
                 .build();
     }
 
+    @GetMapping("/user/{id}")
+    ApiResponse<PageResponse<OrderResponse>> getAll(
+            @PathVariable int id,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
+        return ApiResponse.<PageResponse<OrderResponse>>builder()
+                .result(orderService.getOrderByUser(id, page, size, sort))
+                .build();
+    }
+
+    @GetMapping("/cancel/{id}")
+    ApiResponse<Void> cancel(@PathVariable int id) {
+        orderService.cancel(id);
+        return ApiResponse.<Void>builder().message("Cancel Success!").build();
+    }
+
     @GetMapping("/search")
     ApiResponse<PageResponse<OrderResponse>> search(
             @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String userId,
             @RequestParam(required = false) String orderStatus,
             @RequestParam(required = false) String paymentStatus,
             @RequestParam(required = false) LocalDate startDate,
@@ -64,15 +82,25 @@ public class OrderController {
             @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<OrderResponse>>builder()
-                .result(orderService.search(keyword, orderStatus, paymentStatus, startDate, endDate, page, size, sort))
+                .result(orderService.search(
+                        keyword, userId, orderStatus, paymentStatus, startDate, endDate, page, size, sort))
                 .build();
     }
 
     @PostMapping
     ApiResponse<OrderResponse> createOrder(@RequestBody @Valid OrderRequest request, HttpServletRequest httpRequest)
-            throws JsonMappingException, JsonProcessingException {
+            throws Exception {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.create(request, httpRequest))
+                .build();
+    }
+
+    @PostMapping("/cart")
+    ApiResponse<OrderResponse> createOrderFromCart(
+            @RequestBody @Valid OrderFromCartRequest request, HttpServletRequest httpRequest, HttpSession session)
+            throws Exception {
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderService.createOrderFromCart(request, httpRequest, session))
                 .build();
     }
 
@@ -85,7 +113,8 @@ public class OrderController {
     }
 
     @PutMapping("/status/{id}")
-    ApiResponse<OrderResponse> updateOrderStatus(@PathVariable int id, @RequestBody OrderStatusRequest request) {
+    ApiResponse<OrderResponse> updateOrderStatus(@PathVariable int id, @RequestBody OrderStatusRequest request)
+            throws Exception {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.updateOrderStatus(id, request))
                 .build();

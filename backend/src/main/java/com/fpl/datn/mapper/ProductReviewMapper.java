@@ -8,10 +8,12 @@ import com.fpl.datn.models.ProductReview;
 
 @Mapper(componentModel = "spring")
 public interface ProductReviewMapper {
-    @Mapping(target = "email", source = "user.email")
-    @Mapping(target = "fullName", source = "user.fullName")
-    @Mapping(target = "producName", source = "product.name")
+
+    @Mapping(target = "userEmail", source = "user.email")
+    @Mapping(target = "userFullName", source = "user.fullName") // Ánh xạ tên đầy đủ của người dùng vào userFullName
+    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "productName", source = "product.name") // Ánh xạ tên sản phẩm vào productName
     @Mapping(target = "productId", source = "product.id")
-    @Mapping(target = "thumbnail", source = "product.thumbnail")
+    @Mapping(target = "productThumbnail", source = "product.thumbnail")
     ProductReviewResponse toProductReviewResponse(ProductReview productReview);
 }

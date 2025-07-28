@@ -5,7 +5,7 @@ spring:
     url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/datn}
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
-    password: root
+    password: daohuucong123
   jpa:
     hibernate:
       ddl-auto: update
@@ -15,6 +15,18 @@ spring:
     multipart:
       max-file-size: 10MB
       max-request-size: 100MB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: phonezone.shop11@gmail.com
+    password: koyi qojj mijo zohp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   port: 8080
   servlet:
@@ -35,6 +47,7 @@ vnpay:
   url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
   refund-url: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
   return-url: http://localhost:8080/datn/payment/vnpay-return
+#  return-url: http://localhost:5173/
 momo:
   url: https://test-payment.momo.vn/v2/gateway/api/create
   refund-url: https://test-payment.momo.vn/v2/gateway/api/refund
@@ -43,5 +56,4 @@ momo:
   secret-key: SetA5RDnLHvt51AULf51DyauxUo3kDU6
   return-url: https://088e-2402-800-63b6-9b27-b497-4453-825e-43fb.ngrok-free.app/datn/payment/momo-return
   notify-url: https://088e-2402-800-63b6-9b27-b497-4453-825e-43fb.ngrok-free.app/datn/payment/momo-notify
-
 

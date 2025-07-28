@@ -16,8 +16,9 @@ import com.fpl.datn.models.Product;
 public interface CategoryMapper {
 
     @Mapping(target = "parent", source = "parent", qualifiedByName = "parentToId")
-    @Mapping(target = "children", source = "children", qualifiedByName = "childrenToNameList")
+    @Mapping(target = "children", source = "children")
     @Mapping(target = "products", source = "products", qualifiedByName = "productsToNameList")
+    @Mapping(target = "nameParent", source = "parent", qualifiedByName = "parentToName")
     CategoryResponse toCategoryResponse(Category category);
 
     @Mapping(target = "parent", expression = "java(mapParentIdToCategory(request.getParent()))")
@@ -28,6 +29,11 @@ public interface CategoryMapper {
     @Mapping(target = "description", source = "description")
     @Mapping(target = "isShow", source = "isShow")
     void update(@MappingTarget Category category, UpdateCategoryRequest request);
+
+    @Named("parentToName")
+    default String parentToName(Category parent) {
+        return parent != null ? parent.getName() : null;
+    }
 
     default void updateParent(@MappingTarget Category category, int parentId) {
         if (parentId == 0) {
@@ -42,13 +48,6 @@ public interface CategoryMapper {
     @Named("parentToId")
     default Integer parentToId(Category parent) {
         return parent != null ? parent.getId() : null;
-    }
-
-    @Named("childrenToNameList")
-    default List<String> childrenToNameList(List<Category> children) {
-        return children == null
-                ? Collections.emptyList()
-                : children.stream().map(Category::getName).collect(Collectors.toList());
     }
 
     @Named("productsToNameList")

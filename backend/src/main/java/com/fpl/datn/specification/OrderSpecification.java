@@ -14,12 +14,26 @@ public class OrderSpecification {
             if (keyword == null || keyword.isEmpty()) {
                 return null;
             }
-            String likeKeyword = "%" + keyword.toLowerCase() + "%";
+            String likeKeyword = "%" + keyword.trim().toLowerCase() + "%";
+            if (keyword.contains("@")) {
+                return cb.like(cb.lower(root.get("user").get("email")), likeKeyword);
+            }
 
             return cb.or(
                     cb.like(cb.lower(root.get("user").get("fullName")), likeKeyword),
                     cb.like(cb.lower(root.get("user").get("phone")), likeKeyword),
                     cb.like(cb.toString(root.get("id")), likeKeyword));
+        };
+    }
+
+    // tìm theo keyword phone, id,fullname
+    public static Specification<Order> hasIdUser(String userId) {
+        return (root, query, cb) -> {
+            if (userId == null || userId.isEmpty()) {
+                return null;
+            }
+
+            return cb.like(cb.toString(root.get("user").get("id")), userId);
         };
     }
     // tìm theo ngày

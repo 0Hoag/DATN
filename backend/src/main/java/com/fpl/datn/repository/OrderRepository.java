@@ -14,5 +14,7 @@ public interface OrderRepository extends JpaRepository<Order, Integer>, JpaSpeci
 
     Page<Order> findByIsDeleteFalse(Pageable pageable);
 
+    Page<Order> findByUserId(int userId, Pageable pageables);
+
     boolean existsByIdAndIsDeleteTrue(int id);
 }

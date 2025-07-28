@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ChartPointResponse {
-    String date; // YYYY-MM
-    String name;
+    Integer month;
     BigDecimal value;
 }

@@ -14,6 +14,7 @@ public class ProductVariantResponse {
     private Integer id;
     private String variantName;
     private Long price;
+    private Long salePrice;
     private Integer quantity;
     private Integer sold;
     private Boolean isActive;

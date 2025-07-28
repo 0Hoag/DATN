@@ -1,8 +1,13 @@
 package com.fpl.datn.dto.response;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.util.List;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @Data
@@ -11,7 +16,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartResponse {
-    private Integer id;
-    private String sessionId;
-    private LocalDateTime createdAt;
+    Integer id;
+    String sessionId;
+    Integer userId;
+    List<CartItemResponse> cartItems;
+    LocalDate createdAt;
 }

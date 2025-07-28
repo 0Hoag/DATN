@@ -9,12 +9,12 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public enum OrderStatus {
-    PENDING("PENDING"),
-    CONFIRMED("CONFIRMED"),
-    SHIPPED("SHIPPED"),
-    DELIVERED("DELIVERED"),
-    RECEIED("RECEIED"),
-    CANCELLED("CANCELLED");
+    PENDING("PENDING"), // đang xử lí
+    CONFIRMED("CONFIRMED"), // đã xác nhận
+    SHIPPED("SHIPPED"), // đang giao
+    DELIVERED("DELIVERED"), // đã giao
+    RECEIED("RECEIED"), // đã nhận
+    CANCELLED("CANCELLED"); // đã hủy
 
     String description;
 }

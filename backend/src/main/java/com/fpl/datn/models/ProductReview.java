@@ -4,37 +4,40 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
 
 @Entity
 @Table(name = "product_reviews")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductReview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    Integer id;
 
-    private Integer rating;
+    Integer rating; // Nullable cho bình luận trả lời của admin
+    String content;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-
-    // Relationships
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product product;
+    Product product;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    User user;
+
+    // Mối quan hệ tự tham chiếu cho bình luận trả lời
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reply_to") // Tên cột là reply_to
+    ProductReview parentReview; // Bình luận gốc mà bình luận này trả lời
+
+    // Mối quan hệ một-một cho bình luận trả lời của admin
+    @OneToOne(mappedBy = "parentReview", cascade = CascadeType.ALL, orphanRemoval = true)
+    ProductReview adminReply; // Bình luận trả lời của admin cho bình luận gốc này
 }

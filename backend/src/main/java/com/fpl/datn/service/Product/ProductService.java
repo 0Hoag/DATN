@@ -1,5 +1,6 @@
 package com.fpl.datn.service.Product;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,6 +10,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -16,6 +18,7 @@ import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.ProductVariantRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
+import com.fpl.datn.dto.response.Product.ProductSaleResponse;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductMapper;
@@ -36,7 +39,7 @@ public class ProductService {
     ProductMapper mapper;
     CategoryRepository cateRepo;
     ProductVariantService productVariantService;
-    ProductImageRepository imageRepo;
+    ProductReviewRepository reviewRepo;
 
     // thêm sản phẩ
     @Transactional
@@ -133,7 +136,7 @@ public class ProductService {
 
     public PageResponse<ProductResponse> search(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Product> productPage = repo.searchByNameOrSku(keyword, pageable);
+        Page<Product> productPage = repo.searchByNameOrSlug(keyword, pageable);
         List<ProductResponse> data =
                 productPage.getContent().stream().map(mapper::toProductResponse).collect(Collectors.toList());
 
@@ -144,5 +147,55 @@ public class ProductService {
                 .totalElements(productPage.getTotalElements())
                 .data(data)
                 .build();
+    }
+
+    public List<ProductSaleResponse> getSaleProductsSimple(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductSaleResponse> pageResult = repo.findSaleProductsSimple(pageable);
+        List<ProductSaleResponse> list = pageResult.getContent();
+        for (ProductSaleResponse item : list) {
+            Double avgRating = reviewRepo.getAverageRatingByProductId(item.getProductId());
+            item.setAverageRating(avgRating != null ? avgRating : 0.0);
+        }
+        return list;
+    }
+
+    public PageResponse<ProductSaleResponse> getProductBySlugCategory(
+            String slugCategory, int page, int size, boolean isDesc) {
+
+        Category category =
+                cateRepo.findBySlug(slugCategory).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size);
+        var pageResult = repo.findAllByCategoryId(category.getId(), pageable);
+        List<ProductSaleResponse> list = pageResult.getContent();
+        for (ProductSaleResponse item : list) {
+            Double avgRating = reviewRepo.getAverageRatingByProductId(item.getProductId());
+            item.setAverageRating(avgRating != null ? avgRating : 0.0);
+        }
+
+        return PageResponse.<ProductSaleResponse>builder()
+                .currentPage(page)
+                .totalPages(pageResult.getTotalPages())
+                .pageSize(pageResult.getSize())
+                .totalElements(pageResult.getTotalElements())
+                .data(list)
+                .build();
+    }
+
+    public ProductResponse detailbySlug(String slug) {
+        Product product = repo.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        return mapper.toProductResponse(product);
+    }
+
+    public Page<ProductSaleResponse> filterProducts(
+            Integer categoryId, List<String> brands, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
+        if (brands != null && brands.isEmpty()) {
+            brands = null;
+        }
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductSaleResponse> products = repo.filterProducts(categoryId, brands, minPrice, maxPrice, pageable);
+        return products;
     }
 }
