@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -77,10 +79,17 @@ public class CategoryService {
         return mapper.toCategoryResponse(category);
     }
 
-    public List<CategoryResponse> list() {
-        return repo.findAll().stream().map(mapper::toCategoryResponse).collect(Collectors.toList());
+    public CategoryResponse detail(String slug) {
+        Category category = repo.findBySlug(slug).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
+        return mapper.toCategoryResponse(category);
     }
-
+    // hien thi cho user
+    public List<CategoryResponse> list() {
+        return repo.findAllByIsShowTrue().stream()
+                .map(mapper::toCategoryResponse)
+                .collect(Collectors.toList());
+    }
+    // dung cho admin
     public PageResponse<CategoryResponse> get(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = repo.findAll(pageable);
@@ -136,5 +145,18 @@ public class CategoryService {
         }
 
         repo.delete(category);
+    }
+
+    public PageResponse<CategoryResponse> searchByKeyword(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
+        Page<Category> pageData = repo.findByNameContainingIgnoreCase(keyword, pageable);
+        var data = pageData.stream().map(mapper::toCategoryResponse).toList();
+        return PageResponse.<CategoryResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
     }
 }

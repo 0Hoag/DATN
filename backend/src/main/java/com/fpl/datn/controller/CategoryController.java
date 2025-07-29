@@ -42,6 +42,14 @@ public class CategoryController {
                 .build();
     }
 
+    @GetMapping("/detail/{slug}")
+    public ApiResponse<CategoryResponse> DetailBySlug(@PathVariable("slug") String slug) {
+        return ApiResponse.<CategoryResponse>builder()
+                .code(1000)
+                .result(categoryService.detail(slug))
+                .build();
+    }
+
     @GetMapping("/List")
     public ApiResponse<List<CategoryResponse>> List() {
         return ApiResponse.<List<CategoryResponse>>builder()
@@ -73,5 +81,16 @@ public class CategoryController {
     public ApiResponse<Void> Delete(@PathVariable("id") int id) {
         categoryService.delete(id);
         return ApiResponse.<Void>builder().code(1000).message("Delete success!").build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<CategoryResponse>> search(
+            @RequestParam String keyword,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<CategoryResponse>>builder()
+                .code(1000)
+                .result(categoryService.searchByKeyword(keyword, page, size))
+                .build();
     }
 }
