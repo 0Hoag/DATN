@@ -409,13 +409,16 @@ public class OrderService {
                 variant.setQuantity(variant.getQuantity() - response.getQuantity());
                 variant.setSold(variant.getSold() + response.getQuantity());
                 variantRepository.save(variant);
-
+                BigDecimal price = (variant.getSalePrice() != null
+                                && variant.getSalePrice().compareTo(BigDecimal.ZERO) != 0)
+                        ? variant.getSalePrice()
+                        : variant.getPrice();
                 var detail = OrderDetail.builder()
                         .order(order)
                         .product(variant.getProduct())
                         .productVariant(variant)
                         .quantity(response.getQuantity())
-                        .price(variant.getPrice())
+                        .price(price)
                         .createdAt(LocalDateTime.now())
                         .build();
                 details.add(detail);
