@@ -16,7 +16,8 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, In
     Page<ProductReview> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
     // ===== PUBLIC: XEM ĐÁNH GIÁ THEO SẢN PHẨM =====
-    Page<ProductReview> findByProductIdOrderByCreatedAtDesc(Integer productId, Pageable pageable);
+    Page<ProductReview> findByProductIdAndIsVisibleTrueOrderByCreatedAtDesc(Integer productId, Pageable pageable);
+    //    Page<ProductReview> findByProductIdOrderByCreatedAtDesc(Integer productId, Pageable pageable);
 
     // ===== KIỂM TRA USER ĐÃ ĐÁNH GIÁ SẢN PHẨM CHƯA =====
     boolean existsByUserIdAndProductId(Integer userId, Integer productId);

@@ -16,6 +16,7 @@ public class OrderDetailResponse {
     Integer id;
     BigDecimal price;
     Integer quantity;
+    Boolean isReviewed;
     // tến sản phẩm
     String name;
     // tên biến thể sản phẩm

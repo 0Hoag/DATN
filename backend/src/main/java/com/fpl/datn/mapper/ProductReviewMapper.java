@@ -15,5 +15,6 @@ public interface ProductReviewMapper {
     @Mapping(target = "productName", source = "product.name") // Ánh xạ tên sản phẩm vào productName
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productThumbnail", source = "product.thumbnail")
+    @Mapping(target = "isReviewed", source = "orderDetail.isReviewed")
     ProductReviewResponse toProductReviewResponse(ProductReview productReview);
 }

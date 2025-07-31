@@ -3,7 +3,14 @@ package com.fpl.datn.controller;
 import jakarta.validation.Valid;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
@@ -49,7 +56,6 @@ public class ProductReviewController {
 
     // ===== FIX: CUSTOMER + ADMIN có thể tạo review =====
     @PostMapping
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     public ApiResponse<ProductReviewResponse> createReview(@Valid @RequestBody ProductReviewRequest request) {
         return ApiResponse.<ProductReviewResponse>builder()
                 .result(productReviewService.createReview(request))
@@ -63,6 +69,12 @@ public class ProductReviewController {
     public ApiResponse<Void> deleteReview(@PathVariable int id) {
         productReviewService.deleteReview(id);
         return ApiResponse.<Void>builder().message("Xóa đánh giá thành công!").build();
+    }
+
+    @PostMapping("/hideReview/{id}")
+    public ApiResponse<Void> hideReview(@PathVariable int id) {
+        productReviewService.hideReview(id);
+        return ApiResponse.<Void>builder().message("Ẩn đánh giá thành công!").build();
     }
 
     // ===== FIX: CUSTOMER + ADMIN có thể xóa review của mình =====

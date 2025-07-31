@@ -12,7 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductReviewRequest {
     // Các annotation validation đã được loại bỏ để cho phép null khi là bình luận trả lời
-    private Integer productId;
+    private Integer orderDetailId;
     private Integer rating;
 
     @NotBlank(message = "Nội dung đánh giá không được để trống")

@@ -60,7 +60,7 @@ public class ProductReviewService {
         productRepository.findById(productId).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        var pageData = repository.findByProductIdOrderByCreatedAtDesc(productId, pageable);
+        var pageData = repository.findByProductIdAndIsVisibleTrueOrderByCreatedAtDesc(productId, pageable);
         var data = pageData.stream().map(mapper::toProductReviewResponse).toList();
 
         return PageResponse.<ProductReviewResponse>builder()
@@ -72,12 +72,12 @@ public class ProductReviewService {
                 .build();
     }
 
-    // ===== FIX: CUSTOMER + ADMIN có thể tạo review =====
+    //     ===== FIX: CUSTOMER + ADMIN có thể tạo review =====
     @Transactional
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     public ProductReviewResponse createReview(ProductReviewRequest request) {
         // Validate input
-        if (request.getProductId() == null || request.getRating() == null) {
+        if (request.getOrderDetailId() == null || request.getRating() == null) {
             throw new AppException(ErrorCode.INVALID_INPUT);
         }
 
@@ -91,10 +91,16 @@ public class ProductReviewService {
                 .findById(currentUserResponse.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        var orderDetail = orderDetailRepository
+                .findById(request.getOrderDetailId())
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
+
+        if (orderDetail.getProductReview() != null) {
+            throw new AppException(ErrorCode.REVIEW_ALREADY_EXISTS);
+        }
+
         // Validate sản phẩm tồn tại và active
-        Product product = productRepository
-                .findById(request.getProductId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        Product product = orderDetail.getProduct();
 
         if (!product.getIsActive()) {
             throw new AppException(ErrorCode.PRODUCT_INACTIVE);
@@ -106,13 +112,13 @@ public class ProductReviewService {
 
         if (!isAdmin) {
             // Chỉ kiểm tra purchase cho CUSTOMER
-            if (!orderDetailRepository.hasUserPurchasedProduct(currentUser.getId(), request.getProductId())) {
+            if (!orderDetailRepository.hasUserPurchasedProduct(currentUser.getId(), product.getId())) {
                 throw new AppException(ErrorCode.USER_NOT_PURCHASED_PRODUCT);
             }
         }
 
         // Kiểm tra user đã đánh giá sản phẩm này chưa
-        if (repository.existsByUserIdAndProductId(currentUser.getId(), request.getProductId())) {
+        if (repository.existsByUserIdAndProductId(currentUser.getId(), product.getId())) {
             throw new AppException(ErrorCode.REVIEW_ALREADY_EXISTS);
         }
 
@@ -120,12 +126,15 @@ public class ProductReviewService {
         ProductReview review = ProductReview.builder()
                 .product(product)
                 .user(currentUser)
+                .orderDetail(orderDetail)
                 .rating(request.getRating())
                 .content(request.getContent())
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
 
+        orderDetail.setIsReviewed(true);
+        orderDetailRepository.save(orderDetail);
         var savedReview = repository.save(review);
         return mapper.toProductReviewResponse(savedReview);
     }
@@ -136,7 +145,21 @@ public class ProductReviewService {
     public void deleteReview(int id) {
         var review = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
 
-        repository.deleteById(id);
+        repository.deleteById(review.getId());
+    }
+
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public void hideReview(Integer orderDetailId) {
+        var orderDetail = orderDetailRepository
+                .findById(orderDetailId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
+        var review = repository
+                .findById(orderDetail.getProductReview().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
+
+        review.setIsVisible(false);
+        repository.save(review);
     }
 
     // ===== FIX: CUSTOMER + ADMIN có thể xóa review của mình =====

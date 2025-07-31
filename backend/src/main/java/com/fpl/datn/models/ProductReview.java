@@ -24,6 +24,10 @@ public class ProductReview {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 
+    @Builder.Default
+    @Column(name = "is_visible")
+    Boolean isVisible = true;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     Product product;
@@ -40,4 +44,8 @@ public class ProductReview {
     // Mối quan hệ một-một cho bình luận trả lời của admin
     @OneToOne(mappedBy = "parentReview", cascade = CascadeType.ALL, orphanRemoval = true)
     ProductReview adminReply; // Bình luận trả lời của admin cho bình luận gốc này
+
+    @OneToOne
+    @JoinColumn(name = "order_detail_id", unique = true)
+    private OrderDetail orderDetail;
 }

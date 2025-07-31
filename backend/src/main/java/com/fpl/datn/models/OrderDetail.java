@@ -32,6 +32,10 @@ public class OrderDetail {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @Builder.Default
+    @Column(name = "is_reviewed")
+    private Boolean isReviewed = false;
+
     // Relationships
     @ManyToOne
     @JoinColumn(name = "order_id")
@@ -44,4 +48,7 @@ public class OrderDetail {
     @ManyToOne
     @JoinColumn(name = "product_variant_id")
     private ProductVariant productVariant;
+
+    @OneToOne(mappedBy = "orderDetail", cascade = CascadeType.ALL)
+    private ProductReview productReview;
 }
