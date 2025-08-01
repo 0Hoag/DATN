@@ -66,4 +66,15 @@ public class SendMailService {
         String body = templateEngine.process("shipping", context);
         sendMail(to, shipped, body, null, null);
     }
+
+    public void sendInvoiceToUserCancelOrder(int orderId, String reason) throws Exception {
+        var order = orderRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        String to = order.getUser().getEmail();
+        String shipped = SHIPPED + order.getAddress().getFullName();
+        Context context = new Context();
+        context.setVariable("orderId", orderId);
+        context.setVariable("reason", reason);
+        String body = templateEngine.process("cancel", context);
+        sendMail(to, shipped, body, null, null);
+    }
 }

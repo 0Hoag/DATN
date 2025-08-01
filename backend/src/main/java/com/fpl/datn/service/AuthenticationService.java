@@ -3,13 +3,14 @@ package com.fpl.datn.service;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -89,7 +90,11 @@ public class AuthenticationService {
 
         var token = generateToken(user);
 
-        var auth = new UsernamePasswordAuthenticationToken(user.getId().toString(), null, new ArrayList<>());
+        var authorities = user.getRoles().stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                .collect(Collectors.toList());
+
+        var auth = new UsernamePasswordAuthenticationToken(user.getId().toString(), null, authorities);
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         return AuthenticationResponse.builder().token(token).authenticated(true).build();

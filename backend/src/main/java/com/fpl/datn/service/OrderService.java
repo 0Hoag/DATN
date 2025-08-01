@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.CancelOrderRequest;
 import com.fpl.datn.dto.request.OrderFromCartRequest;
 import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
@@ -224,16 +225,43 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancel(int id) {
+    public void cancel(int id, CancelOrderRequest request) throws Exception {
         var order = getValidOrder(id);
+        if (request.getReason() == null || request.getReason().isEmpty())
+            throw new AppException(ErrorCode.MISSING_INPUT);
         if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
             restoreInventory(order);
             order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
+            if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription())) {
+                order.setPaymentStatus(PaymentStatus.REFUNDED.getDescription());
+            }
+            order.setReason(request.getReason());
             repository.save(order);
             logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
+
             return;
         }
-        throw new AppException(ErrorCode.ORDER_DELETE_PAID);
+        throw new AppException(ErrorCode.CANCEL_ORDER_FAIL);
+    }
+
+    @Transactional
+    public void cancelAdmin(int id, CancelOrderRequest request) throws Exception {
+        var order = getValidOrder(id);
+        if (request.getReason() == null || request.getReason().isEmpty())
+            throw new AppException(ErrorCode.MISSING_INPUT);
+        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
+            restoreInventory(order);
+            order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
+            if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription())) {
+                order.setPaymentStatus(PaymentStatus.REFUNDED.getDescription());
+            }
+            order.setReason(request.getReason());
+            repository.save(order);
+            logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
+            sendMailService.sendInvoiceToUserCancelOrder(id, request.getReason());
+            return;
+        }
+        throw new AppException(ErrorCode.CANCEL_ORDER_FAIL);
     }
 
     // Update trạng thái đơn hàng và Trạng thái thanh toán;
@@ -264,6 +292,7 @@ public class OrderService {
         if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.SHIPPED.getDescription())) {
             sendMailService.sendInvoiceToUserUpdateStatus(id);
         }
+
         var response = mapper.toOrderResponse(order);
         // Nếu COD thì trạng thái đơn hàng RECEIED nó mới lưu vào log hoặc VNPAY mà thái đơn hàng là PAID thì nó mới lưu
         if (isValidPaymentCOD(order) || isValidPaymentVNPAY(order)) {
@@ -389,8 +418,6 @@ public class OrderService {
                 variant.setSold(variant.getSold() - detail.getQuantity());
                 variantRepository.save(variant);
             }
-            orderDetailRepository.deleteAll(order.getOrderDetails());
-            order.getOrderDetails().clear();
         }
     }
     // Xử lí tạo hàng tồn kho

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fpl.datn.dto.ApiResponse;
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.CancelOrderRequest;
 import com.fpl.datn.dto.request.OrderFromCartRequest;
 import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
@@ -64,9 +65,15 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping("/cancel/{id}")
-    ApiResponse<Void> cancel(@PathVariable int id) {
-        orderService.cancel(id);
+    @PostMapping("/cancel/{id}")
+    ApiResponse<Void> cancel(@PathVariable int id, @RequestBody CancelOrderRequest request) throws Exception {
+        orderService.cancel(id, request);
+        return ApiResponse.<Void>builder().message("Cancel Success!").build();
+    }
+
+    @PostMapping("/admin/cancel/{id}")
+    ApiResponse<Void> cancelAmin(@PathVariable int id, @RequestBody CancelOrderRequest request) throws Exception {
+        orderService.cancelAdmin(id, request);
         return ApiResponse.<Void>builder().message("Cancel Success!").build();
     }
 

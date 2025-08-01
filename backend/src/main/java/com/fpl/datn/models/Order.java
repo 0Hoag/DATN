@@ -34,6 +34,9 @@ public class Order {
     @Column(columnDefinition = "TEXT")
     private String note;
 
+    @Column(columnDefinition = "TEXT")
+    private String reason;
+
     @Column(name = "is_return")
     private Boolean isReturn;
 
