@@ -90,9 +90,6 @@ public class UserService {
             user.setRoles(roles);
         }
         
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
         user.setUpdatedAt(LocalDateTime.now());
 
         return userMapper.toUserResponse(userRepositories.save(user));
