@@ -1,0 +1,179 @@
+<script setup>
+import { handleError } from "@/api/functions/common";
+import { CategoryService } from "@/api/service/CategoryService";
+import { ProductService } from "@/api/service/ProductService";
+import ProductList from "@/components/ProductList.vue";
+import { BRANDS } from "@/constant";
+import { onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
+
+const brands = ref(
+  BRANDS.map((b) => ({
+    value: b,
+    label: b,
+  }))
+);
+
+const selectedBrands = ref([]); // nếu cần dùng lọc theo brand sau
+
+const listProductBySlugCategory = ref([]);
+const route = useRoute();
+
+// Phân trang
+const pagination = ref({
+  current: 1,
+  pageSize: 10,
+  total: 0,
+});
+
+// Khoảng giá
+const minPrice = ref("");
+const maxPrice = ref("");
+
+// ID danh mục từ slug
+const categroyId = ref(null);
+
+
+
+
+const getDetailCategoryBySlug = async () => {
+  try {
+    const res = await CategoryService.fetchDetailBySlug(route.params.slug);
+    categroyId.value = res.result.id;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+const getListProductBySlugCategory = async () => {
+  try {
+    const res = await ProductService.fetchListProductBySlugCategory(route.params.slug, {
+      page: pagination.value.current,
+      size: pagination.value.pageSize,
+    });
+    listProductBySlugCategory.value = res.result.data;
+    pagination.value.total = res.result.totalElements;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+const filterProduct = async () => {
+  try {
+    const params = new URLSearchParams();
+    params.append("categoryId", categroyId.value);
+    params.append("page", pagination.value.current);
+    params.append("size", pagination.value.pageSize);
+    if (minPrice.value) params.append("minPrice", minPrice.value);
+    if (maxPrice.value) params.append("maxPrice", maxPrice.value);
+    selectedBrands.value.forEach((brand) => params.append("brands", brand));
+
+    const res = await ProductService.filter(params);
+    listProductBySlugCategory.value = res.result.data;
+    pagination.value.total = res.result.totalElements;
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+// Gọi khi nhấn "Áp dụng bộ lọc"
+const handleFilter = async () => {
+  pagination.value.current = 1;
+  await filterProduct();
+};
+
+// Gọi khi nhấn "Xóa bộ lọc"
+const handleReset = async () => {
+  minPrice.value = "";
+  maxPrice.value = "";
+  selectedBrands.value = [];
+  pagination.value.current = 1;
+  await getListProductBySlugCategory();
+};
+watch(
+  ()=>route.params.slug,
+  async () => {
+    handleReset();
+     await getListProductBySlugCategory();
+  }
+)
+
+watch(
+  () => pagination.value.current,
+  async () => {
+    if(minPrice.value || maxPrice.value) await filterProduct();
+    else await getListProductBySlugCategory();
+  }
+);
+onMounted(async () => {
+  await getDetailCategoryBySlug();
+  await getListProductBySlugCategory();
+});
+</script>
+
+<template>
+  <div class="row my-3">
+    <!-- Sidebar Filter -->
+    <div class="col-lg-3">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h6 class="mb-0"><i class="fas fa-filter me-2"></i>Bộ lọc sản phẩm</h6>
+        </div>
+        <div class="card-body">
+          <!-- Price Filter -->
+          <div class="mb-4">
+            <h6 class="fw-bold">Khoảng giá (VNĐ)</h6>
+            <div class="mb-2">
+              <label>Giá thấp nhất</label>
+              <input
+                type="number"
+                class="form-control"
+                v-model="minPrice"
+                placeholder="VD: 1000000"
+              />
+            </div>
+            <div>
+              <label>Giá cao nhất</label>
+              <input
+                type="number"
+                class="form-control"
+                v-model="maxPrice"
+                placeholder="VD: 10000000"
+              />
+            </div>
+          </div>
+
+          <!-- Brand Filter -->
+          <div class="mb-4">
+            <h6 class="fw-bold">Thương hiệu</h6>
+            <div class="form-check mb-2" v-for="b in brands">
+              <input class="form-check-input" type="checkbox" :id="b.value" :value="b.value"  v-model="selectedBrands" />
+              <label class="form-check-label" :for="b.label">
+                {{ b.value }}
+              </label>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary" @click="handleFilter">Áp dụng bộ lọc</button>
+            <button class="btn btn-outline-secondary" @click="handleReset">
+              Xóa bộ lọc
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <ProductList :products="listProductBySlugCategory" />
+      <!-- Phân trang -->
+      <div class="d-flex justify-content-center mt-3">
+        <a-pagination
+          v-model:current="pagination.current"
+          :total="pagination.total"
+          simple
+          :page-size="pagination.pageSize"
+        />
+      </div>
+    </div>
+  </div>
+</template>

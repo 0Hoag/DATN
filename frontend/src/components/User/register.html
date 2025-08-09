@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechZone - Đăng ký</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <!-- Header -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">
+                <i class="fas fa-mobile-alt me-2 text-warning"></i>TechZone
+            </a>
+            
+            <div class="mx-auto" style="width: 50%;">
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm sản phẩm...">
+                    <button class="btn btn-warning" type="button">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="d-flex">
+                <a href="login.html" class="text-white text-decoration-none me-3">
+                    <i class="fas fa-user me-1"></i>Đăng nhập
+                </a>
+                <a href="cart.html" class="text-white text-decoration-none">
+                    <i class="fas fa-shopping-cart me-1"></i>Giỏ hàng
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card border-0 shadow-lg">
+                    <div class="card-body p-5">
+                        <div class="text-center mb-4">
+                            <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                            <h3 class="fw-bold">Đăng ký tài khoản</h3>
+                            <p class="text-muted">Tạo tài khoản để trải nghiệm mua sắm tốt nhất tại TechZone</p>
+                        </div>
+
+                        <!-- Register Form -->
+                        <form id="registerForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Họ và tên *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-user"></i>
+                                        </span>
+                                        <input type="text" class="form-control" id="fullname" required placeholder="Nhập họ và tên">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Số điện thoại *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-phone"></i>
+                                        </span>
+                                        <input type="tel" class="form-control" id="phone" required placeholder="Nhập số điện thoại">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Email *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    <input type="email" class="form-control" id="email" required placeholder="Nhập địa chỉ email">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Mật khẩu *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" id="password" required placeholder="Nhập mật khẩu">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password', 'toggleIcon1')">
+                                            <i class="fas fa-eye" id="toggleIcon1"></i>
+                                        </button>
+                                    </div>
+                                    <div class="form-text">Tối thiểu 8 ký tự, bao gồm chữ và số</div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Xác nhận mật khẩu *</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-lock"></i>
+                                        </span>
+                                        <input type="password" class="form-control" id="confirmPassword" required placeholder="Nhập lại mật khẩu">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                                            <i class="fas fa-eye" id="toggleIcon2"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Ngày sinh</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-calendar"></i>
+                                        </span>
+                                        <input type="date" class="form-control" id="birthday">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Giới tính</label>
+                                    <select class="form-select" id="gender">
+                                        <option value="">Chọn giới tính</option>
+                                        <option value="male">Nam</option>
+                                        <option value="female">Nữ</option>
+                                        <option value="other">Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                                    <label class="form-check-label" for="agreeTerms">
+                                        Tôi đồng ý với <a href="#" class="text-decoration-none">Điều khoản sử dụng</a> và <a href="#" class="text-decoration-none">Chính sách bảo mật</a> của TechZone
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="newsletter">
+                                    <label class="form-check-label" for="newsletter">
+                                        Nhận thông tin khuyến mãi và sản phẩm mới qua email
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-user-plus me-2"></i>Đăng ký tài khoản
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Social Register -->
+                        <div class="text-center my-4">
+                            <span class="text-muted">Hoặc đăng ký bằng</span>
+                        </div>
+                        <div class="row g-2 mb-4">
+                            <div class="col-6">
+                                <button class="btn btn-outline-danger w-100">
+                                    <i class="fab fa-google me-2"></i>Google
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button class="btn btn-outline-primary w-100">
+                                    <i class="fab fa-facebook-f me-2"></i>Facebook
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Login Link -->
+                        <div class="text-center">
+                            <span class="text-muted">Đã có tài khoản? </span>
+                            <a href="login.html" class="text-decoration-none fw-semibold">Đăng nhập ngay</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const agreeTerms = document.getElementById('agreeTerms').checked;
+            const fullname = document.getElementById('fullname').value;
+            const phone = document.getElementById('phone').value;
+            const email = document.getElementById('email').value;
+            
+            // Validation
+            if (!agreeTerms) {
+                alert('Vui lòng đồng ý với điều khoản sử dụng');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('Mật khẩu xác nhận không khớp');
+                return;
+            }
+            
+            if (password.length < 8) {
+                alert('Mật khẩu phải có ít nhất 8 ký tự');
+                return;
+            }
+
+            // Phone validation
+            const phoneRegex = /^[0-9]{10,11}$/;
+            if (!phoneRegex.test(phone)) {
+                alert('Số điện thoại không hợp lệ');
+                return;
+            }
+
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Email không hợp lệ');
+                return;
+            }
+            
+            // Simulate user registration based on database structure
+            const userData = {
+                id: Date.now(),
+                username: email,
+                full_name: fullname,
+                email: email,
+                phone: phone,
+                password_hash: btoa(password), // Simple encoding for demo
+                birthday: document.getElementById('birthday').value,
+                gender: document.getElementById('gender').value,
+                is_active: true,
+                newsletter_subscribed: document.getElementById('newsletter').checked,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            };
+            
+            // Store user data (in real app, this would be sent to server)
+            localStorage.setItem('registeredUser', JSON.stringify(userData));
+            
+            // Show success message
+            alert('Đăng ký thành công! Vui lòng đăng nhập để tiếp tục.');
+            window.location.href = 'login.html';
+        });
+
+        // Real-time password validation
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const feedback = this.nextElementSibling.nextElementSibling;
+            
+            if (password.length < 8) {
+                feedback.textContent = 'Mật khẩu phải có ít nhất 8 ký tự';
+                feedback.className = 'form-text text-danger';
+            } else if (!/(?=.*[a-zA-Z])(?=.*[0-9])/.test(password)) {
+                feedback.textContent = 'Mật khẩu phải bao gồm cả chữ và số';
+                feedback.className = 'form-text text-warning';
+            } else {
+                feedback.textContent = 'Mật khẩu hợp lệ';
+                feedback.className = 'form-text text-success';
+            }
+        });
+
+        // Real-time confirm password validation
+        document.getElementById('confirmPassword').addEventListener('input', function() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = this.value;
+            const feedback = this.nextElementSibling.nextElementSibling;
+            
+            if (confirmPassword && password !== confirmPassword) {
+                feedback.textContent = 'Mật khẩu xác nhận không khớp';
+                feedback.className = 'form-text text-danger';
+            } else if (confirmPassword && password === confirmPassword) {
+                feedback.textContent = 'Mật khẩu khớp';
+                feedback.className = 'form-text text-success';
+            } else {
+                feedback.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>
