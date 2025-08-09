@@ -7,9 +7,12 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.fpl.datn.models.Voucher;
+
+import feign.Param;
 
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
@@ -43,4 +46,17 @@ public interface VoucherRepository extends JpaRepository<Voucher, Integer> {
 
     // Tìm voucher đã ngừng hoạt động
     Page<Voucher> findByIsActiveFalse(Pageable pageable);
+
+    @Query(
+            """
+	SELECT v
+	FROM Voucher v
+	WHERE CURRENT_TIMESTAMP < v.endAt
+	AND v.id NOT IN (
+		SELECT uv.voucher.id
+		FROM ZUserVoucher uv
+		WHERE uv.user.id = :userId
+	)
+		""")
+    Page<Voucher> findAvailableVouchers(@Param("userId") Integer userId, Pageable pageable);
 }

@@ -120,6 +120,7 @@ public enum ErrorCode {
     CANNOT_DELETE_REVIEW_WITH_REPLY(1530, "Không thể xóa bình luận đã có phản hồi", HttpStatus.BAD_REQUEST),
     RATING_INVALID(1531, "Đánh giá phải từ 1 đến 5 sao", HttpStatus.BAD_REQUEST),
     CONTENT_NOT_BLANK(1532, "Nội dung đánh giá không được để trống", HttpStatus.BAD_REQUEST),
+    ORDER_NOT_RECEIVED(1533, "Order not received", HttpStatus.BAD_REQUEST),
 
     PRODUCT_DELETE_EXISTED(1995, "Product had uses", HttpStatus.BAD_REQUEST),
 

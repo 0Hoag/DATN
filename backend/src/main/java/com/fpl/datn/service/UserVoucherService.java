@@ -191,9 +191,9 @@ public class UserVoucherService {
         var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         Pageable pageable = PageRequest.of(page - 1, size);
-        var pageData = repository.findAvailableVouchersForUser(user.getId(), pageable);
+        var pageData = voucherRepository.findAvailableVouchers(user.getId(), pageable);
         var data = pageData.stream()
-                .map(userVoucher -> mapper.UserVoucherResponse(userVoucher))
+                .map(userVoucher -> voucherMapper.toVoucherResponse(userVoucher))
                 .toList();
         return PageResponse.<VoucherResponse>builder()
                 .currentPage(page)
