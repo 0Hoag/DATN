@@ -9,7 +9,16 @@
         Vui lòng liên hệ quản trị viên nếu bạn cho rằng đây là lỗi.
       </p>
       <a href="/" class="btn btn-primary btn-lg me-2 mt-3"> Về trang chủ </a>
-      <a href="/contact" class="btn btn-outline-primary btn-lg mt-3"> Liên hệ hỗ trợ </a>
+      <a href="/contact" class="btn btn-outline-primary btn-lg me-2 mt-3"> Liên hệ hỗ trợ </a>
+      <button @click="goBack" class="btn btn-outline-primary btn-lg mt-3"> Quay về trang trước đó</button>
     </div>
   </div>
 </template>
+<script setup>
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+function goBack() {
+  router.back();
+}
+</script>

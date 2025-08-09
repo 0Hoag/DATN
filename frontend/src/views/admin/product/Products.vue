@@ -2,7 +2,7 @@
  <div class="d-flex justify-content-between align-items-center mb-3">
   <h1>Quản lý sản phẩm</h1>
   <router-link :to="{ name: 'product-create' }">
-   <button class="btn btn-success p-2 fs-5">
+   <button class="btn btn-success p-2 fs-5" v-if="hasScope(['MANAGE_PRODUCTS'])">
     <font-awesome-icon icon="plus" />
     Thêm sản phẩm
    </button>

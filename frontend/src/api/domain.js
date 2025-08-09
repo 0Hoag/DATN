@@ -44,6 +44,8 @@ UPDATE_CATEGORY: DOMAIN + "category",
   UPDATE_REVIEW: DOMAIN + "reviews",
   DELETE_REVIEW: DOMAIN + "reviews",
   DETAIL_PRODUCT_REVIEW: DOMAIN + "reviews/product",
+  SEARCH_REVIEW_BY_PRODUCT_NAME: DOMAIN + "reviews/admin/search",
+
   // Voucher
   LIST_VOUCHER: DOMAIN + "voucher",
   CREATE_VOUCHER: DOMAIN + "voucher",

@@ -31,7 +31,9 @@ const admin = [
         path: "categories",
         name: "categories",
         component: Categoires,
-        meta: { title: "Quản lý danh mục" },
+        meta: { title: "Quản lý danh mục" ,
+           allowedRoles: ["ROLE_ADMIN","ROLE_MANAGER" ],
+        },
       },
       {
         path: "products",
@@ -43,26 +45,34 @@ const admin = [
         path: "products/create-product",
         name: "product-create",
         component: CreateProduct,
-        meta: { title: "Tạo sản phẩm" },
+        meta: { title: "Tạo sản phẩm",
+           allowedRoles: ["MANAGE_PRODUCTS" ],
+         },
       },
       {
         path: "products/edit-product/:id",
         name: "product-edit",
         component: EditProduct,
-        meta: { title: "Chỉnh sửa sản phẩm" },
+        meta: { title: "Chỉnh sửa sản phẩm" ,
+           allowedRoles: ["MANAGE_PRODUCTS" ],
+        },
       },
       {
         path: "products/variant-attribute",
         name: "variant-attribute",
         component: VariantAttribute,
-        meta: { title: "Thuộc tính biến thể" },
+        meta: { title: "Thuộc tính biến thể" ,
+            allowedRoles: ["MANAGE_PRODUCTS" ],
+        },
       },
 
       {
         path: "users",
         name: "users",
         component: Users,
-        meta: { title: "Quản lý người dùng" },
+        meta: { title: "Quản lý người dùng" ,
+            allowedRoles: ["MANAGE_USERS"],
+        },
       },
       {
         path: "orders",
@@ -74,13 +84,17 @@ const admin = [
         path: "orders/create-order",
         name: "order-create",
         component: CreateOrder,
-        meta: { title: "Tạo đơn hàng" },
+        meta: {
+          title: "Tạo đơn hàng",
+        },
       },
       {
         path: "orders/edit-order/:id",
         name: "order-edit",
         component: EditOrder,
-        meta: { title: "Chỉnh sửa đơn hàng" },
+        meta: {
+          title: "Chỉnh sửa đơn hàng",
+        },
       },
       {
         path: "orders/return-order",
@@ -98,7 +112,10 @@ const admin = [
         path: "reviews",
         name: "reviews",
         component: Reviews,
-        meta: { title: "Quản lý đánh giá sản phẩm" },
+        meta: {
+          title: "Quản lý đánh giá sản phẩm",
+          allowedRoles: ["ROLE_ADMIN", "ROLE_MANAGER"],
+        },
       },
       {
         path: "vouchers",
@@ -106,7 +123,7 @@ const admin = [
         component: Vouchers,
         meta: { title: "Quản lý voucher" },
       },
-       {
+      {
         path: "profile",
         name: "profile",
         component: MyProfile,

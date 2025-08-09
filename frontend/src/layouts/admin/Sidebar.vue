@@ -55,7 +55,7 @@
         <!-- <a-menu-item key="order-return"> Trả hàng </a-menu-item> -->
       </a-sub-menu>
 
-      <a-menu-item key="reviews">
+      <a-menu-item key="reviews" v-if="hasScope(['ROLE_ADMIN', 'ROLE_MANAGER'])">
         <template #icon>
           <font-awesome-icon icon="comment" />
         </template>

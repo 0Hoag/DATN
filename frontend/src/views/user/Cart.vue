@@ -626,7 +626,7 @@ const checkout = async () => {
       addressId: selectedAddress.value.id,
       paymentMethodId: selectedPaymentMethod.value,
       orderStatus: "PENDING",
-      voucherId: selectedVouchers.value.id ?? null,
+      voucherId: selectedVouchers.value?.id ?? null,
       note: noteForOrder.value,
     };
     const res = await OrderService.createOrderFromUser(orderData);
