@@ -200,7 +200,22 @@ const getOrderRecentByUser = async () => {
     hideLoading();
   }
 };
+async function updateStatusReceived(order) {
+  try {
+    showLoading();
 
+    await OrderService.updateStatus(order.id, {
+      orderStatus: "RECEIED",
+      paymentStatus: "PAID",
+    });
+    toast.success("Cập nhật trạng thái đơn hàng thành công!");
+    await filterOrderByStatus();
+  } catch (error) {
+    toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+    hideLoading();
+  }
+}
 // lấy thông tin user
 const nameUser = ref(store.userInfo?.fullName);
 const emailUser = ref(store.userInfo?.email);
@@ -865,6 +880,13 @@ onMounted(() => {
                             "
                           >
                             Xem chi tiết
+                          </button>
+                          <button
+                            v-if="order.orderStatus == 'DELIVERED'"
+                            class="btn btn-outline-success btn-sm mx-2"
+                            @click="updateStatusReceived(order)"
+                          >
+                            Đã nhận được hàng
                           </button>
                           <button
                             v-if="order.orderStatus == 'RECEIED'"

@@ -56,7 +56,12 @@
   </div>
 </template>
 <script setup>
-import { hideLoading, showLoading, showPromtDelete } from "@/api/functions/common";
+import {
+  handleError,
+  hideLoading,
+  showLoading,
+  showPromtDelete,
+} from "@/api/functions/common";
 import { ReviewService } from "@/api/service/ReviewService";
 import { onBeforeMount, ref, watch } from "vue";
 // tìm kiếm
@@ -97,8 +102,6 @@ async function handleSearch() {
   }, 1000);
 }
 
-
-
 const list = ref([]);
 const pagination = ref({
   current: 1,
@@ -115,6 +118,7 @@ async function fetchList() {
     console.log(list.value);
     pagination.value.total = response.result.totalElements;
   } catch (error) {
+    handleError(error);
     console.log(error);
   }
 }
