@@ -47,6 +47,18 @@ public interface UserVoucherRepository extends JpaRepository<ZUserVoucher, Integ
     // ĐÃ SỬA: Lấy danh sách ID của các voucher mà người dùng đã sử dụng (isUsed = true)
     @Query("SELECT zuv.voucher.id FROM ZUserVoucher zuv WHERE zuv.user.id = :userId AND zuv.isUsed = true")
     List<Integer> findFullyUsedVoucherIdsByUserId(@Param("userId") Integer userId);
+
+    @Query(
+            """
+			SELECT uv
+			FROM ZUserVoucher uv
+			JOIN FETCH uv.voucher v
+			WHERE uv.user.id = :userId
+			AND uv.isUsed = false
+			AND CURRENT_TIMESTAMP < v.endAt
+	""")
+    Page<ZUserVoucher> findAvailableVouchersForUser(@Param("userId") Integer userId, Pageable pageable);
+
     // Phương thức mới cần thêm vào
     Optional<ZUserVoucher> findByUserIdAndVoucherId(Integer userId, Integer voucherId);
 

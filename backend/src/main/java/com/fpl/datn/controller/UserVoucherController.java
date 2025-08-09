@@ -80,7 +80,6 @@ public class UserVoucherController {
 
     // API để lấy danh sách voucher mà người dùng có thể sử dụng
     @GetMapping("/can-use")
-    @PreAuthorize("hasAuthority('VIEW_USER_VOUCHER') or hasRole('USER')")
     public ApiResponse<PageResponse<VoucherResponse>> getVouchersUserCanUse(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size) {

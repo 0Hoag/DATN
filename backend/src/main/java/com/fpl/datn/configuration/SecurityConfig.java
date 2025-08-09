@@ -61,7 +61,8 @@ public class SecurityConfig {
                         "/cart/**",
                         "/email/**",
                         "/category/**",
-                        "/product/**")
+                        "/product/**",
+                        "/reviews/search")
                 .permitAll()
                 .requestMatchers(HttpMethod.PUT, "/cart/**", "/users/profile/**")
                 .permitAll()

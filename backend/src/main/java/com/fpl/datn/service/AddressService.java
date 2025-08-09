@@ -29,7 +29,7 @@ public class AddressService {
     public List<AddressResponse> findByUserId(int userId) {
         var userAddress = repository.findByIsDeleteFalseAndUser_Id(userId);
         if (userAddress == null || userAddress.isEmpty()) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            return null;
         }
         return userAddress.stream().map(mapper::toAddressResoonse).toList();
     }

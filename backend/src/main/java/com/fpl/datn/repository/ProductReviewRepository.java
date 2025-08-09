@@ -22,7 +22,11 @@ public interface ProductReviewRepository extends JpaRepository<ProductReview, In
     // ===== KIỂM TRA USER ĐÃ ĐÁNH GIÁ SẢN PHẨM CHƯA =====
     boolean existsByUserIdAndProductId(Integer userId, Integer productId);
 
-    // ===== THỐNG KÊ ĐÁNH GIÁ =====
+    @Query("SELECT pr FROM ProductReview pr " + "JOIN pr.product p "
+            + "WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :productName, '%')) "
+            + "AND (pr.isVisible = true OR pr.isVisible IS NULL) "
+            + "ORDER BY pr.createdAt DESC")
+    Page<ProductReview> searchByProductName(@Param("productName") String productName, Pageable pageable);
 
     // Đếm tổng số đánh giá theo sản phẩm
     Long countByProductId(Integer productId);
