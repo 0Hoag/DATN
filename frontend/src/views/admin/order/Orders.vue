@@ -156,6 +156,7 @@
             </button>
             <button
               class="btn btn-success mx-2"
+              v-if="['CONFIRMED','DELIVERED','RECEIED'].includes(order.orderStatus) || order.paymentStatus == 'PAID'"
               @click="exportInvoice(order)"
               title="Xuất hóa đơn"
             >
@@ -460,11 +461,11 @@ const exportInvoice = async (order) => {
     const res = await instance.get(`${API.EXPORT_INVOICE}/${order.id}`, {
       responseType: "blob",
     });
-    const blob = new Blob([res.data], {type: 'application/pdf'})
+    const blob = new Blob([res.data], { type: "application/pdf" });
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    link.setAttribute('download', 'invoice.pdf');
+    link.setAttribute("download", "invoice.pdf");
     document.body.appendChild(link);
     link.click();
     link.remove();
