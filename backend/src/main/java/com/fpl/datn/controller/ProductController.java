@@ -89,6 +89,7 @@ public class ProductController {
                 .result(productService.search(keyword, page, size))
                 .build();
     }
+
     @GetMapping("/user/search")
     public ApiResponse<PageResponse<ProductSaleResponse>> searchProductsForUser(
             @RequestParam String keyword,
@@ -117,9 +118,9 @@ public class ProductController {
             @RequestParam(required = false) BigDecimal maxPrice,
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        Page<ProductSaleResponse> result = productService.filterProducts(categoryIds, brands, minPrice, maxPrice,keyword, page, size);
+            @RequestParam(defaultValue = "10") int size) {
+        Page<ProductSaleResponse> result =
+                productService.filterProducts(categoryIds, brands, minPrice, maxPrice, keyword, page, size);
 
         PageResponse<ProductSaleResponse> pageResponse = PageResponse.<ProductSaleResponse>builder()
                 .currentPage(result.getNumber())

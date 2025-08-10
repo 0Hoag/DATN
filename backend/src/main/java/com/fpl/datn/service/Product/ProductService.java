@@ -104,7 +104,7 @@ public class ProductService {
 
     // phân trang sản phẩm
     public PageResponse<ProductResponse> get(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size,Sort.by(Sort.Direction.DESC,"id"));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "id"));
         var pageData = repo.findAll(pageable);
         var data = pageData.getContent().stream().map(mapper::toProductResponse).collect(Collectors.toList());
 
@@ -149,13 +149,12 @@ public class ProductService {
                 .build();
     }
 
-    //search cho user
+    // search cho user
     public PageResponse<ProductSaleResponse> searchForUser(String keyword, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<ProductSaleResponse> productPage = repo.searchByNameOrSlugForUser(keyword, pageable);
 
-        List<ProductSaleResponse> data = productPage.getContent()
-                .stream()
+        List<ProductSaleResponse> data = productPage.getContent().stream()
                 .peek(dto -> {
                     Double avgRating = reviewRepo.getAverageRatingByProductId(dto.getProductId());
                     dto.setAverageRating(avgRating != null ? avgRating : 0.0);
@@ -170,6 +169,7 @@ public class ProductService {
                 .data(data)
                 .build();
     }
+
     public List<ProductSaleResponse> getSaleProductsSimple(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<ProductSaleResponse> pageResult = repo.findSaleProductsSimple(pageable);
@@ -217,8 +217,7 @@ public class ProductService {
             BigDecimal maxPrice,
             String keyword,
             int page,
-            int size
-    ) {
+            int size) {
         if (brands != null && brands.isEmpty()) {
             brands = null;
         }
@@ -229,6 +228,6 @@ public class ProductService {
             keyword = null;
         }
         Pageable pageable = PageRequest.of(page - 1, size);
-        return repo.filterProducts(categoryIds, brands, minPrice, maxPrice,keyword, pageable);
+        return repo.filterProducts(categoryIds, brands, minPrice, maxPrice, keyword, pageable);
     }
 }

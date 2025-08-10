@@ -229,7 +229,7 @@ import { useCartStore } from "@/store/cartStore";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Navigation, Pagination, Autoplay, Thumbs } from "swiper/modules";
 
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useRoute } from "vue-router";
 
 import "swiper/css";
@@ -375,8 +375,9 @@ const addToCart = async () => {
 };
 
 const buyNow = async () => {
-  await cartStore.addToCart(selectedVariantDetail.value.id, 1);
-  router.push({ name: "cart" });
+ await cartStore.addToCart(selectedVariantDetail.value.id, 1);
+await nextTick();
+router.push({ name: "cart" });
   console.log("cart item from detail", cartStore.cartItem);
 };
 
