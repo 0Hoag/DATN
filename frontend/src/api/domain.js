@@ -134,5 +134,8 @@ UPDATE_CATEGORY: DOMAIN + "category",
 
   // payment
   GET_PAYMENT_METHOD: DOMAIN + 'payment',
-  VNPAY_RETURN: DOMAIN + 'payment/vnpay-return'
+  VNPAY_RETURN: DOMAIN + 'payment/vnpay-return',
+
+  //pdf
+  EXPORT_INVOICE : DOMAIN + 'pdf/order',
 };

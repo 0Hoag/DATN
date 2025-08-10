@@ -676,7 +676,7 @@ onMounted(() => {
                 />
                 <h5>Chưa có đơn hàng nào</h5>
                 <p class="text-muted">Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên</p>
-                <a href="category.html" class="btn btn-primary">Mua sắm ngay</a>
+                <router-link :to="{name: 'home'}" class="btn btn-primary">Mua sắm ngay</router-link>
               </div>
             </div>
           </div>
@@ -919,7 +919,7 @@ onMounted(() => {
                   />
                   <h5>Chưa có đơn hàng nào</h5>
                   <p class="text-muted">Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên</p>
-                  <a href="category.html" class="btn btn-primary">Mua sắm ngay</a>
+                <router-link :to="{name: 'home'}" class="btn btn-primary">Mua sắm ngay</router-link>
                 </div>
               </div>
               <!-- Pagination -->

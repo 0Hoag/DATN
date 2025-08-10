@@ -175,8 +175,8 @@
       v-if="relatedProducts && relatedProducts.length > 0"
     >
       <h5 class="fw-bold mb-3">Sản phẩm liên quan</h5>
-      
-      <div class="row  mt-1">
+
+      <div class="row mt-1">
         <div class="col-md-2 d-flex mb-3" v-for="p in relatedProducts">
           <router-link :to="{ name: 'product', params: { slug: p.slug } }">
             <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
@@ -211,7 +211,6 @@
           </router-link>
         </div>
       </div>
-
     </div>
   </div>
 
@@ -266,13 +265,16 @@ const avatarUrl = (name) => {
 };
 
 const currentPage = ref(1);
-const pageSize = 10;
+const pageSize = 1;
 const total = ref(0);
 const isLoading = ref(false);
 const listReview = ref([]);
 const getListReviewByProduct = async () => {
   if (isLoading.value) return;
+  isLoading.value = true;
+
   try {
+
     const response = await ReviewService.fetchListReviewByProduct(
       productDetail.value.id,
       {
@@ -305,7 +307,6 @@ const hasMore = () => {
 // };
 
 //
-
 
 const newReview = ref({ name: "", rating: "", comment: "" });
 const reviews = ref([
@@ -375,9 +376,9 @@ const addToCart = async () => {
 };
 
 const buyNow = async () => {
- await cartStore.addToCart(selectedVariantDetail.value.id, 1);
-await nextTick();
-router.push({ name: "cart" });
+  await cartStore.addToCart(selectedVariantDetail.value.id, 1);
+  await nextTick();
+  router.push({ name: "cart" });
   console.log("cart item from detail", cartStore.cartItem);
 };
 
@@ -387,13 +388,17 @@ const setThumbsSwiper = (swiper) => {
   thumbsSwiper.value = swiper;
 };
 
-
 watch(
-  ()=> route.params.slug,
-  () => {
-    getDetailProduct();
+  () => route.params.slug,
+  async () => {
+    currentPage.value = 1;
+    listReview.value = [];
+    total.value = 0;
+    await getDetailProduct();
+    await getRelatedProduct();
+    await getListReviewByProduct();
   }
-)
+);
 onMounted(async () => {
   await cartStore.getCart();
   await getDetailProduct();
