@@ -264,7 +264,7 @@
           <div
             ref="scrollContainer"
             class="overflow-auto d-flex flex-column"
-            style=" height: 600px"
+            style="height: 600px"
           >
             <div class="flex-shrink-0">
               <div
@@ -686,8 +686,12 @@ const removeVariantImage = (variant, imgIndex) => {
   const imgRemoved = variant.images[imgIndex];
 
   // Cập nhật mảng ảnh
-  variant.images = variant.images.filter((_, i) => i !== imgIndex);
-
+  const listImages = variant.images.filter((_, i) => i !== imgIndex);
+  variant.images = listImages.map((img, index) => ({
+    ...img,
+    sortOrder: index + 1,
+    isThumbnail: index === 0,
+  }));
   // Đưa ảnh bị xóa vào danh sách đã xoá
   if (imgRemoved.id) listRemoveImage.value.push(imgRemoved.id);
   console.log(listRemoveImage.value, "list remove");
@@ -793,7 +797,7 @@ onMounted(async () => {
   await fetchListAttribute();
   await fetchListImage();
 
-   observer = new IntersectionObserver(
+  observer = new IntersectionObserver(
     (entries) => {
       if (entries[0].isIntersecting) {
         fetchListImage();

@@ -99,10 +99,10 @@
           >
             <div class="d-flex align-items-center p-2">
               <img
-                :src="getThumnailForVariant(variant).imageUrl"
+                :src="getThumnailForVariant(variant)?.imageUrl"
                 class="me-2"
                 style="height: 30px"
-                :alt="getThumnailForVariant(variant).altText"
+                :alt="getThumnailForVariant(variant)?.altText"
               />
               <span class="text-danger fw-bold">{{ variant.variantName }}</span>
             </div>
@@ -305,7 +305,7 @@ const hasMore = () => {
 // };
 
 //
-const selectedImage = ref("");
+
 
 const newReview = ref({ name: "", rating: "", comment: "" });
 const reviews = ref([
@@ -342,8 +342,7 @@ const getDetailProduct = async () => {
       listVariant.value = productDetail.value.productVariants;
       if (listVariant.value.length > 0) {
         selectedVariant2.value = listVariant.value[0].id;
-        selectedImage.value = selectedVariantDetail.value.images[0].imageUrl;
-        console.log("selected img", selectedImage.value);
+
         categorySlug.value = productDetail.value.category.slug;
       }
     }
