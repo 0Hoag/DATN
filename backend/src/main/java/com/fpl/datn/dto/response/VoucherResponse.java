@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VoucherResponse {
+    Integer userId;
     Integer id;
     String code;
     String description;

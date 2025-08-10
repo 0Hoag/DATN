@@ -85,8 +85,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 		(SELECT AVG(r.rating) FROM ProductReview r WHERE r.product = p)
 	)
 	FROM Product p
-	WHERE (:categoryId IS NULL OR p.category.id = :categoryId)
+	WHERE (:categoryIds IS NULL OR p.category.id IN :categoryIds)
 	AND (:brands IS NULL OR p.brand IN :brands)
+	AND (:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
 	AND EXISTS (
 		SELECT 1 FROM ProductVariant pv
 		WHERE pv.product = p
@@ -95,9 +96,27 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	)
 """)
     Page<ProductSaleResponse> filterProducts(
-            @Param("categoryId") Integer categoryId,
+            @Param("categoryIds") List<Integer> categoryIds,
             @Param("brands") List<String> brands,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
+            @Param("keyword") String keyword,
             Pageable pageable);
+
+    @Query(
+            """
+	SELECT new com.fpl.datn.dto.response.Product.ProductSaleResponse(
+		p.id,
+		p.name,
+		p.slug,
+		(SELECT MIN(v.price) FROM ProductVariant v WHERE v.product.id = p.id),
+		(SELECT MIN(v.salePrice) FROM ProductVariant v WHERE v.product.id = p.id),
+		p.thumbnail,
+		0.0
+	)
+	FROM Product p
+	WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%'))
+	OR LOWER(p.slug) LIKE LOWER(CONCAT('%', :keyword, '%'))
+""")
+    Page<ProductSaleResponse> searchByNameOrSlugForUser(@Param("keyword") String keyword, Pageable pageable);
 }

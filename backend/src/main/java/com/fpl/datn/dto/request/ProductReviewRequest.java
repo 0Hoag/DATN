@@ -16,8 +16,7 @@ public class ProductReviewRequest {
     private Integer rating;
 
     @NotBlank(message = "Nội dung đánh giá không được để trống")
-    @Size(min = 10, max = 1000, message = "Nội dung đánh giá phải từ 10-1000 ký tự")
     private String content;
 
-    // private Integer replyTo; // Trường này vẫn được giữ lại cho chức năng trả lời
+    private Integer replyTo; // Trường này vẫn được giữ lại cho chức năng trả lời
 }

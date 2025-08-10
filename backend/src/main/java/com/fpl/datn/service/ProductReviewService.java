@@ -103,10 +103,15 @@ public class ProductReviewService {
         // Validate sản phẩm tồn tại và active
         Product product = orderDetail.getProduct();
 
+        if (!product.getIsActive()) {
+            throw new AppException(ErrorCode.PRODUCT_INACTIVE);
+        }
+
         if (!product.getIsActive()) throw new AppException(ErrorCode.PRODUCT_INACTIVE);
 
         if (!orderDetail.getOrder().getOrderStatus().equals(OrderStatus.RECEIED.getDescription()))
             throw new AppException(ErrorCode.ORDER_NOT_RECEIVED);
+
         // Tạo đánh giá mới
         ProductReview review = ProductReview.builder()
                 .product(product)
@@ -217,16 +222,6 @@ public class ProductReviewService {
                 .data(data)
                 .build();
     }
-
-    //    private <T> PageResponse<T> toPageResponse(Page<?> page, List<T> data, int currentPage) {
-    //        return PageResponse.<T>builder()
-    //                .currentPage(currentPage)
-    //                .totalPages(page.getTotalPages())
-    //                .pageSize(page.getSize())
-    //                .totalElements(page.getTotalElements())
-    //                .data(data)
-    //                .build();
-    //    }
 
     // ===== FIX: CUSTOMER + ADMIN có thể check review status =====
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")

@@ -90,6 +90,17 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/user/search")
+    public ApiResponse<PageResponse<ProductSaleResponse>> searchProductsForUser(
+            @RequestParam String keyword,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<ProductSaleResponse>>builder()
+                .code(1000)
+                .result(productService.searchForUser(keyword, page, size))
+                .build();
+    }
+
     @GetMapping("/sale")
     public ApiResponse<List<ProductSaleResponse>> getSaleProductsSimple(
             @RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int size) {
@@ -101,14 +112,15 @@ public class ProductController {
 
     @GetMapping("/filter")
     public ApiResponse<PageResponse<ProductSaleResponse>> filterProducts(
-            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) List<Integer> categoryIds,
             @RequestParam(required = false) List<String> brands,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
         Page<ProductSaleResponse> result =
-                productService.filterProducts(categoryId, brands, minPrice, maxPrice, page, size);
+                productService.filterProducts(categoryIds, brands, minPrice, maxPrice, keyword, page, size);
 
         PageResponse<ProductSaleResponse> pageResponse = PageResponse.<ProductSaleResponse>builder()
                 .currentPage(result.getNumber())
