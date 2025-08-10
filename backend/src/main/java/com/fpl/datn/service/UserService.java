@@ -92,7 +92,6 @@ public class UserService {
             user.setRoles(roles);
         }
 
-
         user.setUpdatedAt(LocalDateTime.now());
 
         return userMapper.toUserResponse(userRepositories.save(user));
