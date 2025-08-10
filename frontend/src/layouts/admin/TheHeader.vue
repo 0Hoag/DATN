@@ -4,7 +4,7 @@
       <!-- Trái: Trang chủ -->
       <div class="d-flex align-items-center gap-2 fs-5">
         <font-awesome-icon icon="house" />
-        <a>Trang chủ</a>
+        <router-link :to="{name: 'home'}" class="text-dark">Trang chủ</router-link>
       </div>
 
       <!-- Phải: Admin và Đăng xuất -->

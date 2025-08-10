@@ -43,4 +43,11 @@ export const ProductService = {
     deleteVariantImage: (params) => {
         return axiosCall.delete(`${API.DELETE_VARIANT_IMAGE}`,params);
     },
+    searchProductVariant: (params) => {
+        return axiosCall.get(API.SEARCH_PRODUCT_VARIANT, params);
+    },
+    filter: (params) => {
+        return axiosCall.get(API.FILTER, params);
+    },
+
 };

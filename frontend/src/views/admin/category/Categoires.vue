@@ -53,7 +53,7 @@ watch(
   () => {
     if (keyword.value.trim()) {
       searchList();
-    } else {  
+    } else {
       fetchListCategory();
     }
   }
@@ -89,7 +89,6 @@ async function fetchListCategory() {
     // pagination.value.total = listCategory.value.length;
     listCategory.value = response.result.data;
     pagination.value.total = response.result.totalElements;
-
   } catch (error) {
     toast.error("Lỗi khi tải danh sách danh mục");
     console.log(error);
@@ -381,7 +380,12 @@ onMounted(() => {
             <option :value="null">Chọn danh mục</option>
             <option
               :value="category.id"
-              v-for="category in listCategory"
+              v-for="category in listCategory.filter(
+                (item) =>
+                  item.parent === null &&
+                  item.children.length == 0 &&
+                  item.products.length == 0
+              )"
               :key="category.id"
             >
               {{ category.name }}
@@ -451,7 +455,11 @@ onMounted(() => {
             <option
               :value="category.id"
               v-for="category in listCategory.filter(
-                (item) => item.id != categoryData.id
+                (item) =>
+                  item.id !== categoryData.id &&
+                  item.parent == null &&
+                   item.products.length == 0 &&
+                  (item.children.length === 0 || item.id === categoryData.parent)
               )"
               :key="category.id"
             >

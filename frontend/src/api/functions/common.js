@@ -1,7 +1,7 @@
 import Swal from "sweetalert2";
 import { toast } from "vue3-toastify";
 
-export const showLoading = (msg = 'Chờ xíu') => {
+export const showLoading = (msg = 'Đang tiến hành xử lý. Vui lòng đợi trong giây lát') => {
   Swal.fire({
     title: msg,
     didOpen: () => {
@@ -44,6 +44,7 @@ export const showPromtConfirm = (title, onConfirm) => {
 
 
 export const handleError = (error) => {
+  console.log(error);
   const errorCode = error?.response?.data?.code;
   const defaultMessage = "Đã xảy ra lỗi không xác định! Vui lòng liên hệ bộ phận kỹ thuật.";
 
@@ -52,6 +53,7 @@ export const handleError = (error) => {
     8888: "Vui lòng nhập đầy đủ thông tin.",
     7777: "Không cho phép tham chiếu vòng lặp.",
     9999: "Lỗi chưa được phân loại. Vui lòng liên hệ quản trị viên.",
+    2501: "Không tìm thấy tài nguyên.",
 
     // User
     1001: "Người dùng đã tồn tại.",
@@ -68,15 +70,17 @@ export const handleError = (error) => {
     1012: "Số điện thoại đã tồn tại.",
     1013: "Email không có thay đổi.",
     1014: "Số điện thoại không có thay đổi.",
-    1015: "Mật khẩu không đúng.",
+    1015: "Email hoặc mật khẩu không đúng.",
     1016: "Lỗi khi tạo người dùng.",
     1017: "Lỗi khi cập nhật người dùng.",
     1019: "Mật khẩu cũ không chính xác.",
     1020: "Mật khẩu mới không được trùng với xác nhận mật khẩu.",
-    1030: "Email không đúng.",
+    1021: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.", // EMAIL_OR_PASSWORD_INCORRECT
+    1022: "Mã OTP không hợp lệ.",
 
-    // Permission
+    // Permission - Role
     1101: "Không tìm thấy quyền.",
+    1102: "Không tìm thấy vai trò.",
 
     // Order
     1201: "Không tìm thấy đơn hàng.",
@@ -89,6 +93,8 @@ export const handleError = (error) => {
     1208: "Yêu cầu hoàn hàng đã tồn tại.",
     1209: "Không tìm thấy thông tin hoàn đơn hàng.",
     1210: "Không tìm thấy trạng thái hoàn hàng.",
+    1211: "Không thể xóa đơn hàng đã được giao.",
+    1212: "Không thể xóa đơn hàng đã thanh toán.",
     1522: "Không thể thay đổi trạng thái đơn hàng.",
 
     // Address
@@ -107,7 +113,7 @@ export const handleError = (error) => {
     1506: "Biến thể sản phẩm đã tồn tại.",
     1510: "Giá trị thuộc tính biến thể đã tồn tại.",
     1511: "Chi tiết biến thể đã tồn tại.",
-    1512: "SKU đã tồn tại.",
+    1512: "SKU sản phẩm đã tồn tại.",
     1513: "Biến thể cập nhật đã tồn tại.",
     1514: "Không thể xóa biến thể đã tồn tại.",
     1515: "Slug sản phẩm đã tồn tại.",
@@ -118,13 +124,19 @@ export const handleError = (error) => {
     1520: "Không tìm thấy thuộc tính biến thể.",
     1523: "Giá trị thuộc tính bị trùng.",
     1524: "Giá trị thuộc tính đã tồn tại.",
-    1525: "ID hình ảnh không được để trống.",
+    1525: "ID ảnh sản phẩm không được để trống.",
     1526: "ID ảnh không được để trống.",
+    1527: "Sản phẩm không hoạt động.",
+    1528: "Người dùng chưa mua sản phẩm này.",
+    1529: "Bạn đã đánh giá sản phẩm này.",
+    1530: "Không thể xóa đánh giá đã có phản hồi.",
+    1531: "Đánh giá phải từ 1 đến 5 sao.",
+    1532: "Nội dung đánh giá không được để trống.",
     1528: "Tên sản phẩm không được để trống.",
     1529: "Slug sản phẩm không được để trống.",
     1530: "Mô tả sản phẩm không được để trống.",
     1531: "Thương hiệu không được để trống.",
-    1532: "Ảnh đại diện sản phẩm không được để trống.",
+    1532: "Ảnh đại diện không được để trống.",
     1533: "Nội dung sản phẩm không được để trống.",
     1534: "Trạng thái trang chủ không được để trống.",
     1535: "Trạng thái hoạt động không được để trống.",
@@ -136,16 +148,21 @@ export const handleError = (error) => {
     1541: "Trạng thái hoạt động của biến thể không được để trống.",
     1542: "ID sản phẩm của biến thể không được để trống.",
     1543: "Giá trị thuộc tính của biến thể không được để trống.",
+    1995: "Sản phẩm đã được sử dụng, không thể xóa.",
+
+    // Product Image (107x)
     1071: "Alt text không được để trống.",
     1072: "Thông số kỹ thuật không được để trống.",
     1073: "Trạng thái ảnh đại diện không được để trống.",
     1074: "Thứ tự sắp xếp ảnh không được để trống.",
     1075: "ID biến thể của ảnh không được để trống.",
     1076: "URL ảnh không được để trống.",
-    1995: "Sản phẩm đã được sử dụng, không thể xóa.",
 
     // Cart
     1601: "Sản phẩm đã tồn tại trong giỏ hàng.",
+    2601: "Giỏ hàng không tồn tại.",
+    2602: "Không tìm thấy sản phẩm trong giỏ hàng.",
+    2603: "Giỏ hàng đang trống.",
 
     // File
     1701: "Tải tệp lên thất bại.",
@@ -160,10 +177,12 @@ export const handleError = (error) => {
     1901: "Chưa xác thực người dùng.",
     1902: "Bạn không có quyền thực hiện hành động này.",
 
-    // Input
+    // Validation / Input
     2001: "Dữ liệu nhập vào không hợp lệ.",
     2002: "Khóa thông báo không hợp lệ.",
     2003: "UserId không được để trống.",
+    2004: "Họ tên không được để trống.",
+    2005: "Số điện thoại không được để trống.",
 
     // Voucher
     2101: "Không tìm thấy voucher.",
@@ -180,11 +199,11 @@ export const handleError = (error) => {
     2204: "Tên danh mục đã tồn tại.",
     2205: "Slug danh mục đã tồn tại.",
 
-    // System
-    2501: "Không tìm thấy tài nguyên.",
+    // Transaction Log
+    2301: "Không tìm thấy log giao dịch.",
   };
 
   const errorMessage = errorMessages[errorCode] || defaultMessage;
-
   toast?.error?.(errorMessage);
 };
+

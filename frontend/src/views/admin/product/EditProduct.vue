@@ -392,7 +392,7 @@ import { useAuth } from "@/composable/useAuth";
   }
   async function fetchListCategory() {
     try {
-      const response = await CategoryService.fetchListCategory();
+      const response = await CategoryService.fetchListCategoryForUser();
       categories.value = response.result.filter((item) => item.children.length === 0).map((item) => ({ value: item.id, label: item.name }));
       console.log(categories.value);
     } catch (error) {

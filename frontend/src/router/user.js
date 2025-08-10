@@ -36,13 +36,13 @@ const user = [
                 path: "/payment",
                 name: "payment",
                 component: () => import("@/views/user/Payment.vue"),
-                meta: { title: "Trang thanh toán" },
+                meta: { title: "Trang thanh toán", requiresAuth: true, },
             },
             {
                 path: "/account",
                 name: "account",
                 component: () => import("@/views/user/Account.vue"),
-                meta: { title: "Hồ sơ" },
+                meta: { title: "Hồ sơ" , requiresAuth: true, },
             },
             {
                 path: '/product/:slug',

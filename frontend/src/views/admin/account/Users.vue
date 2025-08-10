@@ -9,12 +9,18 @@ import {
 import { AccountService } from "@/api/service/AccountService";
 import { RoleService } from "@/api/service/RoleService";
 import Modal from "@/components/Modal.vue";
+import { useAuth } from "@/composable/useAuth";
+import { useUserStore } from "@/store/userStore";
 import dayjs from "dayjs";
 import { computed, onMounted, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
+const store = useUserStore();
+const { hasScope } = useAuth();
 const activeType = ref("STAFF");
 const addModalRef = ref(null);
 const editModalRef = ref(null);
+const blockUserModalRef = ref(null);
+const blockUserModel = ref({});
 const listAccount = ref([]);
 const listRole = ref([]);
 const accountModel = ref({
@@ -32,7 +38,7 @@ const accountModelEdit = ref({
 
 const pagination = ref({
   current: 1,
-  pageSize: 10,
+  pageSize: 1,
   total: 0,
 });
 
@@ -79,24 +85,6 @@ async function searchUser() {
   }
 }
 
-async function filterByRole() {
-  try {
-    showLoading();
-    const params = {
-      keyword: '',
-      role: roleSelected.value,
-      page: pagination.value.current,
-      size: pagination.value.pageSize,
-    };
-    const response = await AccountService.searchUser(params);
-    listAccount.value = response.result.data;
-    pagination.value.total = response.result.totalElements;
-  } catch (error) {
-    handleError(error);
-  } finally {
-    hideLoading();
-  }
-}
 
 async function handleSearch() {
   if (timer.value) clearTimeout(timer.value);
@@ -106,7 +94,9 @@ async function handleSearch() {
       pagination.value.current = 1; // watcher sẽ tự gọi searchUser/fetchListAccount
     } else {
       if (!searchKeyword.value.trim()) {
-        await fetchListAccount();
+        // await fetchListAccount();
+                await searchUser();
+
       } else {
         await searchUser();
       }
@@ -124,6 +114,11 @@ async function fetchListRole() {
   }
 }
 
+function openModalBlockUser(account) {
+  blockUserModel.value.reason = "";
+  blockUserModel.value.id = account.id;
+  blockUserModalRef.value?.open();
+}
 function openModalAdd() {
   resetForm();
   addModalRef.value.open();
@@ -140,6 +135,12 @@ function openModalDelete(user) {
   showPromtDelete(() => {
     submitFormDelete(user);
   });
+}
+function confirmBlockUser() {
+  showPromtConfirm("Xác nhận chặn người dùng", () => submitFormBlockUser());
+}
+function confirmRestoreUser(account) {
+  showPromtConfirm("Xác nhận phục hồi người dùng", () => submitFormRestoreUser(account));
 }
 const closeModal = () => {
   addModalRef.value?.close();
@@ -214,10 +215,15 @@ async function submitFormAdd() {
 }
 async function submitFormEdit() {
   try {
-    if (!validateFormEdit()) return; // Kiểm tra tính hợp lệ của form
+    // if (!validateFormEdit()) return;
     showLoading();
     const data = getFormEdit();
-    await AccountService.updateAccount(data.id, data);
+    await AccountService.updateAccount(data.id, {
+      fullName: data.fullName,
+      phone: data.phone,
+      isEnable: data.isEnable,
+      roles: data.roles,
+    });
     await fetchListAccount();
     toast.success("Cập nhật tài khoản thành công!");
     closeModal();
@@ -240,7 +246,39 @@ async function submitFormDelete(user) {
     hideLoading();
   }
 }
-
+async function submitFormBlockUser() {
+  try {
+    showLoading();
+    const { id, reason } = blockUserModel.value;
+    await AccountService.blockUser(id, { reason });
+    toast.success("Chặn người dùng thành công!");
+    await fetchListAccount();
+    // closeModal();
+    blockUserModalRef.value?.close();
+  } catch (error) {
+    handleError(error);
+  } finally {
+    hideLoading();
+  }
+}
+async function submitFormRestoreUser(account) {
+  try {
+    showLoading();
+    await AccountService.restoreUser(account.id);
+    toast.success("Phục hồi người dùng thành công!");
+    await fetchListAccount();
+    // closeModal();
+    blockUserModalRef.value?.close();
+  } catch (error) {
+    handleError(error);
+  } finally {
+    hideLoading();
+  }
+}
+const filterByRole = () => {
+  pagination.value.current = 1;
+  searchUser();
+}
 watch(
   () => pagination.value.current,
   (newVal, oldVal) => {
@@ -254,27 +292,29 @@ watch(
   }
 );
 
-
 onMounted(() => {
   fetchListAccount();
-  fetchListRole();
+  console.log(hasScope(["MANAGE_USERS"]));
+  if (hasScope(["MANAGE_USERS"])) {
+    fetchListRole();
+  }
 });
-
-
-
-
 </script>
 
 <template>
   <h1>Quản lý người dùng</h1>
   <div class="d-flex justify-content-end align-items-center mb-3">
-    <button class="btn btn-success p-2 fs-5" @click="openModalAdd">
+    <button
+      class="btn btn-success p-2 fs-5"
+      @click="openModalAdd"
+      v-if="hasScope(['MANAGE_USERS'])"
+    >
       <font-awesome-icon icon="plus" />
       Thêm người dùng
     </button>
   </div>
   <div class="d-flex justify-content-end align-items-center mb-3 gap-2">
-  <button class="btn btn-outline-secondary" @click="filterByRole">Lọc</button>
+    <button class="btn btn-outline-secondary" @click="filterByRole">Lọc</button>
     <select class="form-select w-auto" v-model="roleSelected">
       <option :value="''">Vai trò</option>
       <option :value="role.name" v-for="role in listRole" :key="role.id">
@@ -292,50 +332,54 @@ onMounted(() => {
       />
     </div>
   </div>
-  <table class="table table-hover text-center align-middle my-3">
-    <thead>
-      <tr>
-        <th>STT</th>
-        <th>Họ tên</th>
-        <th>Email</th>
-        <th>Số điện thoại</th>
-        <th>Vai trò</th>
-        <th>Trạng thái</th>
-        <th>Ngày tham gia</th>
-        <th>Thao tác</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr v-for="(account, index) in listAccount" :key="account.id">
-        <td>{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</td>
-        <td>{{ account.fullName || "Chưa có tên" }}</td>
-        <td>{{ account.email }}</td>
-        <td>{{ account.phone || "Chưa có số điện thoại" }}</td>
-        <td>{{ account.roles.map((role) => role.name).join(", ") }}</td>
-        <td>{{ account.deletedAt == null ? "Hoạt động" : "Khóa" }}</td>
-        <td>{{ dayjs(account.createdAt).format("DD-MM-YYYY") }}</td>
-        <td>
-          <button class="btn btn-primary mx-2" @click="openModalEdit(account)">
-            <font-awesome-icon icon="pen-to-square" />
-          </button>
-          <button class="btn btn-danger" @click="openModalDelete(account)">
-            <font-awesome-icon icon="trash" />
-          </button>
-          
-        </td>
-      </tr>
-      <tr v-if="listAccount.length === 0">
-        <td colspan="8" class="text-center py-4">
-          <font-awesome-icon
-            icon="circle-exclamation"
-            size="2x"
-            class="text-secondary mb-2"
-          />
-          <div>Không có dữ liệu</div>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+  <div class="table-responsive-sm table-responsive-md">
+    <table class="table table-hover text-center align-middle my-3">
+      <thead>
+        <tr>
+          <th>STT</th>
+          <th>Họ tên</th>
+          <th>Email</th>
+          <th>Số điện thoại</th>
+          <th>Vai trò</th>
+          <th>Trạng thái</th>
+          <th>Ngày tham gia</th>
+          <th>Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(account, index) in listAccount" :key="account.id">
+          <td>{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</td>
+          <td>{{ account.fullName || "Chưa có tên" }}</td>
+          <td>{{ account.email }}</td>
+          <td>{{ account.phone || "Chưa có số điện thoại" }}</td>
+          <td>{{ account.roles.map((role) => role.name).join(", ") }}</td>
+          <td>{{ account.deletedAt == null ? "Hoạt động" : "Khóa" }}</td>
+          <td>{{ dayjs(account.createdAt).format("DD-MM-YYYY") }}</td>
+          <td>
+            <button class="btn btn-primary mx-2" title="Chỉnh sửa người dùng" @click="openModalEdit(account)">
+              <font-awesome-icon icon="pen-to-square" />
+            </button>
+            <button class="btn btn-success mx-2" title="Khôi phục người dùng"  @click="confirmRestoreUser(account)" v-if="account.deletedAt">
+              <font-awesome-icon icon="fa-solid fa-arrow-rotate-left" />
+            </button>
+            <button class="btn btn-danger" title="Chặn người dùng" @click="openModalBlockUser(account)" v-if="!account.deletedAt">
+              <font-awesome-icon icon="ban" />
+            </button>
+          </td>
+        </tr>
+        <tr v-if="listAccount.length === 0">
+          <td colspan="8" class="text-center py-4">
+            <font-awesome-icon
+              icon="circle-exclamation"
+              size="2x"
+              class="text-secondary mb-2"
+            />
+            <div>Không có dữ liệu</div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 
   <div class="d-flex justify-content-end mt-3">
     <a-pagination
@@ -345,7 +389,7 @@ onMounted(() => {
       :page-size="pagination.pageSize"
     />
   </div>
-
+  <!-- modal them nguoi dung -->
   <Modal ref="addModalRef">
     <template #header> Thêm người dùng </template>
     <template #body>
@@ -411,6 +455,7 @@ onMounted(() => {
                   v-model="accountModel.roles"
                   :value="role.name"
                   :id="`add-role-${role.name}`"
+                  :disabled="!hasScope(['MANAGE_USERS'])"
                 />
                 <label class="form-check-label" :for="`add-role-${role.name}`">
                   {{ role.name }}
@@ -428,7 +473,7 @@ onMounted(() => {
       </form>
     </template>
   </Modal>
-
+  <!-- modal chinh sua nguoi dung -->
   <Modal ref="editModalRef">
     <template #header> Chỉnh sửa tài khoản </template>
     <template #body>
@@ -483,6 +528,7 @@ onMounted(() => {
                   v-model="accountModelEdit.roles"
                   :value="role.name"
                   :id="`edit-role-${role.name}`"
+                  :disabled="!hasScope(['MANAGE_USERS'])"
                 />
                 <label class="form-check-label" :for="`edit-role-${role.name}`">
                   {{ role.name }}
@@ -497,6 +543,26 @@ onMounted(() => {
             </button>
           </div>
         </div>
+      </form>
+    </template>
+  </Modal>
+
+  <!-- modal chan nguoi dung -->
+  <Modal ref="blockUserModalRef">
+    <template #header>Lý do chặn người dùng</template>
+    <template #body>
+      <form id="reasonBlockUser" @submit.prevent='confirmBlockUser'>
+        <div class="form-floating">
+          <textarea
+            id="formBlockUser"
+            v-model="blockUserModel.reason"
+            class="form-control"
+            placeholder="Nhập lý do chặn người dùng"
+          required
+          ></textarea>
+          <label for="formBlockUser">Nhập lý do chặn người dùng</label>
+        </div>
+        <button class="btn btn-primary my-3" >Xác nhận</button>
       </form>
     </template>
   </Modal>

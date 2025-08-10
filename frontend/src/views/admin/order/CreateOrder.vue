@@ -145,7 +145,7 @@
             </td>
             <td>{{ formatCurrency(item.total) }}</td>
             <td>
-              <button class="btn btn-danger">
+              <button class="btn btn-danger" @click="removeFromCart(item)">
                 <font-awesome-icon icon="trash" />
               </button>
             </td>
@@ -169,7 +169,13 @@
 
       <!-- Thanh tìm kiếm -->
       <div class="d-flex justify-content-end my-3">
-        <input type="text" class="form-control w-25" placeholder="Tìm kiếm sản phẩm..." />
+        <input
+          type="text"
+          class="form-control w-100"
+          placeholder="Tìm kiếm sản phẩm.."
+          @input="handleSearch"
+          v-model="searchKeyword"
+        />
       </div>
 
       <!-- Danh sách sản phẩm -->
@@ -181,6 +187,7 @@
               :src="product.images.find((img) => img.isThumbnail === true)?.imageUrl"
               class="card-img-top"
               alt="..."
+              style="height: 60px; object-fit: contain"
             />
             <div class="card-body text-center">
               <p class="card-text">{{ product.variantName }}</p>
@@ -211,7 +218,9 @@
 
   <!-- Nút lưu -->
   <div class="d-flex justify-content-start mt-3">
-    <button class="btn btn-primary" type="button" @click="showConfirmCreateOrder">Lưu</button>
+    <button class="btn btn-primary" type="button" @click="showConfirmCreateOrder">
+      Lưu
+    </button>
   </div>
 </template>
 
@@ -240,8 +249,7 @@ const address = ref([{ value: "", label: "Tự nhập địa chỉ" }]);
 
 // Dữ liệu phương thức thanh toán
 const paymentMethod = ref([
-  { value: "1", label: "Thanh toán khi nhận hàng" },
-  { value: "2", label: "Thanh toán qua VNPay" },
+
 ]);
 // Dữ liệu trạng thái đơn hàng
 const orderStatus = ref([
@@ -261,20 +269,19 @@ const cart = ref([]);
 // Biến riêng cho mỗi select
 const selectedCustomer = ref(undefined);
 const selectedAddress = ref(null);
-const selectedPaymentMethod = ref("1");
-const selectedOrderStatus = ref("PENDING");
+const selectedPaymentMethod = ref(1);
+const selectedOrderStatus = ref("CONFIRMED");
 const customAddress = ref(""); // input khi người dùng tự nhập
 const customPhone = ref(""); // input khi người dùng tự nhập
 const customFullname = ref(""); // input khi người dùng tự nhập
 const note = ref(""); // input khi người dùng tự nhập
 const pagination = ref({
   current: 1,
-  pageSize: 5,
+  pageSize: 10,
   total: 0,
 });
-
 const timer = ref(null);
-const keyword = ref("");
+const searchKeyword = ref("");
 
 // Filter và handler
 const onChangeCustomer = (value) => {
@@ -314,11 +321,10 @@ async function fecthListUser() {
     );
     customer.value = listUser.value.map((item) => ({
       value: item.id,
-      label: item.fullName,
+      label: item.fullName + ' - ' + item.email,
       address: item.addresses,
     }));
     // address.value = listUser.value.map((item) => ({ value: item.addresses.id, label: item.addresses.fullName }));
-    pagination.value.total = listUser.value.length;
     console.log(listUser.value);
     console.log(customer.value);
   } catch (error) {
@@ -335,18 +341,57 @@ async function fetchListProduct() {
       size: pagination.value.pageSize,
     });
     listProduct.value = response.result.data;
+    console.log("📦 API response:", response.result);
+    console.log("🧮 totalElements:", response.result.totalElements);
+    console.log("📄 pageSize:", pagination.value.pageSize);
+
     pagination.value.total = response.result.totalElements;
-    console.log(listProduct.value);
+    console.log("pagination.value", pagination.value);
   } catch (error) {
     console.log(error);
   }
 }
+
+async function searchList() {
+  try {
+    showLoading();
+    // isSearching.value = true;
+
+    const response = await ProductService.searchProductVariant({
+      keyword: searchKeyword.value.trim(),
+      page: pagination.value.current,
+      size: pagination.value.pageSize,
+    });
+
+    listProduct.value = response.result.data;
+    pagination.value.total = response.result.totalElements;
+  } catch (error) {
+    toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+    hideLoading();
+  }
+}
+
+async function handleSearch() {
+  if (timer.value) clearTimeout(timer.value);
+
+  timer.value = setTimeout(async () => {
+    pagination.value.current = 1;
+
+    if (!searchKeyword.value.trim()) {
+      await fetchListProduct(); // Gọi API fetch bình thường
+    } else {
+      await searchList(); // Gọi API search
+    }
+  }, 1000); // debounce
+}
+
 async function fetchPaymentMethods() {
   try {
     const response = await PaymentService.fetchPaymentMethods();
-    paymentMethod.value = response.result.map(item => ({
+    paymentMethod.value = response.result.filter(item => item.name == 'COD').map((item) => ({
       value: item.id,
-      label: item.description
+      label: item.description,
     }));
   } catch (error) {
     console.log(error);
@@ -434,12 +479,9 @@ function validateForm() {
   return true;
 }
 function showConfirmCreateOrder() {
-  showPromtConfirm(
-    " Xác nhận thông tin đã chính xác.",
-    () => {
-      submitFormAdd();
-    }
-  );
+  showPromtConfirm(" Xác nhận thông tin đã chính xác.", () => {
+    submitFormAdd();
+  });
 }
 async function submitFormAdd() {
   try {
@@ -465,6 +507,12 @@ function resetForm() {
   note.value = "";
   cart.value = [];
 }
+
+function removeFromCart(orderItem){
+  cart.value = cart.value.filter(item => item.id != orderItem.id);
+}
+
+
 watch(
   () => selectedCustomer.value,
   (newVal) => {
@@ -492,7 +540,17 @@ watch(
   },
   { deep: true }
 );
+watch(
+  () => pagination.value.current,
+  () => {
+    if (searchKeyword.value.trim()) {
+      searchList();
+    } else {
+      fetchListProduct();
+    }
 
+  }
+);
 const totalCart = computed(() =>
   cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
 );

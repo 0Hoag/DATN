@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Quản lý voucher</h1>
-    <button class="btn btn-success p-2 fs-5" @click="openModalAdd" v-if="hasScope(['ROLE_ADMIN','ROLE_MANAGER'])">
+    <button class="btn btn-success p-2 fs-5" @click="openModalAdd" v-if="hasScope(['ROLE_ADMIN'])">
       <font-awesome-icon icon="plus" />
       Thêm voucher
     </button>
@@ -167,7 +167,7 @@ const editModalRef = ref(null);
 const listVoucher = ref([]);
 const pagination = ref({
   current: 1,
-  pageSize: 10,
+  pageSize: 1,
   total: 0,
 });
 const searchKeyword = ref("");

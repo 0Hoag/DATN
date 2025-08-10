@@ -5,12 +5,12 @@ import auth from "./auth";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "vue3-toastify";
 const routes = [...admin, ...user, ...auth,
-    { path: '/forbidden', name: 'Forbidden', component: () => import('@/views/Page403.vue') },
-   {
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/views/PageNotFound.vue'),
-  },
+{ path: '/forbidden', name: 'Forbidden', component: () => import('@/views/Page403.vue') },
+{
+  path: '/:pathMatch(.*)*',
+  name: 'NotFound',
+  component: () => import('@/views/PageNotFound.vue'),
+},
 ];
 const router = createRouter({
   history: createWebHistory(),
@@ -32,7 +32,20 @@ router.beforeEach((to, from) => {
   const isAdminRoute = to.path.startsWith("/admin");
 
   if (isAdminRoute && !isAuthenticated && to.name !== "login-admin") {
-    return { name: "Login" };
+    return { name: "login-admin" };
+  }
+
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    toast.warn("Vui lòng đăng nhập để tiếp tục");
+   return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(
+        from.fullPath !== to.fullPath
+          ? from.fullPath
+          : { name: "user-login" }
+      );
+    }, 1500); // delay ngắn để toast kịp render
+  });
   }
 
   let roles = [];

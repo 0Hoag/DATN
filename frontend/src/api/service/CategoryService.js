@@ -20,4 +20,10 @@ export const CategoryService = {
    searchCategory: (params) => {
     return axiosCall.get(API.SEARCH_CATEGORY, params);
   },
+  fetchDetailBySlug: (slug) => {
+    return axiosCall.get(`${API.DETAIL_CATEGORY_BY_SLUG}/${slug}`);
+  },
+  fetchDetailById: (id) => {
+    return axiosCall.get(`${API.DETAIL_CATEGORY_BY_ID}/${id}`);
+  },
 };

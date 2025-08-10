@@ -92,50 +92,7 @@
                     </div>
                 </div>
 
-                <!-- Delivery Method -->
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Phương thức giao hàng</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-check mb-3 p-3 border rounded">
-                            <input class="form-check-input" type="radio" name="delivery" id="standard" value="standard" checked>
-                            <label class="form-check-label w-100" for="standard">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Giao hàng tiêu chuẩn</strong>
-                                        <div class="text-muted small">Giao hàng trong 2-3 ngày làm việc</div>
-                                    </div>
-                                    <span class="badge bg-success">Miễn phí</span>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="form-check mb-3 p-3 border rounded">
-                            <input class="form-check-input" type="radio" name="delivery" id="express" value="express">
-                            <label class="form-check-label w-100" for="express">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Giao hàng nhanh</strong>
-                                        <div class="text-muted small">Giao hàng trong 24h (áp dụng nội thành)</div>
-                                    </div>
-                                    <span class="badge bg-warning text-dark">30.000₫</span>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="form-check p-3 border rounded">
-                            <input class="form-check-input" type="radio" name="delivery" id="pickup" value="pickup">
-                            <label class="form-check-label w-100" for="pickup">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <strong>Nhận tại cửa hàng</strong>
-                                        <div class="text-muted small">123 Nguyễn Văn Cừ, Q.1, TP.HCM</div>
-                                    </div>
-                                    <span class="badge bg-success">Miễn phí</span>
-                                </div>
-                            </label>
-                        </div>
-                    </div>
-                </div>
+              
 
                 <!-- Payment Method -->
                 <div class="card border-0 shadow-sm mb-4">
@@ -143,54 +100,19 @@
                         <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Phương thức thanh toán</h5>
                     </div>
                     <div class="card-body">
-                        <div class="form-check mb-3 p-3 border rounded">
+                        <div class="form-check mb-3 p-3 border rounded" v-for="payment in paymentMethod">
                             <input class="form-check-input" type="radio" name="payment" id="cod" value="cod" checked>
-                            <label class="form-check-label w-100" for="cod">
+                            <label class="form-check-label w-100" :for="payment.name">
                                 <div class="d-flex align-items-center">
-                                    <i class="fas fa-money-bill-wave fa-2x text-success me-3"></i>
+
                                     <div>
-                                        <strong>Thanh toán khi nhận hàng (COD)</strong>
-                                        <div class="text-muted small">Thanh toán bằng tiền mặt khi nhận hàng</div>
+                                        <strong>{{payment.description}}</strong>
+                                        <div class="text-muted small">{{ payment.description }} <span v-if="payment.name == 'COD'">khi nhận hàng</span></div>
                                     </div>
                                 </div>
                             </label>
                         </div>
-                        <div class="form-check mb-3 p-3 border rounded">
-                            <input class="form-check-input" type="radio" name="payment" id="bank" value="bank">
-                            <label class="form-check-label w-100" for="bank">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-university fa-2x text-primary me-3"></i>
-                                    <div>
-                                        <strong>Chuyển khoản ngân hàng</strong>
-                                        <div class="text-muted small">Chuyển khoản qua ATM/Internet Banking</div>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="form-check mb-3 p-3 border rounded">
-                            <input class="form-check-input" type="radio" name="payment" id="momo" value="momo">
-                            <label class="form-check-label w-100" for="momo">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-mobile-alt fa-2x text-danger me-3"></i>
-                                    <div>
-                                        <strong>Ví MoMo</strong>
-                                        <div class="text-muted small">Thanh toán qua ví điện tử MoMo</div>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
-                        <div class="form-check p-3 border rounded">
-                            <input class="form-check-input" type="radio" name="payment" id="card" value="card">
-                            <label class="form-check-label w-100" for="card">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-credit-card fa-2x text-info me-3"></i>
-                                    <div>
-                                        <strong>Thẻ tín dụng/ghi nợ</strong>
-                                        <div class="text-muted small">Visa, Mastercard, JCB, American Express</div>
-                                    </div>
-                                </div>
-                            </label>
-                        </div>
+                      
                     </div>
                 </div>
             </div>
@@ -249,3 +171,22 @@
         </div>
     </div>
 </template>
+<script setup>
+import { handleError } from '@/api/functions/common';
+import { PaymentService } from '@/api/service/PaymentService';
+import { onMounted, ref } from 'vue';
+const paymentMethod = ref([]);
+async function fetchPaymentMethods() {
+  try {
+    const response = await PaymentService.fetchPaymentMethods();
+    paymentMethod.value = response.result;
+    console.log(paymentMethod.value);
+  } catch (error) {
+    console.log(error);
+    handleError(error);
+  }
+}
+onMounted(async()=>{
+    await fetchPaymentMethods();
+})
+</script>

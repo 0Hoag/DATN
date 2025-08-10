@@ -25,8 +25,8 @@
           <font-awesome-icon icon="box" />
         </template>
         <template #title> Sản phẩm </template>
-        <a-menu-item key="products">Tất cả sản phẩm</a-menu-item>
-        <a-menu-item key="product-create" v-if="hasScope(['ROLE_ADMIN', 'ROLE_MANAGER'])"
+        <a-menu-item key="products" >Tất cả sản phẩm</a-menu-item>
+        <a-menu-item key="product-create" v-if="hasScope(['MANAGE_PRODUCTS'])"
           >Thêm sản phẩm</a-menu-item
         >
         <a-menu-item
@@ -43,7 +43,7 @@
         <span>Người dùng</span>
       </a-menu-item>
 
-      <a-sub-menu>
+      <a-sub-menu v-if="hasScope(['MANAGE_ORDERS'])">
         <template #icon>
           <font-awesome-icon icon="cart-shopping" />
         </template>
@@ -55,7 +55,7 @@
         <!-- <a-menu-item key="order-return"> Trả hàng </a-menu-item> -->
       </a-sub-menu>
 
-      <a-menu-item key="reviews">
+      <a-menu-item key="reviews" v-if="hasScope(['ROLE_ADMIN', 'ROLE_MANAGER'])">
         <template #icon>
           <font-awesome-icon icon="comment" />
         </template>
@@ -105,6 +105,8 @@ function handleMenuClick({ key }) {
     router.push({ name: key });
   }
 }
+
+
 // Check if the user has permission to access the sidebar
 
 </script>

@@ -1,11 +1,11 @@
 <template>
-  <div class="container ">
+  <div class="container">
     <!-- Product Info Section -->
     <div class="row">
       <!-- Image Gallery -->
       <div class="col-lg-5">
         <div class="border rounded mb-3 bg-white p-3 text-center">
-          <img :src="selectedImage" class="img-fluid" height="50px" width="350px"/>
+          <img :src="selectedImage" class="img-fluid" height="50px" width="350px" />
         </div>
         <div class="d-flex gap-2 justify-content-center">
           <img
@@ -13,7 +13,8 @@
             :key="index"
             :src="img.imageUrl"
             class="thumb-img"
-            @click="selectedImage = img"
+            style="height: 50px; object-fit: cover"
+            @click="selectedImage = img.imageUrl"
           />
         </div>
       </div>
@@ -34,7 +35,11 @@
             {{ formatPrice(selectedVariantDetail?.price) }}
           </span>
         </div>
-
+        <p>Mô tả ngắn: {{ productDetail?.description }}</p>
+        <div v-if="selectedVariantDetail?.quantity > 0">
+          Tồn kho: {{ selectedVariantDetail?.quantity }}
+        </div>
+        <div v-else><strong class="text-danger fs-4">Hết hàng</strong></div>
         <!-- Color -->
         <!-- <div class="mb-3">
           <label class="option-label">Chọn màu:</label>
@@ -97,8 +102,8 @@
         </div>
 
         <!-- Buttons -->
-        <div class="d-flex gap-2 mt-4">
-          <button class="btn-buy" >Mua ngay</button>
+        <div class="d-flex gap-2 mt-4" v-if="selectedVariantDetail?.quantity > 0">
+          <button class="btn-buy" @click="buyNow">Mua ngay</button>
           <button class="btn-cart" @click="addToCart">Thêm vào giỏ</button>
         </div>
       </div>
@@ -113,67 +118,75 @@
     <!-- Reviews -->
     <div class="mt-5">
       <h5 class="fw-bold mb-3">Đánh giá & Nhận xét</h5>
-      <div
-        v-if="productDetail.productReviews && productDetail.productReviews.length === 0"
-        class="text-muted"
-      >
+      <div v-if="listReview && listReview.length === 0" class="text-muted">
         Chưa có đánh giá nào cho sản phẩm này.
       </div>
-      <div v-else class="review-list">
+      <div v-else class="spec-box overflow-auto" style="max-height:500px ;" >
         <div
-          v-for="(review, index) in productDetail.productReviews"
+          v-for="(review, index) in listReview"
           :key="index"
           class="border-bottom py-3"
         >
-          <div class="fw-bold">{{ review.name }}</div>
+          <div class="d-flex justify-content-start align-items-center mb-2">
+            <img
+              :src="avatarUrl(review.userFullName)"
+              alt="avatar"
+              class="rounded-circle me-2"
+              width="40"
+              height="40"
+            />
+            <div class="fw-bold">{{ review.userFullName }} - {{ review.userEmail }}</div>
+          </div>
           <div class="text-warning mb-1">
             <i class="fa fa-star" v-for="n in review.rating" :key="n"></i>
           </div>
-          <div>{{ review.comment }}</div>
+          <div>{{ review.content }}</div>
         </div>
-      </div>
-      <div class="mt-4">
-        <h6 class="fw-bold">Viết đánh giá của bạn</h6>
-        <div class="mb-2">
-          <select v-model="newReview.rating" class="form-select">
-            <option disabled value="">Chọn số sao</option>
-            <option v-for="n in 5" :key="n" :value="n">{{ n }} sao</option>
-          </select>
+        <div class="text-center mt-3" v-if="hasMore()">
+          <button class="btn btn-primary" @click="loadMore" :disabled="isLoading">
+            <span v-if="!isLoading">Tải thêm</span>
+            <span v-else>Đang tải...</span>
+          </button>
         </div>
-        <div class="mb-2">
-          <textarea
-            v-model="newReview.comment"
-            class="form-control"
-            rows="3"
-            placeholder="Nội dung đánh giá..."
-          ></textarea>
-        </div>
-        <button @click="submitReview" class="btn btn-outline-primary">
-          Gửi đánh giá
-        </button>
       </div>
     </div>
 
     <!-- Related Products -->
-    <div class="mt-5">
+    <div class="mt-5" v-if="relatedProducts && relatedProducts.length > 0">
       <h5 class="fw-bold mb-3">Sản phẩm liên quan</h5>
-      <div class="row g-3">
-        <div v-for="p in relatedProducts" :key="p.id" class="col-6 col-md-3">
-          <div class="card h-100">
-            <img :src="p.thumbnail" class="card-img-top related-thumb" />
-            <div class="card-body p-2">
-              <div class="fw-semibold small text-dark">{{ p.name }}</div>
-              <div class="text-danger fw-bold">
-                {{ formatPrice(p.salePrice || p.price) }}
+      <div class="row g-3 mt-1">
+        <div class="col-md-2 d-flex mb-3" v-for="p in relatedProducts">
+          <router-link :to="{ name: 'product', params: { slug: p.slug } }">
+            <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
+              <div class="product-img-wrapper">
+                <img :src="p.imageUrl" :alt="p.name" class="img-fluid" />
               </div>
               <div
-                v-if="p.salePrice"
-                class="text-muted text-decoration-line-through small"
+                class="card-body flex-grow-1 d-flex flex-column justify-content-between m-auto w-100"
               >
-                {{ formatPrice(p.price) }}
+                <h6 class="card-title text-left">
+                  {{ p.name }}
+                </h6>
+                <div
+                  class="mb-1 text-warning d-flex justify-content-start align-items-center mt-auto"
+                  style="min-height: 28px"
+                >
+                  <font-awesome-icon icon="fa-solid fa-star" />
+                  <span class="text-muted small ms-1">({{ p.averageRating }})</span>
+                </div>
+                <p class="text-danger fw-bold mb-1 text-start">
+                  {{
+                    p.minSalePrice
+                      ? formatPrice(p.minSalePrice)
+                      : formatPrice(p.minOriginPrice)
+                  }}<br />
+                  <del class="text-muted" v-if="p.minSalePrice">{{
+                    formatPrice(p.minOriginPrice)
+                  }}</del>
+                </p>
               </div>
             </div>
-          </div>
+          </router-link>
         </div>
       </div>
     </div>
@@ -183,36 +196,68 @@
 <script setup>
 import { handleError } from "@/api/functions/common";
 import { CartService } from "@/api/service/CartService";
+import { CategoryService } from "@/api/service/CategoryService";
 import { ProductService } from "@/api/service/ProductService";
+import { ReviewService } from "@/api/service/ReviewService";
+import router from "@/router";
 import { useCartStore } from "@/store/cartStore";
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
+// sản phẩm liên quan
+const relatedProducts = ref([]);
+const categorySlug = ref(null);
+const getRelatedProduct = async () => {
+  relatedProducts.value = [];
+  try {
+    const res = await ProductService.fetchListProductBySlugCategory(categorySlug.value, {
+      page: 1,
+      size: 12,
+    });
+    relatedProducts.value = res.result.data.filter(
+      (item) => productDetail.value.id != item.productId
+    );
+    console.log("relatedProducts", relatedProducts.value);
+  } catch (error) {
+    console.log(error);
+    handleError(error);
+  }
+};
 
-const relatedProducts = [
-  {
-    id: 1,
-    name: "iPhone 15 Pro Max",
-    price: 34990000,
-    salePrice: 31990000,
-    thumbnail: "https://cdn.example.com/iphone15.png",
-  },
-  {
-    id: 2,
-    name: "Xiaomi 14 Ultra",
-    price: 25990000,
-    thumbnail: "https://cdn.example.com/xiaomi14.png",
-  },
-  // ...
-];
-const product = {
-  name: "Samsung Galaxy S25 Ultra 5G",
-  brand: "Samsung",
-  images: [
-    "https://cdn.example.com/s25-front.png",
-    "https://cdn.example.com/s25-back.png",
-  ],
-  specText:
-    "Màn hình: 6,9 inch QHD+ AMOLED 120Hz. Camera: 108MP + 12MP + 10MP + 10MP. Pin: 5000mAh, sạc nhanh 45W. Chipset: Snapdragon 8 Gen 3. RAM: 12GB. ROM: 256GB.",
+// review
+const avatarUrl = (name) => {
+  const displayName = name || "Unknown";
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    displayName
+  )}&background=random`;
+};
+
+const currentPage = ref(1);
+const pageSize = 10;
+const total = ref(0);
+const isLoading = ref(false);
+const listReview = ref([]);
+const getListReviewByProduct = async () => {
+  if (isLoading.value) return;
+  try {
+    const response = await ReviewService.fetchListReviewByProduct(productDetail.value.id, {
+      page: currentPage.value,
+      size: pageSize,
+    });
+    listReview.value.push(...response.result.data);
+    total.value = response.result.totalElements;
+  } catch (error) {
+    handleError(error);
+  } finally {
+    isLoading.value = false;
+  }
+};
+const loadMore = async () => {
+  currentPage.value++;
+  await getListReviewByProduct();
+};
+
+const hasMore = () => {
+  return listReview.value.length < total.value;
 };
 
 // const splitSpecs = (text) => {
@@ -222,8 +267,8 @@ const product = {
 //     .filter((s) => s.length > 0);
 // };
 
-const selectedImage = ref('');
-
+//
+const selectedImage = ref("");
 
 const newReview = ref({ name: "", rating: "", comment: "" });
 const reviews = ref([
@@ -260,7 +305,9 @@ const getDetailProduct = async () => {
       listVariant.value = productDetail.value.productVariants;
       if (listVariant.value.length > 0) {
         selectedVariant2.value = listVariant.value[0].id;
-        selectedImage.value = selectedVariantDetail.value.images[0].imageUrl
+        selectedImage.value = selectedVariantDetail.value.images[0].imageUrl;
+        console.log("selected img", selectedImage.value);
+        categorySlug.value = productDetail.value.category.slug;
       }
     }
     console.log(productDetail.value);
@@ -269,22 +316,38 @@ const getDetailProduct = async () => {
     handleError(error);
   }
 };
+
 const getThumnailForVariant = (variant) => {
   return variant.images.find((v) => v.isThumbnail);
 };
+
 const selectVariant = (id) => {
   selectedVariant2.value = id;
   console.log(selectedVariantDetail.value);
 };
+
 const selectedVariantDetail = computed(() => {
   return listVariant.value.find((v) => v.id === selectedVariant2.value);
 });
+
 const cartStore = useCartStore();
-const addToCart = () => {
-    cartStore.addToCart(selectedVariantDetail.value.id, 1);
-}
-onMounted(() => {
-  getDetailProduct();
+
+const addToCart = async () => {
+  await cartStore.addToCart(selectedVariantDetail.value.id, 1);
+  await cartStore.getCart();
+  console.log("cart item from detail", cartStore.cartItem);
+};
+
+const buyNow = async () => {
+  await cartStore.addToCart(selectedVariantDetail.value.id, 1);
+  router.push({ name: "cart" });
+  console.log("cart item from detail", cartStore.cartItem);
+};
+onMounted(async () => {
+  await cartStore.getCart();
+  await getDetailProduct();
+  await getRelatedProduct();
+  await getListReviewByProduct();
 });
 </script>
 

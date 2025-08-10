@@ -17,14 +17,16 @@
     <div class="container d-flex align-items-center justify-content-between">
       <!-- Logo -->
       <div class="logo">
-        <a href="/"><img src="../../assets/image/PHoneZone.png" alt="Logo" /></a>
+        <router-link :to="{ name: 'home' }"
+          ><img src="../../assets/image/PHoneZone.png" alt="Logo"
+        /></router-link>
       </div>
 
       <!-- Search Bar -->
       <div class="search-bar flex-grow-1 mx-4">
         <div class="input-group">
           <input type="text" class="form-control" placeholder="Bạn cần tìm gì hôm nay?" />
-          <button><i class="fa fa-search"></i></button>
+          <button><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></button>
         </div>
       </div>
 
@@ -66,45 +68,47 @@
           <font-awesome-icon :icon="['fas', 'cart-shopping']" />
           <span class="d-none d-md-inline">Giỏ hàng</span>
         </router-link>
+        <router-link
+          :to="{ name: 'dashboard' }"
+          class="d-flex align-items-center gap-1"
+          v-if="hasScope(['ROLE_ADMIN', 'ROLE_MANAGER', 'ROLE_SHIFT_STAFF'])"
+        >
+          <font-awesome-icon :icon="['fas', 'dashboard']" />
+          <span class="d-none d-md-inline">Dashboard</span>
+        </router-link>
       </div>
     </div>
+
+    <!-- menu -->
+    <div class="container mt-2 d-flex justify-content-center">
+      <ul class="menu">
+        <li v-for="item in categories" @mouseenter="adjustPosition($event)">
+          <router-link
+            v-if="item.children.length === 0"
+            :to="{ name: 'category', params: { slug: item.slug } }"
+          >
+            {{ item.name }}
+          </router-link>
+          <span v-else class="d-inline-flex align-items-center">
+            {{ item.name }}
+            <font-awesome-icon icon="fa-solid fa-caret-down" class="ms-2" />
+          </span>
+
+          <ul
+            v-if="item.children.length > 0"
+            class="sub-menu mt-4 bg-white shadow rounded"
+            :class="item.children.length <= 4 ? 'center' : 'full'"
+          >
+            <li v-for="child in item.children" :key="child.id">
+              <router-link :to="{ name: 'category', params: { slug: child.slug } }">
+                {{ child.name }}
+              </router-link>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
-
- 
-<a-menu mode="horizontal" class="d-flex justify-content-center" >
-  <template v-for="category in categories" :key="category.id + '-wrapper'">
-   <a-sub-menu v-if="category.children" :key="category.id + '-submenu'">
-  <template #title>
-    <router-link
-      :to="`/category/${category.slug}`"
-      style="display: inline-block; width: 100%;"
-    >
-      {{ category.name }}
-    </router-link>
-  </template>
-
-  <a-menu-item
-    v-for="child in category.children"
-    :key="child.id"
-  >
-    <router-link :to="`/category/${child.slug}`">
-      {{ child.name }}
-    </router-link>
-  </a-menu-item>
-</a-sub-menu>
-
-
-    <a-menu-item
-      v-else
-      :key="category.id + '-item'"
-    >
-      <router-link :to="{name: 'category', params: {slug: category.slug}}">{{ category.name }}</router-link>
-    </a-menu-item>
-  </template>
-</a-menu>
-
-
-
 </template>
 
 <script setup>
@@ -115,7 +119,8 @@ import { useUserStore } from "@/store/userStore";
 import { CategoryService } from "@/api/service/CategoryService";
 import { handleError } from "@/api/functions/common";
 import { useRouter } from "vue-router";
-
+import { useAuth } from "@/composable/useAuth";
+const { hasScope } = useAuth();
 const store = useUserStore();
 // onMounted(() => {
 //   document.querySelectorAll(".dropdown-toggle").forEach((el) => {
@@ -154,14 +159,6 @@ const getListCategory = async () => {
         ...c,
         children: c.children || [],
       }));
-
-    // Đợi DOM cập nhật xong rồi mới init dropdown
-    await nextTick();
-
-    document.querySelectorAll(".dropdown-toggle").forEach((el) => {
-      const dropdown = new Dropdown(el);
-      // Không cần toggle ngay
-    });
   } catch (error) {
     console.log(error);
     handleError(error);
@@ -169,16 +166,37 @@ const getListCategory = async () => {
 };
 const router = useRouter();
 function goToCategory(slug) {
-    router.push({ name: 'category', params: { slug } });
+  router.push({ name: "category", params: { slug } });
+}
+
+function adjustPosition(event) {
+  const subMenu = event.currentTarget.querySelector(".sub-menu");
+  if (!subMenu) return;
+
+  // reset
+  subMenu.style.left = "";
+  subMenu.style.right = "";
+  subMenu.style.transform = "";
+
+  const rect = subMenu.getBoundingClientRect();
+  console.log(rect);
+  console.log(window.innerWidth);
+
+  if (rect.left < 0) {
+    subMenu.style.left = "0";
+    subMenu.style.transform = "translateY(-10px)"; // giữ hiệu ứng
+  } else if (rect.right > window.innerWidth) {
+    subMenu.style.right = "0";
+    subMenu.style.transform = "translateY(-10px)";
   }
+}
+
 onMounted(() => {
   getListCategory();
 });
 </script>
 
 <style scoped>
-
-
 .dropdown-item img {
   width: 20px;
   height: 20px;
@@ -247,60 +265,76 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* Dropdown Menu */
-.navbar-nav .nav-link {
-  color: #333;
-  font-weight: 500;
-}
-
-.navbar-nav .nav-link:hover {
-  color: #d70018;
-}
-
-.dropdown-menu {
-  border-radius: 0;
-  border: none;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-.dropdown-item:hover {
-  background-color: #f1f1f1;
-  color: #d70018;
-}
-
-.navbar-nav .nav-link {
-  font-size: 15px;
-  color: #333 !important;
-  transition: all 0.2s ease-in-out;
-}
-
-.navbar-nav .nav-link:hover {
-  color: #d70018 !important;
-}
-
-.dropdown-menu {
-  border-radius: 6px;
-  border: none;
-  margin-top: 0.5rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
-  padding: 0.5rem 0;
-}
-
-.dropdown-item {
-  padding: 8px 20px;
-  font-size: 14px;
-  color: #333;
-  transition: all 0.2s;
-}
-
-.dropdown-item:hover {
-  background-color: #f8f9fa;
-  color: #d70018;
-}
-
 a {
   text-decoration: none;
   color: black;
+}
+
+/* menu */
+.menu {
+  display: flex;
+  list-style: none;
+  flex-wrap: wrap;
+  max-width: 700px;
+  box-sizing: border-box;
+}
+
+.menu > li {
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  position: relative;
+  border-bottom: 2px solid transparent;
+}
+
+.menu > li:hover {
+  border-bottom-color: blue;
+}
+
+/* Ẩn menu con mặc định */
+.sub-menu {
+  position: absolute;
+  top: 100%;
+  padding: 0.5rem;
+  list-style: none;
+
+  display: inline-flex;
+
+  gap: 1rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+/* Hiển thị khi hover */
+.menu > li:hover > .sub-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.sub-menu > li:hover {
+  color: black;
+}
+
+.sub-menu > li {
+  flex: 1 1 150px;
+  text-align: center;
+  padding: 0.5rem;
+  color: black;
+}
+
+/* ít item -> center ngay dưới cha */
+.sub-menu.center {
+  left: 0;
+  flex-wrap: nowrap;
+}
+
+/* nhiều item -> full width menu */
+.sub-menu.full {
+  min-width: 600px;
+  justify-content: flex-start;
+  flex-wrap: wrap;
 }
 </style>

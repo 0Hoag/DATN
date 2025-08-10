@@ -59,13 +59,13 @@
           <!-- Remember Me & Forgot Password -->
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="form-check">
-              <input
+              <!-- <input
                 class="form-check-input"
                 type="checkbox"
                 id="rememberMe"
                 v-model="loginForm.rememberMe"
-              />
-              <label class="form-check-label" for="rememberMe"> Ghi nhớ đăng nhập </label>
+              /> -->
+              <!-- <label class="form-check-label" for="rememberMe"> Ghi nhớ đăng nhập </label> -->
             </div>
             <router-link
               :to="{ name: 'ForgotPassword' }"

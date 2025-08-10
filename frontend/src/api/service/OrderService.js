@@ -7,6 +7,9 @@ export const OrderService = {
   createOrder: (params) => {
     return axiosCall.post(API.CREATE_ORDER, params);
   },
+  createOrderFromUser: (params) => {
+    return axiosCall.post(API.CREATE_ORDER_FORM_USER, params);
+  },
   updateOrder: (id, params) => {
     return axiosCall.put(`${API.UPDATE_ORDER}/${id}`, params);
   },
@@ -22,8 +25,11 @@ export const OrderService = {
   searchOrder: (params) => {
     return axiosCall.get(API.SEARCH_ORDER, params);
   },
-  cancelOrder: (id) => {
-    return axiosCall.get(`${API.CANCEL_ORDER}/${id}`);
+  cancelOrder: (id, params) => {
+    return axiosCall.post(`${API.CANCEL_ORDER_BY_CLIENT}/${id}`,params);
+  },
+  cancelOrderByAdmin: (id,params) => {
+    return axiosCall.post(`${API.CANCEL_ORDER_BY_ADMIN}/${id}`,params);
   },
   fetchOrdersByUser: (id, params) => {
     return axiosCall.get(`${API.LIST_ORDER_BY_USER}/${id}`,params);

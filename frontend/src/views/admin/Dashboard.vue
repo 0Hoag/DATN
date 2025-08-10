@@ -252,12 +252,12 @@ onMounted(() => {
     </div>
     <div class="col-4">
       <div class="card shadow border-0">
-        <div class="card-body">
+        <div class="card-body overflow-auto" style="height: 550px;" >
           <strong>Top 10 sản phẩm bán chạy</strong>
           <div class="card border-1 my-2" v-for="(product, index) in topProducts" :key="index">
-            <div class="card-body row">
-             <div class="col-3">
-              <img :src="product.thumbnail" alt="" class="object-fit-contain w-100" >
+            <div class="card-body row " >
+             <div class="col-3" style="height: 50px;">
+              <img :src="product.thumbnail" alt="" class="object-fit-contain h-100" >
               </div>
              <div class="col-9"> 
              <h5 class="card-title">{{ product.productName }} <span class="badge text-bg-secondary">{{ product.quantitySold }}</span></h5>

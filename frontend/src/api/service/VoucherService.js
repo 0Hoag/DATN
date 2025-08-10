@@ -16,4 +16,8 @@ export const VoucherService = {
     searchVoucher: (params) => {
         return axiosCall.get(API.SEARCH_VOUCHER, params);
     },
+    getVoucherCanUse: (params) => {
+        return axiosCall.get(API.CAN_USE_VOUCHER, params);
+    },
+    
 };

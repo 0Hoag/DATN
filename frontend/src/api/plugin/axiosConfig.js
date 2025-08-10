@@ -1,3 +1,5 @@
+import { useAuth } from "@/composable/useAuth";
+import { useUserStore } from "@/store/userStore";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "vue3-toastify";
@@ -5,7 +7,6 @@ const instance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
   withCredentials: true, // ✅ Gửi cookie cho mọi request
 });
-
 instance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -18,6 +19,9 @@ instance.interceptors.request.use(
         if (decoded.exp && decoded.exp < now) {
           // Token đã hết hạn
           localStorage.removeItem("token");
+          localStorage.removeItem('userInfo')
+          localStorage.removeItem('scope')
+          logout();
           toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", {
             autoClose: 5000,
             onClose: () => {

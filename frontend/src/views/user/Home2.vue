@@ -41,7 +41,7 @@
     </div>
 
     <!-- Flash Sale -->
-    <div class="row mt-5 flash-sale-section p-3 rounded bg-warning-subtle">
+    <!-- <div class="row mt-5 flash-sale-section p-3 rounded bg-warning-subtle">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="text-danger fw-bold mb-0">
           <i class="fa-solid fa-bolt fa-shake text-warning me-2"></i> FLASH SALE
@@ -61,7 +61,6 @@
             <img :src="product.imageUrl" :alt="product.title" />
           </div>
 
-          <!-- Đảm bảo chiều cao đồng đều -->
           <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
             <h6 class="card-title text-start text-truncate">
               {{ product.name }}
@@ -80,13 +79,13 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
 
     <!-- Danh sách sản phẩm -->
     <div class="row mt-3">
       <div class="d-flex justify-content-between">
         <h5>ĐIỆN THOẠI NỔI BẬT NHẤT</h5>
-        <router-link :to="{name:'category', params: {slug: 'apple'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
+        <router-link :to="{name:'category', params: {slug: 'dien-thoai'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
       </div>
       <div class="col-12 d-flex flex-wrap gap-2">
         <!-- <button class="btn btn-light border rounded-pill " v-for="cate in listCategory">{{ cate.name }}</button> -->
@@ -133,7 +132,7 @@
     <div class="row mt-4">
       <div class="d-flex justify-content-between">
         <h5>LAPTOP NỔI BẬT NHẤT</h5>
-        <router-link :to="{name:'category', params: {slug: 'samsung'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
+        <router-link :to="{name:'category', params: {slug: 'laptop'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
       </div>
       <!-- <div class="col-12 d-flex flex-wrap gap-2">
         <button class="btn btn-light border rounded-pill">MSI</button>
@@ -187,7 +186,7 @@
     <div class="row mt-4">
       <div class="d-flex justify-content-between">
         <h5>ĐỒNG HỒ NỔI BẬT NHẤT</h5>
-        <router-link :to="{name:'category', params: {slug: 'xiaomi'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
+        <router-link :to="{name:'category', params: {slug: 'dong-ho'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
       </div>
       <!-- <div class="col-12 d-flex flex-wrap gap-2">
         <button class="btn btn-light border rounded-pill">ROLEX</button>
@@ -265,12 +264,11 @@ const categories = ref([
   { icon: "bi bi-newspaper", label: "Tin công nghệ" },
 ]);
 
-const rightBanners = ref([
-  "/image/banner1.png",
-  "/image/banner4.png",
-  "/image/banner3.jpg",
-]);
+import banner1 from "@/assets/image/banner1.png";
+import banner3 from "@/assets/image/banner3.jpg";
+import banner4 from "@/assets/image/banner4.jpg";
 
+const rightBanners = ref([banner1, banner4, banner3]);
 const flashSaleProducts = ref([
   {
     title: "iPhone 14 Pro Max 128GB",
@@ -298,7 +296,7 @@ const listProductMobile = ref([]);
 const getListProductMobile = async () => {
   listProductMobile.value = [];
   try {
-    const res = await ProductService.fetchListProductBySlugCategory("samsung",{
+    const res = await ProductService.fetchListProductBySlugCategory("dien-thoai",{
       page:1,
       size: 12,
     });
@@ -313,7 +311,7 @@ const listProductLaptop = ref([]);
 const getListProductLaptop = async () => {
   listProductLaptop.value = [];
   try {
-    const res = await ProductService.fetchListProductBySlugCategory("apple",{
+    const res = await ProductService.fetchListProductBySlugCategory("laptop",{
       page:1,
       size: 12,
     });
@@ -328,7 +326,7 @@ const listProductWatch = ref([]);
 const getListProductWatch = async () => {
   listProductWatch.value = [];
   try {
-    const res = await ProductService.fetchListProductBySlugCategory("xiaomi",{
+    const res = await ProductService.fetchListProductBySlugCategory("dong-ho",{
       page:1,
       size: 12,
     });
@@ -348,7 +346,7 @@ function formatPrice(price) {
 }
 
 onMounted(() => {
-  getListProductSale();
+  // getListProductSale();
   getListProductMobile();
   getListProductLaptop();
   getListProductWatch();

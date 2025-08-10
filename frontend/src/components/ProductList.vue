@@ -8,6 +8,7 @@ const props = defineProps({
     type: String,
     default: "Sản phẩm nổi bật",
   },
+
 });
 
 function formatPrice(price) {
@@ -61,7 +62,7 @@ function getDisplayPrice(variants) {
         <router-link :to="{name: 'product', params: {slug: product.slug}}">
           <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
             <div class="product-img-wrapper">
-              <img :src="product.imageUrl" :alt="product.name" class="img-fluid" />
+              <img :src="product.imageUrl" :alt="product.name" class="img-fluid" style=" height: 200px; object-fit: cover"/>
             </div>
             <div
               class="card-body flex-grow-1 d-flex flex-column justify-content-between m-auto w-100"
@@ -93,7 +94,7 @@ function getDisplayPrice(variants) {
     </div>
     <div class="text-center py-2" v-if="products.length == 0">
       <font-awesome-icon :icon="['fas', 'box']" size="3x" class="text-muted mb-3" />
-      <h5>Chưa có sản phẩm, vui lòng chọn danh mục khác</h5>
+      <h5>Không có dữ liệu</h5>
     </div>
   </div>
 </template>
