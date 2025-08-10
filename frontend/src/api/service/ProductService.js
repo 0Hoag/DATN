@@ -28,6 +28,9 @@ export const ProductService = {
     searchProduct: (params) => {
         return axiosCall.get(API.SEARCH_PRODUCT, params);
     },
+    searchProductForUser: (params) => {
+        return axiosCall.get(API.SEARCH_PRODUCT_FOR_USER, params);
+    },
     fetchListProductVariant: (params) => {
         return axiosCall.get(API.LIST_PRODUCT_VARIANT, params);
     },

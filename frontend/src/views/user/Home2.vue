@@ -41,15 +41,21 @@
     </div>
 
     <!-- Flash Sale -->
-    <!-- <div class="row mt-5 flash-sale-section p-3 rounded bg-warning-subtle">
+    <div
+      class="row mt-5 flash-sale-section p-3 rounded bg-warning-subtle"
+      v-if="isActive"
+    >
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="text-danger fw-bold mb-0">
           <i class="fa-solid fa-bolt fa-shake text-warning me-2"></i> FLASH SALE
         </h5>
-        <div class="countdown-timer text-danger fw-semibold small">00:59:59</div>
+        <div class="countdown-timer text-danger fw-semibold small">
+          Kết thúc trong:
+          {{ h }}:{{ m }}:{{ s }}
+        </div>
       </div>
-      <div class="d-flex gap-3 flex-nowrap overflow-auto">
-        <div
+      <!-- <div class="d-flex gap-3 flex-nowrap overflow-auto"> -->
+      <!-- <div
           v-for="(product, index) in flashSaleProducts"
           :key="index"
           class="card flash-sale-card shadow-sm position-relative d-flex flex-column h-100"
@@ -72,20 +78,53 @@
             </div>
 
             <p class="text-danger fw-bold mb-1 text-start">
-         
               {{ formatPrice(product.minSalePrice) }}<br />
               <del class="text-muted">{{ formatPrice(product.minOriginPrice) }}</del>
             </p>
           </div>
-        </div>
-      </div>
-    </div> -->
+        </div> -->
+      <!-- </div> -->
+      <Swiper :modules="[Navigation,Pagination]" :loop="true" :slides-per-view="5" navigation  pagination>
+        <SwiperSlide v-for="(product, index) in flashSaleProducts" :key="index">
+          <div
+            class="card flash-sale-card shadow-sm position-relative d-flex flex-column h-100"
+            style="flex: 0 0 auto; width: 220px"
+          >
+            <span class="flash-badge">SALE</span>
+
+            <div class="product-img-wrapper">
+              <img :src="product.imageUrl" :alt="product.title" />
+            </div>
+
+            <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+              <h6 class="card-title text-start text-truncate">
+                {{ product.name }}
+              </h6>
+
+              <div class="mb-1 text-warning d-flex align-items-center mt-auto">
+                <i class="fa fa-star"></i>
+                <span class="text-muted small ms-1">({{ product.averageRating }})</span>
+              </div>
+
+              <p class="text-danger fw-bold mb-1 text-start">
+                {{ formatPrice(product.minSalePrice) }}<br />
+                <del class="text-muted">{{ formatPrice(product.minOriginPrice) }}</del>
+              </p>
+            </div>
+          </div>
+        </SwiperSlide>
+      </Swiper>
+    </div>
 
     <!-- Danh sách sản phẩm -->
     <div class="row mt-3">
       <div class="d-flex justify-content-between">
         <h5>ĐIỆN THOẠI NỔI BẬT NHẤT</h5>
-        <router-link :to="{name:'category', params: {slug: 'dien-thoai'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
+        <router-link
+          :to="{ name: 'category', params: { slug: 'dien-thoai' } }"
+          class="btn btn-light border rounded-pill"
+          >Xem tất cả</router-link
+        >
       </div>
       <div class="col-12 d-flex flex-wrap gap-2">
         <!-- <button class="btn btn-light border rounded-pill " v-for="cate in listCategory">{{ cate.name }}</button> -->
@@ -93,7 +132,7 @@
 
       <div class="row g-3 mt-1">
         <div class="col-md-2 d-flex mb-3" v-for="p in listProductMobile">
-         <router-link :to="{name: 'product', params: {slug: p.slug}}">
+          <router-link :to="{ name: 'product', params: { slug: p.slug } }">
             <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
               <div class="product-img-wrapper">
                 <img :src="p.imageUrl" :alt="p.name" class="img-fluid" />
@@ -123,7 +162,7 @@
                 </p>
               </div>
             </div>
-         </router-link>
+          </router-link>
         </div>
       </div>
     </div>
@@ -132,7 +171,11 @@
     <div class="row mt-4">
       <div class="d-flex justify-content-between">
         <h5>LAPTOP NỔI BẬT NHẤT</h5>
-        <router-link :to="{name:'category', params: {slug: 'laptop'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
+        <router-link
+          :to="{ name: 'category', params: { slug: 'laptop' } }"
+          class="btn btn-light border rounded-pill"
+          >Xem tất cả</router-link
+        >
       </div>
       <!-- <div class="col-12 d-flex flex-wrap gap-2">
         <button class="btn btn-light border rounded-pill">MSI</button>
@@ -147,7 +190,7 @@
 
       <div class="row g-3 mt-1">
         <div class="col-md-2 d-flex mb-3" v-for="p in listProductLaptop">
-           <router-link :to="{name: 'product', params: {slug: p.slug}}">
+          <router-link :to="{ name: 'product', params: { slug: p.slug } }">
             <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
               <div class="product-img-wrapper">
                 <img :src="p.imageUrl" :alt="p.name" class="img-fluid" />
@@ -177,7 +220,7 @@
                 </p>
               </div>
             </div>
-         </router-link>
+          </router-link>
         </div>
       </div>
     </div>
@@ -186,7 +229,11 @@
     <div class="row mt-4">
       <div class="d-flex justify-content-between">
         <h5>ĐỒNG HỒ NỔI BẬT NHẤT</h5>
-        <router-link :to="{name:'category', params: {slug: 'dong-ho'}}" class="btn btn-light border rounded-pill">Xem tất cả</router-link>
+        <router-link
+          :to="{ name: 'category', params: { slug: 'dong-ho' } }"
+          class="btn btn-light border rounded-pill"
+          >Xem tất cả</router-link
+        >
       </div>
       <!-- <div class="col-12 d-flex flex-wrap gap-2">
         <button class="btn btn-light border rounded-pill">ROLEX</button>
@@ -199,7 +246,7 @@
 
       <div class="row g-3 mt-1">
         <div class="col-md-2 d-flex mb-3" v-for="p in listProductWatch">
-           <router-link :to="{name: 'product', params: {slug: p.slug}}">
+          <router-link :to="{ name: 'product', params: { slug: p.slug } }">
             <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
               <div class="product-img-wrapper">
                 <img :src="p.imageUrl" :alt="p.name" class="img-fluid" />
@@ -229,7 +276,7 @@
                 </p>
               </div>
             </div>
-         </router-link>
+          </router-link>
         </div>
       </div>
     </div>
@@ -239,7 +286,11 @@
 <script setup>
 import { handleError } from "@/api/functions/common";
 import { ProductService } from "@/api/service/ProductService";
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import "swiper/css"; // style cơ bản
+import "swiper/css/navigation";
+import "swiper/css/autoplay";
 
 const menus = ref([
   { name: "Điện thoại", items: ["iPhone", "Samsung", "Xiaomi", "OPPO"] },
@@ -267,6 +318,8 @@ const categories = ref([
 import banner1 from "@/assets/image/banner1.png";
 import banner3 from "@/assets/image/banner3.jpg";
 import banner4 from "@/assets/image/banner4.jpg";
+import { faL } from "@fortawesome/free-solid-svg-icons";
+import { Navigation, Pagination } from "swiper/modules";
 
 const rightBanners = ref([banner1, banner4, banner3]);
 const flashSaleProducts = ref([
@@ -296,8 +349,8 @@ const listProductMobile = ref([]);
 const getListProductMobile = async () => {
   listProductMobile.value = [];
   try {
-    const res = await ProductService.fetchListProductBySlugCategory("dien-thoai",{
-      page:1,
+    const res = await ProductService.fetchListProductBySlugCategory("dien-thoai", {
+      page: 1,
       size: 12,
     });
     listProductMobile.value = res.result.data || [];
@@ -311,8 +364,8 @@ const listProductLaptop = ref([]);
 const getListProductLaptop = async () => {
   listProductLaptop.value = [];
   try {
-    const res = await ProductService.fetchListProductBySlugCategory("laptop",{
-      page:1,
+    const res = await ProductService.fetchListProductBySlugCategory("laptop", {
+      page: 1,
       size: 12,
     });
     listProductLaptop.value = res.result.data || [];
@@ -326,8 +379,8 @@ const listProductWatch = ref([]);
 const getListProductWatch = async () => {
   listProductWatch.value = [];
   try {
-    const res = await ProductService.fetchListProductBySlugCategory("dong-ho",{
-      page:1,
+    const res = await ProductService.fetchListProductBySlugCategory("dong-ho", {
+      page: 1,
       size: 12,
     });
     listProductWatch.value = res.result.data || [];
@@ -345,12 +398,97 @@ function formatPrice(price) {
   }).format(price);
 }
 
+// count down
+const h = ref("00");
+const m = ref("00");
+const s = ref("00");
+const isActive = ref(true);
+let startTime, endTime, timer;
+
+// Hàm tính Thứ 7 & Chủ Nhật tuần tới (gọn nhất)
+function getNextWeekendTimes() {
+  const now = new Date();
+
+  // Thứ 7 09:00
+  // const start = new Date(now);
+  // const diffToSat = (6 - start.getDay() + 7) % 7;
+  // start.setDate(start.getDate() + diffToSat);
+  // start.setHours(9, 0, 0, 0);
+
+  // Chủ Nhật 23:59:59
+  // const end = new Date(start);
+  // end.setDate(start.getDate() + 1);
+  // end.setHours(23, 59, 59, 999);
+
+  // Test tự động tính toán
+  const start = new Date(now.getTime() + 1 * 1000);
+  const end = new Date(start.getTime() + 50 * 1000);
+
+  return { start, end };
+}
+
+function tick() {
+  const now = new Date();
+
+  if (now < startTime) {
+    isActive.value = false;
+    h.value = m.value = s.value = "00";
+    return;
+  }
+
+  isActive.value = true;
+  let diff = Math.floor((endTime - now) / 1000);
+
+  // reset lại countdown sang tuần sau
+  if (diff < 0) {
+    const next = getNextWeekendTimes();
+    startTime = next.start;
+    endTime = next.end;
+
+    localStorage.setItem("flashsale-start", startTime.toISOString());
+    localStorage.setItem("flashsale-end", endTime.toISOString());
+
+    isActive.value = false;
+    h.value = m.value = s.value = "00";
+    return;
+  }
+
+  // tinh toan ra giờ phút giây
+  const totalHours = Math.floor(diff / 3600);
+  const minutes = Math.floor((diff % 3600) / 60);
+  const seconds = diff % 60;
+
+  // chuyển sang string, nếu mà giây chỉ có 1 chữ chố thì sẽ thêm 0 vào đằng trước
+  h.value = String(totalHours).padStart(2, "0");
+  m.value = String(minutes).padStart(2, "0");
+  s.value = String(seconds).padStart(2, "0");
+}
+
 onMounted(() => {
-  // getListProductSale();
+  getListProductSale();
   getListProductMobile();
   getListProductLaptop();
   getListProductWatch();
+
+  const startFromStorage = localStorage.getItem("flashsale-start");
+  const endFromStorage = localStorage.getItem("flashsale-end");
+
+  if (startFromStorage && endFromStorage) {
+    startTime = new Date(startFromStorage);
+    endTime = new Date(endFromStorage);
+  } else {
+    const times = getNextWeekendTimes();
+    startTime = times.start;
+    endTime = times.end;
+    localStorage.setItem("flashsale-start", startTime.toISOString());
+    localStorage.setItem("flashsale-end", endTime.toISOString());
+  }
+
+  tick();
+  timer = setInterval(tick, 1000);
 });
+
+onUnmounted(() => clearInterval(timer));
 </script>
 
 <style scoped>
@@ -493,7 +631,6 @@ body {
 .product-img-wrapper {
   width: 100%;
   aspect-ratio: 4 / 3;
-  background-color: #f8f9fa;
   display: flex;
   align-items: center;
   justify-content: center;

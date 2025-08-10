@@ -25,7 +25,7 @@
       <!-- Search Bar -->
       <div class="search-bar flex-grow-1 mx-4">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Bạn cần tìm gì hôm nay?" />
+          <input type="text" class="form-control" placeholder="Bạn cần tìm gì hôm nay?" @keyup.enter="handleSearch" v-model="searchKeyword"/>
           <button><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></button>
         </div>
       </div>
@@ -122,15 +122,8 @@ import { useRouter } from "vue-router";
 import { useAuth } from "@/composable/useAuth";
 const { hasScope } = useAuth();
 const store = useUserStore();
-// onMounted(() => {
-//   document.querySelectorAll(".dropdown-toggle").forEach((el) => {
-//     el.addEventListener("click", function (e) {
-//       e.preventDefault();
-//       const dropdown = new Dropdown(el);
-//       dropdown.toggle();
-//     });
-//   });
-// });
+const router = useRouter();
+
 
 const categories = ref([
   // { id: 1, name: "Điện thoại", slug: "dien-thoai", children: [] },
@@ -164,7 +157,7 @@ const getListCategory = async () => {
     handleError(error);
   }
 };
-const router = useRouter();
+
 function goToCategory(slug) {
   router.push({ name: "category", params: { slug } });
 }
@@ -190,7 +183,17 @@ function adjustPosition(event) {
     subMenu.style.transform = "translateY(-10px)";
   }
 }
+//search
+const searchKeyword = ref('');
+function handleSearch() {
+  const value = searchKeyword.value.trim();
+  if(!value) return;
 
+  router.push({
+    name: 'search',
+    query: {q: value},
+  })
+}
 onMounted(() => {
   getListCategory();
 });

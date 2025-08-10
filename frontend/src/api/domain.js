@@ -84,6 +84,7 @@ UPDATE_CATEGORY: DOMAIN + "category",
   DETAIL_PRODUCT: DOMAIN + "product",
   DETAIL_PRODUCT_BY_SLUG: DOMAIN + "product/detail",
   SEARCH_PRODUCT: DOMAIN + "product/search",
+  SEARCH_PRODUCT_FOR_USER: DOMAIN + "product/user/search",
   FILTER: DOMAIN + 'product/filter',
   // Product variant
   LIST_PRODUCT_VARIANT: DOMAIN + "product_variant/Get",
@@ -97,7 +98,7 @@ UPDATE_CATEGORY: DOMAIN + "category",
   // Image
   UPLOAD_IMAGE: DOMAIN + "upload_image/",
   DELETE_IMAGES: DOMAIN + "upload_image/",
-  LIST_IMAGE: DOMAIN + "upload_image/list",
+  LIST_IMAGE: DOMAIN + "upload_image/get",
   // Setting
 
   // Role

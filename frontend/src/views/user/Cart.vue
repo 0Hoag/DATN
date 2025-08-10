@@ -223,16 +223,7 @@
               >Áp dụng</a-button
             >
           </template>
-          <div class="mb-3">
-            <div class="mb-3">
-              <input
-                type="text"
-                class="form-control w-100"
-                placeholder="Tìm kiếm voucher.."
-                @input="handleSearch"
-                v-model="searchKeyword"
-              />
-            </div>
+          <div class="mb-3 overflow-y-auto overflow-x-hidden w-100" style="max-height: 600px;">
             <div class="row g-2">
               <div
                 v-for="voucher in listVoucherCanUse"
@@ -265,6 +256,28 @@
                 </div>
               </div>
             </div>
+            <div
+              class="text-center py-5"
+              v-if="listVoucherCanUse && listVoucherCanUse.length == 0"
+            >
+              <font-awesome-icon
+                :icon="['fas', 'ticket']"
+                size="2x"
+                class="text-muted mb-3"
+              />
+              <p>Không có voucher nào để sử dụng</p>
+            </div>
+            <div
+              class="d-flex justify-content-end mt-3"
+              v-if="listVoucherCanUse && listVoucherCanUse.length > 0"
+            >
+              <a-pagination
+                v-model:current="paginationVoucher.current"
+                :total="paginationVoucher.total"
+                simple
+                :page-size="paginationVoucher.pageSize"
+              />
+            </div>
           </div>
         </a-modal>
       </div>
@@ -276,12 +289,8 @@
         <div v-if="selectedVouchers" class="mt-3">
           <div class="small text-muted mb-2">Voucher đã áp dụng:</div>
           <div class="d-flex flex-wrap gap-2">
-            <span
-
-              class="badge bg-success d-flex align-items-center"
-            >
+            <span class="badge bg-success d-flex align-items-center">
               {{ selectedVouchers?.code }} - {{ formatPrice(discountAmount) }}
-              
             </span>
           </div>
         </div>
@@ -309,6 +318,7 @@
 
       <div
         class="form-check mb-2 p-2 border rounded"
+        v-if="listpaymentMethod && listpaymentMethod.length > 0"
         v-for="medthod in listpaymentMethod"
       >
         <input
@@ -328,6 +338,7 @@
           {{ medthod.description }}
         </label>
       </div>
+      <div class="mb-2" v-else>Chưa có phương thức thanht toán nào</div>
     </div>
 
     <!-- Tóm tắt đơn hàng -->
@@ -386,7 +397,7 @@ import { VoucherService } from "@/api/service/VoucherService";
 import { useCartStore } from "@/store/cartStore";
 import { useUserStore } from "@/store/userStore";
 import { storeToRefs } from "pinia";
-import { computed, onBeforeMount, onMounted, ref } from "vue";
+import { computed, onBeforeMount, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { toast } from "vue3-toastify";
 import Modal from "@/components/Modal.vue";
@@ -396,9 +407,6 @@ const router = useRouter();
 const route = useRoute();
 const cartStore = useCartStore();
 const userStore = useUserStore();
-
-const searchKeyword = ref("");
-const timer = ref(null);
 
 const isDisplayOnCart = ref(!!userStore.token);
 
@@ -476,8 +484,6 @@ const checkPermissionToCreateOrder = async () => {
     return;
   }
   await checkout();
-
-  toast.success("Đơn hàng đã tạo thành công");
 
   await getCart();
 };
@@ -617,9 +623,22 @@ const addNewAddress = async () => {
 const noteForOrder = ref("");
 const paymentUrl = ref("");
 
+const validateCheckout = () => {
+  if (!selectedAddress.value) {
+    toast.error("Vui lòng chọn địa chỉ");
+    return false;
+  }
+  if (!selectedPaymentMethod.value) {
+    toast.error("Vui lòng chọn phương thức thanh toán");
+    return false;
+  }
+  return true;
+};
+
 const checkout = async () => {
   try {
     showLoading();
+    if (!validateCheckout()) return;
     console.log("addressid", selectedAddress.value.id);
     console.log("selectedPaymentMethod", selectedPaymentMethod.value);
     const orderData = {
@@ -630,7 +649,8 @@ const checkout = async () => {
       note: noteForOrder.value,
     };
     const res = await OrderService.createOrderFromUser(orderData);
-    console.log('result',res.result);
+    if (res.code == 1000) toast.success("Đơn hàng đã tạo thành công");
+    console.log("result", res.result);
     paymentUrl.value = res.result.paymentUrl;
     console.log("payemnt url", paymentUrl.value);
     localStorage.setItem("orderId", JSON.stringify(res.result.id));
@@ -649,29 +669,38 @@ const checkout = async () => {
   }
 };
 
+//voucher
 const paginationVoucher = ref({
   current: 1,
   pageSize: 10,
   total: 0,
 });
 const listVoucherCanUse = ref([]);
-//voucher
+
 const getVoucherUserCanUse = async () => {
   try {
     const res = await VoucherService.getVoucherCanUse({
       size: paginationVoucher.value.pageSize,
       page: paginationVoucher.value.current,
     });
-    listVoucherCanUse.value = res.result.data.filter(item => subtotal.value > item.minOrderValue).map((item) => ({
-      ...item,
-      type: item.discountValue <= 100 ? "percent" : "fixed",
-    }));
+    listVoucherCanUse.value = res.result.data
+      .filter((item) => subtotal.value > item.minOrderValue)
+      .map((item) => ({
+        ...item,
+        type: item.discountValue <= 100 ? "percent" : "fixed",
+      }));
     console.log("res", res.result);
     paginationVoucher.value.total = res.result.totalElements;
   } catch (error) {
     handleError(error);
   }
 };
+watch(
+  () => paginationVoucher.value.current,
+  () => {
+    getVoucherUserCanUse();
+  }
+);
 
 //update order status
 const updateOrderStatus = async (orderId) => {

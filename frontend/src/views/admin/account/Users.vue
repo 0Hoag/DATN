@@ -38,7 +38,7 @@ const accountModelEdit = ref({
 
 const pagination = ref({
   current: 1,
-  pageSize: 1,
+  pageSize: 10,
   total: 0,
 });
 

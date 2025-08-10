@@ -129,7 +129,7 @@
         <div class="card">
           <div class="card-body">
             <h4 class="mb-3">Tạo biến thể sản phẩm</h4>
-            <!-- <a href="javascript:void(0)" @click="openMediaModal">Upload ảnh</a> -->
+            <a href="javascript:void(0)" @click="openMediaModal">Upload ảnh</a>
 
             <!-- Chọn các thuộc tính -->
             <a-select
@@ -191,17 +191,30 @@
                   >
                   <div class="col-md-12">
                     <p>Ảnh đại diện</p>
-                    <!-- Danh sách ảnh -->
-
-                    <img
-                      :src="img.imageUrl"
-                      class="img-thumbnail rounded me-2"
-                      width="150"
-                      height="150"
-                      alt="Xem ảnh"
+                    <div
                       v-for="(img, index) in variant.images"
                       :key="index"
-                    />
+                      class="position-relative d-inline-block me-2"
+                    >
+                      <!-- Nút X để xóa ảnh -->
+
+                      <font-awesome-icon
+                        icon="xmark"
+                        class="position-absolute top-0 end-0 m-1 text-danger bg-white rounded-circle p-1"
+                        style="cursor: pointer; z-index: 1"
+                        @click="removeVariantImage(variant, index)"
+                      />
+
+                      <!-- Ảnh -->
+                      <img
+                        :src="img.imageUrl"
+                        @click="showLightBox(variant.images, index)"
+                        class="img-thumbnail rounded object-fit-contain"
+                        style="width: 150px; height: 150px"
+                        alt="Xem ảnh"
+                        title="Click vào để xem hình ảnh"
+                      />
+                    </div>
                   </div>
                   <div class="col-md-12">
                     <label>Tên biến thể</label>
@@ -216,7 +229,7 @@
                       required
                     />
                   </div>
-                    <div class="col-md-6">
+                  <div class="col-md-6">
                     <label>Giá khuyến mãi</label>
                     <input
                       v-model="variant.salePrice"
@@ -249,7 +262,11 @@
       <a-tabs v-model:activeKey="activeKey">
         <a-tab-pane key="1" tab="Upload ảnh">
           <div class="container mt-5 d-flex justify-content-center">
-            <div class="upload-box text-center p-5 border border-2 border-dashed rounded">
+            <div
+              class="upload-box text-center p-5 border border-2 border-dashed rounded"
+              @dragover.prevent
+              @drop.prevent="onDrop"
+            >
               <div class="mb-3">
                 <font-awesome-icon icon="cloud-arrow-up" size="2xl" />
               </div>
@@ -264,7 +281,7 @@
                   accept="image/*"
                 />
               </label>
-              <button class="btn btn-primary" @click="onUploadImage">
+              <button class="btn btn-primary ms-2" @click="onUploadImage">
                 Upload {{ selectedFiles.length > 0 ? selectedFiles.length + " tệp" : "" }}
               </button>
             </div>
@@ -272,24 +289,33 @@
         </a-tab-pane>
         <a-tab-pane key="2" tab="Thư viện">
           <h6>Danh sách ảnh</h6>
-          <div class="overflow-auto" style="max-height: 600px">
-            <div
-              v-for="(img, index) in listImage"
-              :key="index"
-              :class="imageCss(index)"
-              class="border mx-3"
-            >
-              <font-awesome-icon icon="circle-check" v-if="isSelected(index)" />
-              <img
-                :src="img?.url"
-                @click="onImageSelect(index)"
-                alt=""
-                class=""
-                width="150"
-                height="150"
-                :title="img.fileName"
-              />
+          <div
+            ref="scrollContainer"
+            class="overflow-auto d-flex flex-column"
+            style="height: 600px"
+          >
+            <div class="flex-shrink-0">
+              <div
+                v-for="(img, index) in listImage"
+                :key="index"
+                :class="imageCss(index)"
+                class="border mx-3"
+              >
+                <font-awesome-icon icon="circle-check" v-if="isSelected(index)" />
+                <img
+                  :src="img?.url"
+                  @click="onImageSelect(index)"
+                  alt=""
+                  width="150"
+                  height="150"
+                  :title="img.fileName"
+                />
+              </div>
             </div>
+
+            <div ref="loadMoreTrigger" class="flex-shrink-0" style="height: 20px"></div>
+
+            <p v-if="isLoading" class="mt-2">Đang tải...</p>
           </div>
 
           <div class="my-3">
@@ -315,11 +341,19 @@
       </a-tabs>
     </template>
   </Modal>
+
+  <!-- vue easy lightbox -->
+  <VueEasyLightbox
+    :visible="visible"
+    :imgs="imagesLightBox"
+    :index="index"
+    @hide="visible = false"
+  />
 </template>
 
 <script setup>
 import { handleError, hideLoading, showLoading } from "@/api/functions/common";
-import { computed, watch, ref, reactive, onMounted } from "vue";
+import { computed, watch, ref, reactive, onMounted, onUnmounted } from "vue";
 import { ProductService } from "@/api/service/ProductService";
 import { toast } from "vue3-toastify";
 import { CategoryService } from "@/api/service/CategoryService";
@@ -327,6 +361,19 @@ import { AttributeService } from "@/api/service/AttributeService";
 import Modal from "@/components/Modal.vue";
 import { ImageService } from "@/api/service/ImageService";
 import { BRANDS } from "@/constant";
+import VueEasyLightbox from "vue-easy-lightbox";
+import { toPathValueStr } from "ant-design-vue/es/vc-cascader/utils/commonUtil";
+
+//vue easy lightbox
+const visible = ref(false);
+const index = ref(0);
+const imagesLightBox = ref([]);
+function showLightBox(images, i) {
+  index.value = i;
+  visible.value = true;
+  imagesLightBox.value = images.map((img) => img.imageUrl);
+  console.log("img", imagesLightBox.value);
+}
 
 const mediaModalRef = ref(null);
 const selectedFiles = ref([]);
@@ -353,7 +400,7 @@ const categories = ref([]);
 const brands = ref(
   BRANDS.map((b) => ({
     value: b,
-    label: b
+    label: b,
   }))
 );
 
@@ -368,14 +415,22 @@ const onFilesSelected = (event) => {
 };
 
 const onUploadImage = async () => {
+  if (selectedFiles.value.length == 0) {
+    toast.error("Vui lòng chọn ít nhất 1 ảnh");
+    return;
+  }
+
   let formData = new FormData();
   selectedFiles.value.forEach((file) => formData.append("files", file));
-
   try {
     showLoading("Đang tiến hành upload");
     const res = await ImageService.uploadImage(formData);
     toast.success("Upload thành công");
+    selectedFiles.value = [];
     console.log("Upload thành công:", res);
+    paginationImage.value.current = 1;
+    paginationImage.value.totalPages = null;
+    listImage.value = [];
     await fetchListImage();
   } catch (error) {
     console.error("Lỗi upload:", error);
@@ -475,20 +530,48 @@ const confirmImageSelection = () => {
 
   console.log(variant);
 };
+
+//scroll infinity image
+const paginationImage = ref({
+  current: 1,
+  pageSize: 30,
+  total: 0,
+  totalPages: null,
+});
+const loadMoreTrigger = ref(null);
+const scrollContainer = ref(null);
+const isLoading = ref(false);
+let observer = null;
 async function fetchListImage() {
+  if (isLoading.value) return;
+  if (
+    paginationImage.value.totalPages &&
+    paginationImage.value.current > paginationImage.value.totalPages
+  ) {
+    return; // hết dữ liệu
+  }
+  isLoading.value = true;
   try {
-    const response = await ImageService.fetchListImage();
-    listImage.value = response.result;
+    const response = await ImageService.fetchListImage({
+      page: paginationImage.value.current,
+      size: paginationImage.value.pageSize,
+    });
+    listImage.value.push(...response.result.data);
+    paginationImage.value.totalPages = response.result.totalPages;
+    paginationImage.value.current++;
   } catch (error) {
     toast.error("Lỗi khi tải danh sách hình ảnh");
     console.log(error);
+    handleError(error);
+  } finally {
+    isLoading.value = false;
   }
 }
 async function fetchListCategory() {
   try {
     const response = await CategoryService.fetchListCategoryForUser();
     categories.value = response.result
-      .filter((item) => item.children.length == 0 )
+      .filter((item) => item.children.length == 0)
       .map((item) => ({ value: item.id, label: item.name }));
     console.log(categories.value);
   } catch (error) {
@@ -544,7 +627,7 @@ function resetForm() {
   Object.keys(selectedValues).forEach((key) => delete selectedValues[key]);
   variants.value = [];
   quillKey.value++;
-  console.log(productModel.value)
+  console.log(productModel.value);
 }
 function validateForm() {
   let errorMessage = "";
@@ -629,6 +712,11 @@ function generateVariantName(productName, attributes) {
 }
 
 const generateVariants = () => {
+  if (selectedAttributes.value.length == 0) {
+    toast.info("Vui lòng chọn thuộc tính");
+    return;
+  }
+
   const valueGroups = selectedAttributes.value.map((attrName) => {
     const values = selectedValues[attrName] || [];
     return values.map((val) => {
@@ -666,6 +754,20 @@ const removeVariant = (variant) => {
   console.log(variants.value);
 };
 
+const removeVariantImage = (variant, imgIndex) => {
+  // Cập nhật mảng ảnh
+  variant.images = variant.images.filter((_, index) => index !== imgIndex);
+};
+
+//drag và drop file
+const onDrop = (event) => {
+  selectedFiles.value = Array.from(event.dataTransfer.files);
+  const files = selectedFiles.value;
+  for (let i = 0; i < files.length; i++) {
+    if (files[i].type.split("/")[0] !== "image") continue;
+  }
+};
+
 watch(
   () => productModel.value.name,
   (newValue) => {
@@ -676,6 +778,27 @@ onMounted(async () => {
   await fetchListCategory();
   await fetchListAttribute();
   await fetchListImage();
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        fetchListImage();
+      }
+    },
+    {
+      root: scrollContainer.value,
+      rootMargin: "100px",
+      threshold: 0.1,
+    }
+  );
+  if (loadMoreTrigger.value) {
+    observer.observe(loadMoreTrigger.value);
+  }
+});
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
+  }
 });
 </script>
 <style scoped>
