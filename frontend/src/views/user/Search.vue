@@ -14,9 +14,10 @@ const brands = ref(
   }))
 );
 
-const selectedBrands = ref([]); // nếu cần dùng lọc theo brand sau
+const selectedBrands = ref([]); 
+const selectedCategories = ref([]); 
 
-const listProductBySlugCategory = ref([]);
+const list = ref([]);
 const route = useRoute();
 
 // Phân trang
@@ -30,51 +31,40 @@ const pagination = ref({
 const minPrice = ref("");
 const maxPrice = ref("");
 
-// ID danh mục từ slug
-const category = ref(null);
-
-
-
-
-const getDetailCategoryBySlug = async () => {
+// get list category
+const categories = ref([])
+const getListCategory = async () => {
+  categories.value = [];
   try {
-    const res = await CategoryService.fetchDetailBySlug(route.params.slug);
-    category.value = res.result;
+    const res = await CategoryService.fetchListCategoryForUser();
+    const raw = res.result || [];
 
+    // Lọc category cha
+    categories.value = raw
+      .filter((c) =>  c.children.length == 0 )
+      .map((c) => ({
+        ...c,
+        children: c.children || [],
+      }));
   } catch (error) {
+    console.log(error);
     handleError(error);
   }
 };
 
-const getListProductBySlugCategory = async () => {
-  try {
-    showLoading();
-    const res = await ProductService.fetchListProductBySlugCategory(route.params.slug, {
-      page: pagination.value.current,
-      size: pagination.value.pageSize,
-    });
-    listProductBySlugCategory.value = res.result.data;
-    pagination.value.total = res.result.totalElements;
-  } catch (error) {
-    handleError(error);
-  }
-  finally{
-    hideLoading();
-  }
-};
-
+//loc
 const filterProduct = async () => {
   try {
     const params = new URLSearchParams();
-    params.append("categoryIds", category.value?.id);
     params.append("page", pagination.value.current);
     params.append("size", pagination.value.pageSize);
     if (minPrice.value) params.append("minPrice", minPrice.value);
     if (maxPrice.value) params.append("maxPrice", maxPrice.value);
     selectedBrands.value.forEach((brand) => params.append("brands", brand));
+    selectedCategories.value.forEach((brand) => params.append("categoryIds", brand));
 
     const res = await ProductService.filter(params);
-    listProductBySlugCategory.value = res.result.data;
+    list.value = res.result.data;
     pagination.value.total = res.result.totalElements;
   } catch (error) {
     handleError(error);
@@ -95,25 +85,47 @@ const handleReset = async () => {
   pagination.value.current = 1;
   await getListProductBySlugCategory();
 };
-watch(
-  ()=>route.params.slug,
-  async () => {
-    handleReset();
-    await getDetailCategoryBySlug();
-     await getListProductBySlugCategory();
+
+//search
+ async function searchList(q) {
+  try {
+   showLoading();
+   // isSearching.value = true;
+
+   const response = await ProductService.searchProductForUser({
+    keyword: q,
+    page: pagination.value.current,
+    size: pagination.value.pageSize,
+   });
+
+   list.value = response.result.data;
+   pagination.value.total = response.result.totalElements;
+  } catch (error) {
+   toast.error("Lỗi khi tìm kiếm dữ liệu");
+  } finally {
+   hideLoading();
   }
-)
+ }
+
 
 watch(
   () => pagination.value.current,
   async () => {
     if(minPrice.value || maxPrice.value) await filterProduct();
-    else await getListProductBySlugCategory();
   }
 );
+
+watch(
+  () => route.query.q,
+  (newQuery) => {
+    if (newQuery) {
+      searchList(newQuery);
+    }
+  },
+  { immediate: true }
+)
 onMounted(async () => {
-  await getDetailCategoryBySlug();
-  await getListProductBySlugCategory();
+  await getListCategory();
 });
 </script>
 
@@ -149,6 +161,18 @@ onMounted(async () => {
             </div>
           </div>
 
+          <!-- Category Filter -->
+          <div class="mb-4">
+            <h6 class="fw-bold">Danh mục</h6>
+           <div class="d-flex flex-wrap gap-2">
+              <div class="form-check mb-2" v-for="c in categories">
+                <input class="form-check-input" type="checkbox" :id="c.name" :value="c.id"  v-model="selectedCategories" />
+                <label class="form-check-label" :for="c.label">
+                  {{ c.name }}
+                </label>
+              </div>
+           </div>
+          </div>
           <!-- Brand Filter -->
           <div class="mb-4">
             <h6 class="fw-bold">Thương hiệu</h6>
@@ -172,9 +196,9 @@ onMounted(async () => {
       </div>
     </div>
     <div class="col-9">
-      <ProductList :products="listProductBySlugCategory" :title="category?.name" />
+      <ProductList :products="list" :title="'Tìm kiếm sản phẩm'" />
       <!-- Phân trang -->
-      <div class="d-flex justify-content-center mt-3" v-if="listProductBySlugCategory && listProductBySlugCategory.length > 0">
+      <div class="d-flex justify-content-center mt-3" v-if="list && list.length > 0">
         <a-pagination
           v-model:current="pagination.current"
           :total="pagination.total"

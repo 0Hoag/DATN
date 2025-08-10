@@ -6,7 +6,6 @@ import java.util.List;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.request.AddCartRequest;
@@ -40,6 +39,7 @@ public class CartService {
     UserRepository userRepository;
     CartMapper mapper;
     CartItemMapper cartItemMapper;
+    AuthenticationService authenticationService;
 
     public CartResponse addToCart(AddCartRequest request, HttpSession session) {
         Integer variantId = request.getVariantId();
@@ -66,7 +66,7 @@ public class CartService {
 
     public List<CartItemResponse> getCartItems(HttpSession session) {
         String sessionId = session.getId();
-        Integer userId = extractUserIdFromSecurityContext();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
         Cart cart = (userId == null)
                 ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
                 : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
@@ -79,7 +79,7 @@ public class CartService {
     @Transactional
     public CartItemResponse changeCartItemQuantity(HttpSession session, ChangeCartItemRequest request) {
         String sessionId = session.getId();
-        Integer userId = extractUserIdFromSecurityContext();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
         Integer variantId = request.getVariantId();
         Integer quantity = request.getQuantity();
         Cart cart = (userId == null)
@@ -100,7 +100,7 @@ public class CartService {
     @Transactional
     public void delete(HttpSession session, Integer variantId) {
         String sessionId = session.getId();
-        Integer userId = extractUserIdFromSecurityContext();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
         Cart cart = (userId == null)
                 ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
                 : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
@@ -113,7 +113,7 @@ public class CartService {
     @Transactional
     public void mergeSessionCartToUser(HttpSession session) {
         String sessionId = session.getId();
-        Integer userId = extractUserIdFromSecurityContext();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
         if (userId == null) return;
 
         var sessionCartOpt = repository.findBySessionId(sessionId);
@@ -142,7 +142,7 @@ public class CartService {
 
     public Cart getOrCreateCart(HttpSession session) {
         String sessionId = session.getId();
-        Integer userId = extractUserIdFromSecurityContext();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
         return userId != null
                 ? repository.findByUserId(userId).orElseGet(() -> createCartForUser(userId))
                 : repository.findBySessionId(sessionId).orElseGet(() -> createCartForSession(sessionId));
@@ -187,18 +187,5 @@ public class CartService {
             newItem.setPrice(variant.getPrice());
             cartItemRepository.save(newItem);
         }
-    }
-
-    public Integer extractUserIdFromSecurityContext() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return null;
-        }
-
-        String name = authentication.getName();
-        if ("anonymousUser".equals(name)) {
-            return null;
-        }
-        return Integer.valueOf(name);
     }
 }

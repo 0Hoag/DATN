@@ -219,6 +219,30 @@ public class ProductReviewService {
                 .build();
     }
 
+    public PageResponse<ProductReviewResponse> searchReviewsByProductName(String name, int page, int size) {
+        validateProductName(name);
+        var pageable = PageRequest.of(page - 1, size);
+        var pageData = repository.searchByProductName(name.trim(), pageable);
+        var data = pageData.stream().map(mapper::toProductReviewResponse).toList();
+        return PageResponse.<ProductReviewResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
+    }
+
+    //    private <T> PageResponse<T> toPageResponse(Page<?> page, List<T> data, int currentPage) {
+    //        return PageResponse.<T>builder()
+    //                .currentPage(currentPage)
+    //                .totalPages(page.getTotalPages())
+    //                .pageSize(page.getSize())
+    //                .totalElements(page.getTotalElements())
+    //                .data(data)
+    //                .build();
+    //    }
+
     // ===== FIX: CUSTOMER + ADMIN có thể check review status =====
     @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     public boolean hasUserReviewedProduct(Integer productId) {
@@ -231,5 +255,11 @@ public class ProductReviewService {
     public boolean hasUserPurchasedProduct(Integer productId) {
         var currentUserResponse = userService.getMyInfo();
         return orderDetailRepository.hasUserPurchasedProduct(currentUserResponse.getId(), productId);
+    }
+
+    private void validateProductName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_INPUT);
+        }
     }
 }

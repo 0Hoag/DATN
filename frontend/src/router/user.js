@@ -49,6 +49,11 @@ const user = [
                 name: 'product',
                 component: () => import('@/views/user/ProductDetail.vue'),
             },
+            {
+                path: '/search',
+                name: 'search',
+                component: () => import('@/views/user/Search.vue'),
+            },
         
         ],
     },

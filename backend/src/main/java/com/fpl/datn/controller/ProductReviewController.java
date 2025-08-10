@@ -50,7 +50,6 @@ public class ProductReviewController {
             @RequestParam(required = false, defaultValue = "10") int size) {
         return ApiResponse.<PageResponse<ProductReviewResponse>>builder()
                 .result(productReviewService.getReviewsByProduct(productId, page, size))
-                .message("Lấy danh sách đánh giá sản phẩm thành công!")
                 .build();
     }
 
@@ -59,7 +58,6 @@ public class ProductReviewController {
     public ApiResponse<ProductReviewResponse> createReview(@Valid @RequestBody ProductReviewRequest request) {
         return ApiResponse.<ProductReviewResponse>builder()
                 .result(productReviewService.createReview(request))
-                .message("Đánh giá sản phẩm thành công!")
                 .build();
     }
 
@@ -103,6 +101,16 @@ public class ProductReviewController {
         return ApiResponse.<Boolean>builder()
                 .result(productReviewService.hasUserReviewedProduct(productId))
                 .message("Kiểm tra trạng thái đánh giá thành công!")
+                .build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<PageResponse<ProductReviewResponse>> searchReviewsByProductName(
+            @RequestParam(required = false) String productName,
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        return ApiResponse.<PageResponse<ProductReviewResponse>>builder()
+                .result(productReviewService.searchReviewsByProductName(productName, page, size))
                 .build();
     }
 

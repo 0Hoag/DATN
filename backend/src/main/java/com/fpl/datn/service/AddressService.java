@@ -1,6 +1,7 @@
 package com.fpl.datn.service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -29,7 +30,7 @@ public class AddressService {
     public List<AddressResponse> findByUserId(int userId) {
         var userAddress = repository.findByIsDeleteFalseAndUser_Id(userId);
         if (userAddress == null || userAddress.isEmpty()) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            return Collections.emptyList();
         }
         return userAddress.stream().map(mapper::toAddressResoonse).toList();
     }
