@@ -186,13 +186,14 @@ function adjustPosition(event) {
 //search
 const searchKeyword = ref('');
 function handleSearch() {
-  const value = searchKeyword.value.trim();
+  const value =  searchKeyword.value.trim() ;
   if(!value) return;
 
   router.push({
     name: 'search',
     query: {q: value},
   })
+  searchKeyword.value = '';
 }
 onMounted(() => {
   getListCategory();
