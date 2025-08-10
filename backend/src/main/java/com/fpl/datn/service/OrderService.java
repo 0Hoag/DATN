@@ -39,12 +39,13 @@ import com.fpl.datn.models.Cart;
 import com.fpl.datn.models.Order;
 import com.fpl.datn.models.OrderDetail;
 import com.fpl.datn.models.Voucher;
+import com.fpl.datn.models.ZUserVoucher;
 import com.fpl.datn.repository.AddressRepository;
-import com.fpl.datn.repository.OrderDetailRepository;
 import com.fpl.datn.repository.OrderRepository;
 import com.fpl.datn.repository.PaymentMethodRepository;
 import com.fpl.datn.repository.ProductVariantRepository;
 import com.fpl.datn.repository.UserRepository;
+import com.fpl.datn.repository.UserVoucherRepository;
 import com.fpl.datn.repository.VoucherRepository;
 import com.fpl.datn.specification.OrderSpecification;
 
@@ -57,18 +58,19 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderService {
     OrderRepository repository;
-    OrderDetailRepository orderDetailRepository;
     UserRepository userRepository;
     AddressRepository addressRepository;
     PaymentMethodRepository paymentRepository;
     ProductVariantRepository variantRepository;
     VoucherRepository voucherRepository;
+    UserVoucherRepository userVoucherRepository;
     OrderMapper mapper;
     TransactionLogService logService;
     VnpayService vnpayService;
     MomoService momoService;
     SendMailService sendMailService;
     CartService cartService;
+    AuthenticationService authenticationService;
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ORDER')")
     public PageResponse<OrderResponse> getAll(int page, int size, boolean isDesc) {
@@ -157,7 +159,7 @@ public class OrderService {
     @Transactional
     public OrderResponse createOrderFromCart(
             OrderFromCartRequest request, HttpServletRequest httpRequest, HttpSession session) throws Exception {
-        Integer userId = cartService.extractUserIdFromSecurityContext();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
         // Lấy giỏ hàng
         Cart cart =
                 (userId == null) ? cartService.getCartBySession(session.getId()) : cartService.getCartByUser(userId);
@@ -342,7 +344,6 @@ public class OrderService {
     }
 
     // Chuẩn bị đặt hàng
-    @PreAuthorize("hasAuthority('BUY_PRODUCT')")
     private Order prepareOrder(OrderRequest request) {
         var user = userRepository
                 .findById(request.getUserId())
@@ -478,6 +479,13 @@ public class OrderService {
     private BigDecimal applyVoucher(Order order, BigDecimal total) {
         var voucher = order.getVoucher();
         if (voucher == null) return total;
+
+        var userVoucherOpt =
+                userVoucherRepository.findByUserIdAndVoucherId(order.getUser().getId(), voucher.getId());
+        if (userVoucherOpt.isPresent()
+                && Boolean.TRUE.equals(userVoucherOpt.get().getIsUsed())) {
+            throw new AppException(ErrorCode.VOUCHER_ALREADY_USED);
+        }
         boolean isExpired = voucher.getStartAt().isAfter(LocalDateTime.now())
                 || voucher.getEndAt().isBefore(LocalDateTime.now());
         boolean isOverused = voucher.getUsageCount() >= voucher.getQuantity();
@@ -504,6 +512,15 @@ public class OrderService {
         // Cập nhật voucher
         voucher.setUsageCount(voucher.getUsageCount() + 1);
         voucherRepository.save(voucher);
+
+        var userVoucher = userVoucherOpt.orElseGet(() -> ZUserVoucher.builder()
+                .user(order.getUser())
+                .voucher(voucher)
+                .isUsed(false)
+                .assignedAt(LocalDateTime.now())
+                .build());
+        userVoucher.setIsUsed(true);
+        userVoucherRepository.save(userVoucher);
         return total;
     }
 }

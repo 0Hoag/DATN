@@ -92,9 +92,7 @@ public class UserService {
             user.setRoles(roles);
         }
 
-        if (request.getPassword() != null && !request.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
+
         user.setUpdatedAt(LocalDateTime.now());
 
         return userMapper.toUserResponse(userRepositories.save(user));
@@ -256,6 +254,7 @@ public class UserService {
         var user = userRepositories
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.EMAIL_INCORRECT));
+
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             throw new AppException(ErrorCode.OLD_PASSWORD_INCORRECT);
         }

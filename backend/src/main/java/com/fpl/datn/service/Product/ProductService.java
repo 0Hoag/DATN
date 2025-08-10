@@ -104,7 +104,7 @@ public class ProductService {
 
     // phân trang sản phẩm
     public PageResponse<ProductResponse> get(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+        Pageable pageable = PageRequest.of(page - 1, size,Sort.by(Sort.Direction.DESC,"id"));
         var pageData = repo.findAll(pageable);
         var data = pageData.getContent().stream().map(mapper::toProductResponse).collect(Collectors.toList());
 
@@ -149,6 +149,27 @@ public class ProductService {
                 .build();
     }
 
+    //search cho user
+    public PageResponse<ProductSaleResponse> searchForUser(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<ProductSaleResponse> productPage = repo.searchByNameOrSlugForUser(keyword, pageable);
+
+        List<ProductSaleResponse> data = productPage.getContent()
+                .stream()
+                .peek(dto -> {
+                    Double avgRating = reviewRepo.getAverageRatingByProductId(dto.getProductId());
+                    dto.setAverageRating(avgRating != null ? avgRating : 0.0);
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.<ProductSaleResponse>builder()
+                .currentPage(page)
+                .totalPages(productPage.getTotalPages())
+                .pageSize(productPage.getSize())
+                .totalElements(productPage.getTotalElements())
+                .data(data)
+                .build();
+    }
     public List<ProductSaleResponse> getSaleProductsSimple(int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
         Page<ProductSaleResponse> pageResult = repo.findSaleProductsSimple(pageable);
@@ -190,12 +211,24 @@ public class ProductService {
     }
 
     public Page<ProductSaleResponse> filterProducts(
-            Integer categoryId, List<String> brands, BigDecimal minPrice, BigDecimal maxPrice, int page, int size) {
+            List<Integer> categoryIds,
+            List<String> brands,
+            BigDecimal minPrice,
+            BigDecimal maxPrice,
+            String keyword,
+            int page,
+            int size
+    ) {
         if (brands != null && brands.isEmpty()) {
             brands = null;
         }
+        if (categoryIds != null && categoryIds.isEmpty()) {
+            categoryIds = null;
+        }
+        if (keyword != null && keyword.trim().isEmpty()) {
+            keyword = null;
+        }
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<ProductSaleResponse> products = repo.filterProducts(categoryId, brands, minPrice, maxPrice, pageable);
-        return products;
+        return repo.filterProducts(categoryIds, brands, minPrice, maxPrice,keyword, pageable);
     }
 }

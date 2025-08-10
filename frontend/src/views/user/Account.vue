@@ -1042,13 +1042,11 @@ onMounted(() => {
                 </div>
                 <div class="text-center py-5" v-else>
                   <font-awesome-icon
-                    :icon="['fas', 'shopping-bag']"
+                    :icon="['fas', 'ticket']"
                     size="3x"
                     class="text-muted mb-3"
                   />
-                  <h5>Chưa có đơn hàng nào</h5>
-                  <p class="text-muted">Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên</p>
-                  <a href="category.html" class="btn btn-primary">Mua sắm ngay</a>
+                  <h5>Chưa có voucher nào</h5>
                 </div>
               </div>
               <!-- Pagination -->

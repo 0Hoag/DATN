@@ -4,23 +4,41 @@
     <div class="row">
       <!-- Image Gallery -->
       <div class="col-lg-5">
-        <div class="border rounded mb-3 bg-white p-3 text-center">
-          <img :src="selectedImage" class="img-fluid" height="50px" width="350px" />
-        </div>
-        <div class="d-flex gap-2 justify-content-center">
-          <img
-            v-for="(img, index) in selectedVariantDetail?.images"
-            :key="index"
-            :src="img.imageUrl"
-            class="thumb-img"
-            style="height: 50px; object-fit: cover"
-            @click="selectedImage = img.imageUrl"
-          />
+        <div class="bg-white rounded">
+          <swiper
+            :modules="[Thumbs, Navigation]"
+            :loop="true"
+            :thumbs="{ swiper: thumbsSwiper }"
+            navigation
+            class="main-swiper"
+          >
+            <swiper-slide v-for="(img, index) in selectedVariantDetail?.images">
+              <img :src="img.imageUrl" :alt="img.imageUrl" />
+            </swiper-slide>
+          </swiper>
+
+          <!-- Swiper thumbnail -->
+          <swiper
+            :modules="[Thumbs]"
+            :loop="true"
+            :slides-per-view="5"
+            watch-slides-progress
+            @swiper="setThumbsSwiper"
+            class="thumbs-swiper"
+          >
+            <swiper-slide v-for="(img, index) in selectedVariantDetail?.images">
+              <img
+                :src="img.imageUrl"
+                :alt="img.imageUrl"
+                style="height: 50px; object-fit: cover"
+              />
+            </swiper-slide>
+          </swiper>
         </div>
       </div>
 
       <!-- Product Details -->
-      <div class="col-lg-7">
+      <div class="col-lg-7 bg-white rounded p-3">
         <h1 class="product-title">{{ selectedVariantDetail?.variantName }}</h1>
         <div class="text-muted mb-2 fs-6">
           Thương hiệu: <strong>{{ productDetail?.brand }}</strong>
@@ -110,18 +128,18 @@
     </div>
 
     <!-- Specs -->
-    <div class="spec-text mt-5">
+    <div class="spec-text mt-5 bg-white rounded p-3">
       <h5 class="fw-bold mb-3">Thông số kỹ thuật</h5>
       <div class="spec-box" v-html="productDetail.content"></div>
     </div>
 
     <!-- Reviews -->
-    <div class="mt-5">
+    <div class="mt-5 bg-white rounded p-3">
       <h5 class="fw-bold mb-3">Đánh giá & Nhận xét</h5>
-      <div v-if="listReview && listReview.length === 0" class="text-muted">
+      <div v-if="listReview && listReview.length === 0" class="text-muted spec-box">
         Chưa có đánh giá nào cho sản phẩm này.
       </div>
-      <div v-else class="spec-box overflow-auto" style="max-height:500px ;" >
+      <div v-else class="spec-box overflow-auto" style="max-height: 500px">
         <div
           v-for="(review, index) in listReview"
           :key="index"
@@ -152,9 +170,13 @@
     </div>
 
     <!-- Related Products -->
-    <div class="mt-5" v-if="relatedProducts && relatedProducts.length > 0">
+    <div
+      class="mt-5 bg-white rounded p-3"
+      v-if="relatedProducts && relatedProducts.length > 0"
+    >
       <h5 class="fw-bold mb-3">Sản phẩm liên quan</h5>
-      <div class="row g-3 mt-1">
+      
+      <div class="row  mt-1">
         <div class="col-md-2 d-flex mb-3" v-for="p in relatedProducts">
           <router-link :to="{ name: 'product', params: { slug: p.slug } }">
             <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
@@ -171,7 +193,7 @@
                   class="mb-1 text-warning d-flex justify-content-start align-items-center mt-auto"
                   style="min-height: 28px"
                 >
-                  <font-awesome-icon icon="fa-solid fa-star" />
+                  <i class="fa fa-star"></i>
                   <span class="text-muted small ms-1">({{ p.averageRating }})</span>
                 </div>
                 <p class="text-danger fw-bold mb-1 text-start">
@@ -189,8 +211,11 @@
           </router-link>
         </div>
       </div>
+
     </div>
   </div>
+
+  <div class="row"></div>
 </template>
 
 <script setup>
@@ -201,8 +226,17 @@ import { ProductService } from "@/api/service/ProductService";
 import { ReviewService } from "@/api/service/ReviewService";
 import router from "@/router";
 import { useCartStore } from "@/store/cartStore";
-import { ref, computed, onMounted } from "vue";
+import { Swiper, SwiperSlide } from "swiper/vue";
+import { Navigation, Pagination, Autoplay, Thumbs } from "swiper/modules";
+
+import { ref, computed, onMounted, watch } from "vue";
 import { useRoute } from "vue-router";
+
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import ProductList from "@/components/ProductList.vue";
+
 // sản phẩm liên quan
 const relatedProducts = ref([]);
 const categorySlug = ref(null);
@@ -211,7 +245,7 @@ const getRelatedProduct = async () => {
   try {
     const res = await ProductService.fetchListProductBySlugCategory(categorySlug.value, {
       page: 1,
-      size: 12,
+      size: 7,
     });
     relatedProducts.value = res.result.data.filter(
       (item) => productDetail.value.id != item.productId
@@ -239,10 +273,13 @@ const listReview = ref([]);
 const getListReviewByProduct = async () => {
   if (isLoading.value) return;
   try {
-    const response = await ReviewService.fetchListReviewByProduct(productDetail.value.id, {
-      page: currentPage.value,
-      size: pageSize,
-    });
+    const response = await ReviewService.fetchListReviewByProduct(
+      productDetail.value.id,
+      {
+        page: currentPage.value,
+        size: pageSize,
+      }
+    );
     listReview.value.push(...response.result.data);
     total.value = response.result.totalElements;
   } catch (error) {
@@ -343,6 +380,20 @@ const buyNow = async () => {
   router.push({ name: "cart" });
   console.log("cart item from detail", cartStore.cartItem);
 };
+
+// gallery loop
+const thumbsSwiper = ref(null);
+const setThumbsSwiper = (swiper) => {
+  thumbsSwiper.value = swiper;
+};
+
+
+watch(
+  ()=> route.params.slug,
+  () => {
+    getDetailProduct();
+  }
+)
 onMounted(async () => {
   await cartStore.getCart();
   await getDetailProduct();
@@ -448,5 +499,95 @@ onMounted(async () => {
 
 .spec-line:last-child {
   border-bottom: none;
+}
+
+/* Vùng chứa gallery */
+.gallery-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+/* Ảnh chính */
+.main-swiper {
+  width: 100%;
+  height: 350px; /* Chiều cao ảnh chính */
+}
+.main-swiper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Hiển thị đủ hình */
+}
+
+/* Thumbnails */
+.thumbs-swiper {
+  margin-top: 10px;
+  height: 80px; /* Chiều cao thumbnail */
+}
+.thumbs-swiper .swiper-slide {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.thumbs-swiper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain; /* Không bị cắt hình */
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.6;
+}
+.thumbs-swiper .swiper-slide-thumb-active img {
+  opacity: 1;
+  border: 2px solid #007bff;
+}
+
+.card {
+  transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.card img {
+  transition: transform 0.3s ease;
+}
+
+.card:hover img {
+  transform: scale(1.05);
+}
+
+.product-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.product-img-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 5px;
+}
+
+.product-img-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.card-title {
+  font-size: 14px;
+  line-height: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  min-height: 40px;
+  white-space: normal;
 }
 </style>

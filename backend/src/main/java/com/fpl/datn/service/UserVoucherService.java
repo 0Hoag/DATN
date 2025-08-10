@@ -5,10 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,8 +31,10 @@ import com.fpl.datn.repository.VoucherRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserVoucherService {
@@ -43,6 +43,8 @@ public class UserVoucherService {
     VoucherRepository voucherRepository;
     UserRepository userRepository;
     UserService userService;
+    AuthenticationService authenticationService;
+    UserVoucherMapper mapper;
     VoucherMapper voucherMapper;
 
     @PreAuthorize("hasAuthority('VIEW_USER_VOUCHER') or hasRole('ADMIN')")
@@ -184,27 +186,15 @@ public class UserVoucherService {
     }
 
     // PHƯƠNG THỨC MỚI: Lấy danh sách voucher mà người dùng có thể sử dụng
-    //    @PreAuthorize("hasAuthority('VIEW_USER_VOUCHER') or hasRole('" + PredefinedRole.ROLE_USER + "')")
     public PageResponse<VoucherResponse> getVouchersUserCanUse(int page, int size) {
-        var currentUserResponse = userService.getMyInfo();
-        User currentUser = userRepository
-                .findById(currentUserResponse.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        LocalDateTime now = LocalDateTime.now();
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("endAt").ascending());
-        // 1. Lấy danh sách ID của các voucher mà người dùng ĐÃ SỬ DỤNG (isUsed = true)
-        List<Integer> usedVoucherIds = repository.findFullyUsedVoucherIdsByUserId(currentUser.getId());
-        Page<Voucher> pageData;
-        if (usedVoucherIds.isEmpty()) {
-            // 2. Nếu người dùng chưa sử dụng voucher nào, lấy tất cả voucher đang hoạt động và còn hạn
-            pageData = voucherRepository.findByIsActiveTrueAndStartAtBeforeAndEndAtAfter(now, now, pageable);
-        } else {
-            // 3. Lấy tất cả voucher đang hoạt động, còn hạn, và KHÔNG nằm trong danh sách ID đã sử dụng
-            pageData = voucherRepository.findByIsActiveTrueAndStartAtBeforeAndEndAtAfterAndIdNotIn(
-                    now, now, usedVoucherIds, pageable);
-        }
-        // 4. Chuyển đổi sang VoucherResponse
-        var data = pageData.stream().map(voucherMapper::toVoucherResponse).toList();
+        var userId = authenticationService.extractUserIdFromSecurityContext();
+        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+        var pageData = voucherRepository.findAvailableVouchers(user.getId(), pageable);
+        var data = pageData.stream()
+                .map(userVoucher -> voucherMapper.toVoucherResponse(userVoucher))
+                .toList();
         return PageResponse.<VoucherResponse>builder()
                 .currentPage(page)
                 .totalPages(pageData.getTotalPages())

@@ -36,7 +36,7 @@
    <tr v-for="(product, index) in list" :key="index">
     <td>{{ (pagination.current - 1) * pagination.pageSize + index + 1 }}</td>
     <td>
-     <img :src="product.thumbnail " alt="" width="150" height="100" />
+     <img :src="product.thumbnail " alt="" width="150" height="100" class="object-fit-contain"/>
     </td>
     <td>{{ product.name }}</td>
     <td>{{ product.category.name }}</td>

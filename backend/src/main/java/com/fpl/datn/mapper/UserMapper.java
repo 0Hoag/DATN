@@ -37,7 +37,6 @@ public interface UserMapper {
     OrderUserResponse toOrderUserResponse(User user);
 
     @Mapping(target = "roles", ignore = true)
-    @Mapping(target = "password", ignore = true)
     void updateUser(@MappingTarget User user, UpdateUserRequest request);
 
     void updateProfile(@MappingTarget User user, UpdateProfileRequest request);

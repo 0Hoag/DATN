@@ -198,4 +198,17 @@ public class AuthenticationService {
 
         return stringJoiner.toString();
     }
+
+    public Integer extractUserIdFromSecurityContext() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        String name = authentication.getName();
+        if ("anonymousUser".equals(name)) {
+            return null;
+        }
+        return Integer.valueOf(name);
+    }
 }

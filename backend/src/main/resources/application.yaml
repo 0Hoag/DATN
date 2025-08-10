@@ -46,8 +46,8 @@ vnpay:
   hash-secret: 38BJLQOEGNK84OS6GNQ66NIP2LI6HAMG
   url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
   refund-url: https://sandbox.vnpayment.vn/merchant_webapi/api/transaction
-#  return-url: http://localhost:8080/datn/payment/vnpay-return
-  return-url: http://localhost:5173/cart
+  return-url: http://localhost:8080/datn/payment/vnpay-return
+#  return-url: http://localhost:5173/
 momo:
   url: https://test-payment.momo.vn/v2/gateway/api/create
   refund-url: https://test-payment.momo.vn/v2/gateway/api/refund

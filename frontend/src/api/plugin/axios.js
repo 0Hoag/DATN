@@ -55,12 +55,9 @@ export const axiosCall = {
         }
     },
 
-    upload: async (url, data = {}, headers = {}, onUploadProgress = null) => {
+    upload: async (url, data = {},config = {}) => {
         try {
-            const response = await instance.post(url, data, {
-                headers,
-                onUploadProgress,
-            });
+            const response = await instance.post(url, data, config);
             return response.data;
         } catch (error) {
             throw error;

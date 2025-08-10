@@ -38,31 +38,16 @@ function getDisplayPrice(variants) {
   <div class="container">
     <!-- Sort Options -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <div>
-        <h4 class="mb-1">{{ title }}</h4>
-        <small class="text-muted">Hiển thị 1-12 trong 156 sản phẩm</small>
-      </div>
-      <div class="d-flex align-items-center gap-3">
-        <div class="d-flex align-items-center">
-          <label class="form-label me-2 mb-0">Sắp xếp:</label>
-          <select class="form-select form-select-sm" style="width: auto">
-            <option>Nổi bật</option>
-            <option>Giá thấp đến cao</option>
-            <option>Giá cao đến thấp</option>
-            <option>Mới nhất</option>
-            <option>Bán chạy nhất</option>
-            <option>Đánh giá cao nhất</option>
-          </select>
-        </div>
+      <div class="pt-3">
+        <h4 class="">{{ title }}</h4>
       </div>
     </div>
-    <div class="row g-3 mt-1">
-      <div class="col-md-3 d-flex mb-3" v-for="product in products" :key="product.id">
-        {{ console.log(product) }}
+    <div class="row row-cols-5 g-1  mt-1">
+      <div class="col d-flex mb-3" v-for="product in products" :key="product.id">
         <router-link :to="{name: 'product', params: {slug: product.slug}}">
           <div class="card product-card shadow-sm d-flex flex-column h-100 w-100">
-            <div class="product-img-wrapper">
-              <img :src="product.imageUrl" :alt="product.name" class="img-fluid" style=" height: 200px; object-fit: cover"/>
+            <div class="product-img-wrapper" >
+              <img :src="product.imageUrl" :alt="product.name" class="img-fluid"  />
             </div>
             <div
               class="card-body flex-grow-1 d-flex flex-column justify-content-between m-auto w-100"
@@ -94,16 +79,61 @@ function getDisplayPrice(variants) {
     </div>
     <div class="text-center py-2" v-if="products.length == 0">
       <font-awesome-icon :icon="['fas', 'box']" size="3x" class="text-muted mb-3" />
-      <h5>Không có dữ liệu</h5>
+      <h5>Không có sản phẩm</h5>
     </div>
   </div>
 </template>
 
 <style scoped>
+
+.card {
+  transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+
+.card img {
+  transition: transform 0.3s ease;
+}
+
+.card:hover img {
+  transform: scale(1.05);
+}
+
 .product-card {
-  transition: transform 0.2s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
 }
-.product-card:hover {
-  transform: translateY(-4px);
+
+.product-img-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 5px;
 }
+
+.product-img-wrapper img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
+}
+
+.card-title {
+  font-size: 14px;
+  line-height: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  min-height: 40px;
+  white-space: normal;
+}
+
 </style>

@@ -17,7 +17,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     // Kiểm tra user đã mua sản phẩm chưa
     @Query("SELECT COUNT(od) > 0 FROM OrderDetail od " + "WHERE od.order.user.id = :userId "
             + "AND od.product.id = :productId "
-            + "AND od.order.orderStatus = 'COMPLETED' "
+            + "AND od.order.orderStatus = 'RECEIED' "
             + "AND (od.order.isDelete = false OR od.order.isDelete IS NULL)")
     boolean hasUserPurchasedProduct(@Param("userId") Integer userId, @Param("productId") Integer productId);
 

@@ -5,7 +5,6 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -61,14 +60,13 @@ public class SecurityConfig {
                         "/pdf/**",
                         "/cart/**",
                         "/email/**",
-                        "/product/sale",
-                        "/product/category/**",
-                        "/category/List",
+                        "/category/**",
                         "/product/**",
                         "/review/**",
                         "/address/**",
                         "/category/detail/**",
                         "/reviews/product/**"
+
                 )
                 .permitAll()
                 .requestMatchers(HttpMethod.PUT, "/cart/**", "/users/profile/**")
@@ -84,7 +82,7 @@ public class SecurityConfig {
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
         httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults());
+                .cors(httpSecurityCorsConfigurer -> corsConfigurationSource());
 
         return httpSecurity.build();
     }
