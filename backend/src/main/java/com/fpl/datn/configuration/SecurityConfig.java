@@ -68,8 +68,7 @@ public class SecurityConfig {
                         "/review/**",
                         "/address/**",
                         "/category/detail/**",
-                        "/reviews/product/**"
-                )
+                        "/reviews/product/**")
                 .permitAll()
                 .requestMatchers(HttpMethod.PUT, "/cart/**", "/users/profile/**")
                 .permitAll()
@@ -82,9 +81,7 @@ public class SecurityConfig {
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
-        httpSecurity
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults());
+        httpSecurity.csrf(AbstractHttpConfigurer::disable).cors(Customizer.withDefaults());
 
         return httpSecurity.build();
     }
