@@ -12,6 +12,7 @@ import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.ProductReviewRequest;
 import com.fpl.datn.dto.response.ProductReviewResponse;
 import com.fpl.datn.dto.response.ProductReviewStatsResponse;
+import com.fpl.datn.enums.OrderStatus;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.ProductReviewMapper;
@@ -102,26 +103,10 @@ public class ProductReviewService {
         // Validate sản phẩm tồn tại và active
         Product product = orderDetail.getProduct();
 
-        if (!product.getIsActive()) {
-            throw new AppException(ErrorCode.PRODUCT_INACTIVE);
-        }
+        if (!product.getIsActive()) throw new AppException(ErrorCode.PRODUCT_INACTIVE);
 
-        // FIX: ADMIN có thể bỏ qua kiểm tra mua hàng
-        boolean isAdmin =
-                currentUser.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"));
-
-        if (!isAdmin) {
-            // Chỉ kiểm tra purchase cho CUSTOMER
-            if (!orderDetailRepository.hasUserPurchasedProduct(currentUser.getId(), product.getId())) {
-                throw new AppException(ErrorCode.USER_NOT_PURCHASED_PRODUCT);
-            }
-        }
-
-        // Kiểm tra user đã đánh giá sản phẩm này chưa
-        if (repository.existsByUserIdAndProductId(currentUser.getId(), product.getId())) {
-            throw new AppException(ErrorCode.REVIEW_ALREADY_EXISTS);
-        }
-
+        if (!orderDetail.getOrder().getOrderStatus().equals(OrderStatus.RECEIED.getDescription()))
+            throw new AppException(ErrorCode.ORDER_NOT_RECEIVED);
         // Tạo đánh giá mới
         ProductReview review = ProductReview.builder()
                 .product(product)

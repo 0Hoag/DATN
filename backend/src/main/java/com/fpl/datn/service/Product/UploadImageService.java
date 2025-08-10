@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -72,7 +71,7 @@ public class UploadImageService {
     }
 
     public PageResponse<UploadImageResponse> get(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC,"id"));
+        Pageable pageable = PageRequest.of(page - 1, size);
         var pageData = uploadImageRepo.findAll(pageable);
 
         var data = pageData.getContent().stream().map(mapper::toResponse).collect(Collectors.toList());
