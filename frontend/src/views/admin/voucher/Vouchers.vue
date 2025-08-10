@@ -167,7 +167,7 @@ const editModalRef = ref(null);
 const listVoucher = ref([]);
 const pagination = ref({
   current: 1,
-  pageSize: 1,
+  pageSize: 10,
   total: 0,
 });
 const searchKeyword = ref("");

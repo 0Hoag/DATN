@@ -19,7 +19,7 @@ const selectedCategories = ref([]);
 
 const list = ref([]);
 const route = useRoute();
-
+const keyword = route.query.q;
 // Phân trang
 const pagination = ref({
   current: 1,
@@ -56,6 +56,7 @@ const getListCategory = async () => {
 const filterProduct = async () => {
   try {
     const params = new URLSearchParams();
+    params.append('keyword',keyword)
     params.append("page", pagination.value.current);
     params.append("size", pagination.value.pageSize);
     if (minPrice.value) params.append("minPrice", minPrice.value);
@@ -82,8 +83,9 @@ const handleReset = async () => {
   minPrice.value = "";
   maxPrice.value = "";
   selectedBrands.value = [];
+  selectedCategories.value = [];
   pagination.value.current = 1;
-  await getListProductBySlugCategory();
+  await searchList(keyword);
 };
 
 //search

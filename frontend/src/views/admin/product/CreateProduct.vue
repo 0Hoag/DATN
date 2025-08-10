@@ -756,7 +756,16 @@ const removeVariant = (variant) => {
 
 const removeVariantImage = (variant, imgIndex) => {
   // Cập nhật mảng ảnh
-  variant.images = variant.images.filter((_, index) => index !== imgIndex);
+  // list hình ảnh sau khi đã xóa 1 hình ảnh
+  const listImages = variant.images.filter((_, index) => index !== imgIndex);
+
+  //sort lại vị trí và set thumbnail
+  variant.images = listImages.map((img, index) => ({
+    ...img,
+    sortOrder: index + 1,
+    isThumbnail: index === 0,
+  }));
+  console.log(variant.images);
 };
 
 //drag và drop file
