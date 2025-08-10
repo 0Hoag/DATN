@@ -114,14 +114,15 @@ public class ProductController {
     }
     @GetMapping("/filter")
     public ApiResponse<PageResponse<ProductSaleResponse>> filterProducts(
-            @RequestParam(required = false) Integer categoryId,
+            @RequestParam(required = false) List<Integer> categoryIds,
             @RequestParam(required = false) List<String> brands,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<ProductSaleResponse> result = productService.filterProducts(categoryId, brands, minPrice, maxPrice, page, size);
+        Page<ProductSaleResponse> result = productService.filterProducts(categoryIds, brands, minPrice, maxPrice,keyword, page, size);
 
         PageResponse<ProductSaleResponse> pageResponse = PageResponse.<ProductSaleResponse>builder()
                 .currentPage(result.getNumber())
@@ -136,5 +137,6 @@ public class ProductController {
                 .result(pageResponse)
                 .build();
     }
+
 
 }

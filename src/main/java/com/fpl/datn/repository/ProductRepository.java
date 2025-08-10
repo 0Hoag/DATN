@@ -58,20 +58,26 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
         (SELECT AVG(r.rating) FROM ProductReview r WHERE r.product = p)
     )
     FROM Product p
-    WHERE (:categoryId IS NULL OR p.category.id = :categoryId)
+    WHERE (:categoryIds IS NULL OR p.category.id IN :categoryIds)
       AND (:brands IS NULL OR p.brand IN :brands)
-      AND (:minPrice IS NULL OR EXISTS (
-           SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice >= :minPrice))
-      AND (:maxPrice IS NULL OR EXISTS (
-           SELECT 1 FROM ProductVariant pv WHERE pv.product = p AND pv.salePrice <= :maxPrice))
+      AND (:keyword IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')))
+      AND EXISTS (
+          SELECT 1 FROM ProductVariant pv
+          WHERE pv.product = p
+          AND (:minPrice IS NULL OR pv.price >= :minPrice)
+          AND (:maxPrice IS NULL OR pv.price <= :maxPrice)
+      )
 """)
     Page<ProductSaleResponse> filterProducts(
-            @Param("categoryId") Integer categoryId,
+            @Param("categoryIds") List<Integer> categoryIds,
             @Param("brands") List<String> brands,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
+            @Param("keyword") String keyword,
             Pageable pageable
     );
+
+
 
     Optional<Product> findBySlug(String slug);
 

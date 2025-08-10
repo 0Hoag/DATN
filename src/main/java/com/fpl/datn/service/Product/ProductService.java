@@ -167,19 +167,25 @@ public class ProductService {
         return list;
     }
     public Page<ProductSaleResponse> filterProducts(
-            Integer categoryId,
+            List<Integer> categoryIds,
             List<String> brands,
             BigDecimal minPrice,
             BigDecimal maxPrice,
+            String keyword,
             int page,
             int size
     ) {
         if (brands != null && brands.isEmpty()) {
             brands = null;
         }
+        if (categoryIds != null && categoryIds.isEmpty()) {
+            categoryIds = null;
+        }
+        if (keyword != null && keyword.trim().isEmpty()) {
+            keyword = null;
+        }
         Pageable pageable = PageRequest.of(page - 1, size);
-        Page<ProductSaleResponse> products = repo.filterProducts(categoryId, brands, minPrice, maxPrice, pageable);
-        return products;
+        return repo.filterProducts(categoryIds, brands, minPrice, maxPrice,keyword, pageable);
     }
 
 
