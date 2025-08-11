@@ -4,7 +4,7 @@ import { CategoryService } from "@/api/service/CategoryService";
 import { ProductService } from "@/api/service/ProductService";
 import ProductList from "@/components/ProductList.vue";
 import { BRANDS } from "@/constant";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const brands = ref(
@@ -19,7 +19,7 @@ const selectedCategories = ref([]);
 
 const list = ref([]);
 const route = useRoute();
-const keyword = route.query.q;
+const keyword = computed(() => route.query.q || "");
 // Phân trang
 const pagination = ref({
   current: 1,
@@ -56,7 +56,7 @@ const getListCategory = async () => {
 const filterProduct = async () => {
   try {
     const params = new URLSearchParams();
-    params.append('keyword',keyword)
+    params.append('keyword',keyword.value)
     params.append("page", pagination.value.current);
     params.append("size", pagination.value.pageSize);
     if (minPrice.value) params.append("minPrice", minPrice.value);
@@ -85,7 +85,7 @@ const handleReset = async () => {
   selectedBrands.value = [];
   selectedCategories.value = [];
   pagination.value.current = 1;
-  await searchList(keyword);
+  await searchList(keyword.value);
 };
 
 //search
@@ -95,7 +95,7 @@ const handleReset = async () => {
    // isSearching.value = true;
 
    const response = await ProductService.searchProductForUser({
-    keyword: q,
+    keyword: keyword.value,
     page: pagination.value.current,
     size: pagination.value.pageSize,
    });
@@ -113,7 +113,8 @@ const handleReset = async () => {
 watch(
   () => pagination.value.current,
   async () => {
-    if(minPrice.value || maxPrice.value) await filterProduct();
+    if(minPrice.value || maxPrice.value || selectedBrands.value.length > 0 || selectedCategories.value.length > 0) await filterProduct();
+    else searchList(keyword.value);
   }
 );
 
