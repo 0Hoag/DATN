@@ -362,8 +362,20 @@ const openReviewForm = (product) => {
   console.log(selectedProduct.value);
 };
 
+const validateFormReview = ()=>{
+  if(!selectedRating.value) {
+    toast.error('Vui lòng chọn số sao đánh giá');
+    return false;
+  }
+  if(!contentReview.value) {
+    toast.error('Vui lòng nhập đánh giá');
+    return false;
+  }
+  return true;
+}
 const submitFormReview = async () => {
   try {
+    if(!validateFormReview()) return;
     showLoading();
     const formReview = {
       orderDetailId: selectedProduct.value.id,
