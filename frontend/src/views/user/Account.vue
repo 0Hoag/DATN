@@ -217,9 +217,9 @@ async function updateStatusReceived(order) {
   }
 }
 // lấy thông tin user
-const nameUser = ref(store.userInfo?.fullName);
-const emailUser = ref(store.userInfo?.email);
-const phoneUser = ref(store.userInfo?.phone);
+const nameUser = ref('');
+const emailUser = ref('');
+const phoneUser = ref('');
 const updateProfileErrors = ref({
   fullName: "",
   phone: "",
@@ -362,8 +362,20 @@ const openReviewForm = (product) => {
   console.log(selectedProduct.value);
 };
 
+const validateFormReview = () => {
+  if (!selectedRating.value) {
+    toast.error("Vui lòng chọn số sao đánh giá");
+    return false;
+  }
+  if (!contentReview.value) {
+    toast.error("Vui lòng nhập đánh giá");
+    return false;
+  }
+  return true;
+};
 const submitFormReview = async () => {
   try {
+    if (!validateFormReview()) return;
     showLoading();
     const formReview = {
       orderDetailId: selectedProduct.value.id,
@@ -439,6 +451,10 @@ async function init() {
   await getAllOrdersByUser();
   await getAddresses();
   await getVoucherUserCanUse();
+
+  nameUser.value = store.userInfo?.fullName;
+  emailUser.value = store.userInfo?.email;
+  phoneUser.value = store.userInfo?.phone;
 }
 
 // hủy đơn hàng
@@ -676,7 +692,9 @@ onMounted(() => {
                 />
                 <h5>Chưa có đơn hàng nào</h5>
                 <p class="text-muted">Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên</p>
-                <a href="category.html" class="btn btn-primary">Mua sắm ngay</a>
+                <router-link :to="{ name: 'home' }" class="btn btn-primary"
+                  >Mua sắm ngay</router-link
+                >
               </div>
             </div>
           </div>
@@ -919,7 +937,9 @@ onMounted(() => {
                   />
                   <h5>Chưa có đơn hàng nào</h5>
                   <p class="text-muted">Hãy bắt đầu mua sắm để tạo đơn hàng đầu tiên</p>
-                  <a href="category.html" class="btn btn-primary">Mua sắm ngay</a>
+                  <router-link :to="{ name: 'home' }" class="btn btn-primary"
+                    >Mua sắm ngay</router-link
+                  >
                 </div>
               </div>
               <!-- Pagination -->

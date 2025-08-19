@@ -14,7 +14,7 @@
           'btn-primary': activeType === '',
           'btn-outline-primary': activeType !== '',
         }"
-        @click="changeStatus('') "
+        @click="changeStatus('')"
       >
         Tất cả
       </button>
@@ -24,7 +24,7 @@
           'btn-primary': activeType === 'PENDING',
           'btn-outline-primary': activeType !== 'PENDING',
         }"
-        @click="changeStatus('PENDING') "
+        @click="changeStatus('PENDING')"
       >
         Chờ xác nhận
       </button>
@@ -34,7 +34,7 @@
           'btn-primary': activeType === 'CONFIRMED',
           'btn-outline-primary': activeType !== 'CONFIRMED',
         }"
-        @click="changeStatus('CONFIRMED') "
+        @click="changeStatus('CONFIRMED')"
       >
         Đã xác nhận
       </button>
@@ -44,7 +44,7 @@
           'btn-primary': activeType === 'SHIPPED',
           'btn-outline-primary': activeType !== 'SHIPPED',
         }"
-        @click="changeStatus('SHIPPED') "
+        @click="changeStatus('SHIPPED')"
       >
         Đang giao
       </button>
@@ -54,7 +54,7 @@
           'btn-primary': activeType === 'DELIVERED',
           'btn-outline-primary': activeType !== 'DELIVERED',
         }"
-        @click="changeStatus('DELIVERED') "
+        @click="changeStatus('DELIVERED')"
       >
         Đã giao
       </button>
@@ -64,7 +64,7 @@
           'btn-primary': activeType === 'RECEIED',
           'btn-outline-primary': activeType !== 'RECEIED',
         }"
-        @click="changeStatus('RECEIED') "
+        @click="changeStatus('RECEIED')"
       >
         Đã nhận
       </button>
@@ -74,7 +74,7 @@
           'btn-primary': activeType === 'CANCELLED',
           'btn-outline-primary': activeType !== 'CANCELLED',
         }"
-        @click="changeStatus('CANCELLED') "
+        @click="changeStatus('CANCELLED')"
       >
         Đã hủy
       </button>
@@ -154,6 +154,14 @@
             >
               <font-awesome-icon icon="box" />
             </button>
+            <button
+              class="btn btn-success mx-2"
+              v-if="['CONFIRMED','DELIVERED','RECEIED'].includes(order.orderStatus) || order.paymentStatus == 'PAID'"
+              @click="exportInvoice(order)"
+              title="Xuất hóa đơn"
+            >
+              <font-awesome-icon icon="fa-solid fa-file-invoice" />
+            </button>
             <router-link
               class="btn btn-primary mx-2"
               :to="{ name: 'order-edit', params: { id: order.id } }"
@@ -220,6 +228,8 @@ import { OrderService } from "@/api/service/OrderService";
 import { onBeforeMount, ref, watch } from "vue";
 import { toast } from "vue3-toastify";
 import Modal from "@/components/Modal.vue";
+import instance from "@/api/plugin/axiosConfig";
+import { API } from "@/api/domain";
 //huy don hang
 const cancelOrderModel = ref({});
 const cancelOrderModalRef = ref(null);
@@ -444,6 +454,29 @@ const changeStatus = (status = "") => {
   activeType.value = status;
   pagination.value.current = 1;
 };
+
+const exportInvoice = async (order) => {
+  try {
+    showLoading();
+    const res = await instance.get(`${API.EXPORT_INVOICE}/${order.id}`, {
+      responseType: "blob",
+    });
+    const blob = new Blob([res.data], { type: "application/pdf" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", "invoice.pdf");
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    handleError(error);
+  } finally {
+    hideLoading();
+  }
+};
+
 watch([() => pagination.value.current, () => activeType.value], async () => {
   await filterOrderByStatus();
 });

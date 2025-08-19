@@ -42,7 +42,6 @@ export const showPromtConfirm = (title, onConfirm) => {
   })
 };
 
-
 export const handleError = (error) => {
   console.log(error);
   const errorCode = error?.response?.data?.code;
@@ -75,7 +74,7 @@ export const handleError = (error) => {
     1017: "Lỗi khi cập nhật người dùng.",
     1019: "Mật khẩu cũ không chính xác.",
     1020: "Mật khẩu mới không được trùng với xác nhận mật khẩu.",
-    1021: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.", // EMAIL_OR_PASSWORD_INCORRECT
+    1021: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
     1022: "Mã OTP không hợp lệ.",
 
     // Permission - Role
@@ -92,10 +91,12 @@ export const handleError = (error) => {
     1207: "Thời gian đổi trả hàng đã hết.",
     1208: "Yêu cầu hoàn hàng đã tồn tại.",
     1209: "Không tìm thấy thông tin hoàn đơn hàng.",
-    1210: "Không tìm thấy trạng thái hoàn hàng.",
+    1210: "Không tìm thấy trạng thái hoàn hàng hoặc VNPAY hoàn tiền thất bại.",
     1211: "Không thể xóa đơn hàng đã được giao.",
     1212: "Không thể xóa đơn hàng đã thanh toán.",
+    1213: "Bạn đã hủy đơn hàng này rồi.",
     1522: "Không thể thay đổi trạng thái đơn hàng.",
+    1209: "Không tìm thấy chi tiết đơn hàng.",
 
     // Address
     1301: "Không tìm thấy địa chỉ.",
@@ -122,9 +123,10 @@ export const handleError = (error) => {
     1518: "Xóa sản phẩm thất bại.",
     1519: "Không tìm thấy đánh giá sản phẩm.",
     1520: "Không tìm thấy thuộc tính biến thể.",
+    1521: "Biến thể không tồn tại.",
     1523: "Giá trị thuộc tính bị trùng.",
     1524: "Giá trị thuộc tính đã tồn tại.",
-    1525: "ID ảnh sản phẩm không được để trống.",
+    1525: "Ảnh sản phẩm không tồn tại.",
     1526: "ID ảnh không được để trống.",
     1527: "Sản phẩm không hoạt động.",
     1528: "Người dùng chưa mua sản phẩm này.",
@@ -132,22 +134,6 @@ export const handleError = (error) => {
     1530: "Không thể xóa đánh giá đã có phản hồi.",
     1531: "Đánh giá phải từ 1 đến 5 sao.",
     1532: "Nội dung đánh giá không được để trống.",
-    1528: "Tên sản phẩm không được để trống.",
-    1529: "Slug sản phẩm không được để trống.",
-    1530: "Mô tả sản phẩm không được để trống.",
-    1531: "Thương hiệu không được để trống.",
-    1532: "Ảnh đại diện không được để trống.",
-    1533: "Nội dung sản phẩm không được để trống.",
-    1534: "Trạng thái trang chủ không được để trống.",
-    1535: "Trạng thái hoạt động không được để trống.",
-    1536: "Danh mục sản phẩm không được để trống.",
-    1537: "Tên biến thể không được để trống.",
-    1538: "Giá biến thể không được để trống.",
-    1539: "Số lượng biến thể không được để trống.",
-    1540: "Số lượng đã bán không được để trống.",
-    1541: "Trạng thái hoạt động của biến thể không được để trống.",
-    1542: "ID sản phẩm của biến thể không được để trống.",
-    1543: "Giá trị thuộc tính của biến thể không được để trống.",
     1995: "Sản phẩm đã được sử dụng, không thể xóa.",
 
     // Product Image (107x)
@@ -191,6 +177,7 @@ export const handleError = (error) => {
     2104: "Bạn đã có voucher này.",
     2105: "Voucher không hợp lệ.",
     2106: "Voucher đã vượt quá số lượt sử dụng.",
+    2107: "Voucher đã được sử dụng.",
 
     // Category
     2201: "Danh mục không tồn tại.",
@@ -201,9 +188,31 @@ export const handleError = (error) => {
 
     // Transaction Log
     2301: "Không tìm thấy log giao dịch.",
+
+    // Email/Password
+    1021: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
+
+    // Additional fixes
+    1528: "Tên sản phẩm không được để trống.",
+    1529: "Slug sản phẩm không được để trống.",
+    1530: "Mô tả sản phẩm không được để trống.",
+    1531: "Thương hiệu không được để trống.",
+    1532: "Ảnh đại diện không được để trống.",
+    1533: "Nội dung sản phẩm không được để trống.",
+    1534: "Trạng thái trang chủ không được để trống.",
+    1535: "Trạng thái hoạt động không được để trống.",
+    1536: "Danh mục sản phẩm không được để trống.",
+    1537: "Tên biến thể không được để trống.",
+    1538: "Giá biến thể không được để trống.",
+    1539: "Số lượng biến thể không được để trống.",
+    1540: "Số lượng đã bán không được để trống.",
+    1541: "Trạng thái hoạt động của biến thể không được để trống.",
+    1542: "ID sản phẩm của biến thể không được để trống.",
+    1543: "Giá trị thuộc tính của biến thể không được để trống.",
   };
 
   const errorMessage = errorMessages[errorCode] || defaultMessage;
   toast?.error?.(errorMessage);
 };
+
 

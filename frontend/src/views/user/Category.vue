@@ -107,7 +107,7 @@ watch(
 watch(
   () => pagination.value.current,
   async () => {
-    if(minPrice.value || maxPrice.value) await filterProduct();
+    if(minPrice.value || maxPrice.value || selectedBrands.value.length > 0 ) await filterProduct();
     else await getListProductBySlugCategory();
   }
 );

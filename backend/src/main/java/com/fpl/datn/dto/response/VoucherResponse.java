@@ -18,6 +18,8 @@ public class VoucherResponse {
     Integer id;
     String code;
     String description;
+    Integer usageCount;
+    Integer quantity;
     BigDecimal discountValue;
     BigDecimal minOrderValue;
     LocalDateTime startAt;

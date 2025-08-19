@@ -2,7 +2,7 @@ spring:
   application:
     name: datn
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/datn}
+    url: ${DBMS_CONNECTION:jdbc:mysql://localhost:3306/duantotnghiep}
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
     password: daohuucong123

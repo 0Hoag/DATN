@@ -129,7 +129,7 @@
         <div class="card">
           <div class="card-body">
             <h4 class="mb-3">Tạo biến thể sản phẩm</h4>
-            <a href="javascript:void(0)" @click="openMediaModal">Upload ảnh</a>
+            <!-- <a href="javascript:void(0)" @click="openMediaModal">Upload ảnh</a> -->
 
             <!-- Chọn các thuộc tính -->
             <a-select
@@ -773,7 +773,11 @@ const onDrop = (event) => {
   selectedFiles.value = Array.from(event.dataTransfer.files);
   const files = selectedFiles.value;
   for (let i = 0; i < files.length; i++) {
-    if (files[i].type.split("/")[0] !== "image") continue;
+    if (files[i].type.split("/")[0] !== "image") {
+      toast.error(`File ${files[i].name} có định dạng không hợp lệ`);
+      selectedFiles.value.splice(i, 1);
+      continue;
+    }
   }
 };
 

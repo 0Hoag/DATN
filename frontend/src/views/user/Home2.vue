@@ -54,68 +54,39 @@
           {{ h }}:{{ m }}:{{ s }}
         </div>
       </div>
-      <!-- <div class="d-flex gap-3 flex-nowrap overflow-auto"> -->
-      <!-- <div
-          v-for="(product, index) in flashSaleProducts"
-          :key="index"
-          class="card flash-sale-card shadow-sm position-relative d-flex flex-column h-100"
-          style="flex: 0 0 auto; width: 220px"
-        >
-          <span class="flash-badge">SALE</span>
-
-          <div class="product-img-wrapper">
-            <img :src="product.imageUrl" :alt="product.title" />
-          </div>
-
-          <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
-            <h6 class="card-title text-start text-truncate">
-              {{ product.name }}
-            </h6>
-
-            <div class="mb-1 text-warning d-flex align-items-center mt-auto">
-              <i class="fa fa-star"></i>
-              <span class="text-muted small ms-1">({{ product.averageRating }})</span>
-            </div>
-
-            <p class="text-danger fw-bold mb-1 text-start">
-              {{ formatPrice(product.minSalePrice) }}<br />
-              <del class="text-muted">{{ formatPrice(product.minOriginPrice) }}</del>
-            </p>
-          </div>
-        </div> -->
-      <!-- </div> -->
       <Swiper :modules="[Navigation,Pagination]" :loop="true" :slides-per-view="5" navigation  pagination>
         <SwiperSlide v-for="(product, index) in flashSaleProducts" :key="index">
-          <div
-            class="card flash-sale-card shadow-sm position-relative d-flex flex-column h-100"
-            style="flex: 0 0 auto; width: 220px"
-          >
-            <span class="flash-badge">SALE</span>
-
-            <div class="product-img-wrapper">
-              <img :src="product.imageUrl" :alt="product.title" />
-            </div>
-
-            <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
-              <h6 class="card-title text-start text-truncate">
-                {{ product.name }}
-              </h6>
-
-              <div class="mb-1 text-warning d-flex align-items-center mt-auto">
-                <i class="fa fa-star"></i>
-                <span class="text-muted small ms-1">({{ product.averageRating }})</span>
+       <router-link :to="{name: 'product', params: {slug: product.slug}}">
+            <div
+              class="card flash-sale-card shadow-sm position-relative d-flex flex-column h-100"
+              style="flex: 0 0 auto; width: 220px"
+            >
+              <span class="flash-badge">SALE</span>
+  
+              <div class="product-img-wrapper">
+                <img :src="product.imageUrl" :alt="product.title" />
               </div>
-
-              <p class="text-danger fw-bold mb-1 text-start">
-                {{ formatPrice(product.minSalePrice) }}<br />
-                <del class="text-muted">{{ formatPrice(product.minOriginPrice) }}</del>
-              </p>
+  
+              <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+                <h6 class="card-title text-start text-truncate">
+                  {{ product.name }}
+                </h6>
+  
+                <div class="mb-1 text-warning d-flex align-items-center mt-auto">
+                  <i class="fa fa-star"></i>
+                  <span class="text-muted small ms-1">({{ product.averageRating }})</span>
+                </div>
+  
+                <p class="text-danger fw-bold mb-1 text-start">
+                  {{ formatPrice(product.minSalePrice) }}<br />
+                  <del class="text-muted">{{ formatPrice(product.minOriginPrice) }}</del>
+                </p>
+              </div>
             </div>
-          </div>
+       </router-link>
         </SwiperSlide>
       </Swiper>
     </div>
-
     <!-- Danh sách sản phẩm -->
     <div class="row mt-3">
       <div class="d-flex justify-content-between">
@@ -323,21 +294,14 @@ import { Navigation, Pagination } from "swiper/modules";
 
 const rightBanners = ref([banner1, banner4, banner3]);
 const flashSaleProducts = ref([
-  {
-    title: "iPhone 14 Pro Max 128GB",
-    img: "/image/ip14pro.png",
-    price: "21.990.000₫",
-    original: "25.990.000₫",
-    rating: 120,
-  },
 ]);
 // danh sach san pham new
 
 const getListProductSale = async () => {
-  flashSaleProducts.value = [];
   try {
     const res = await ProductService.fetchListProductSale();
     flashSaleProducts.value = res.result || [];
+    console.log(flashSaleProducts.value);
   } catch (error) {
     console.log(error);
 
