@@ -94,7 +94,6 @@ public class MomoService {
             String txnRef = params.get("orderId");
             String transactionNo = params.get("transId");
 
-            // Rebuild rawData để xác minh chữ ký
             String rawData = "accessKey=" + config.getAccessKey()
                     + "&amount=" + params.get("amount")
                     + "&extraData=" + params.get("extraData")

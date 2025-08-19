@@ -56,7 +56,7 @@ public class CartController {
 
     @DeleteMapping("/{variantId}")
     ApiResponse<Void> getCart(HttpSession session, @PathVariable Integer variantId) {
-        cartService.delete(session, variantId);
+        cartService.deleteCartItem(session, variantId);
         return ApiResponse.<Void>builder().message("Delete Success!").build();
     }
 }

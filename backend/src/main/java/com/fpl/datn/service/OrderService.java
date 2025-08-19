@@ -226,44 +226,31 @@ public class OrderService {
         logService.logPayment(order, OrderActionType.DELETE.getType(), null, null);
     }
 
+    private void cancelOrderCommon(Order order, String reason, boolean isAdmin) throws Exception {
+        if (reason == null || reason.isEmpty()) throw new AppException(ErrorCode.MISSING_INPUT);
+        if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription()))
+            throw new AppException(ErrorCode.CANCEL_ORDER_FAIL);
+        restoreInventory(order);
+        order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
+        if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription())) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED.getDescription());
+        }
+        order.setReason(reason);
+        repository.save(order);
+        logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
+        if (isAdmin) sendMailService.sendInvoiceToUserCancelOrder(order.getId(), reason);
+    }
+
     @Transactional
     public void cancel(int id, CancelOrderRequest request) throws Exception {
         var order = getValidOrder(id);
-        if (request.getReason() == null || request.getReason().isEmpty())
-            throw new AppException(ErrorCode.MISSING_INPUT);
-        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
-            restoreInventory(order);
-            order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
-            if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription())) {
-                order.setPaymentStatus(PaymentStatus.REFUNDED.getDescription());
-            }
-            order.setReason(request.getReason());
-            repository.save(order);
-            logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
-
-            return;
-        }
-        throw new AppException(ErrorCode.CANCEL_ORDER_FAIL);
+        cancelOrderCommon(order, request.getReason(), false);
     }
 
     @Transactional
     public void cancelAdmin(int id, CancelOrderRequest request) throws Exception {
         var order = getValidOrder(id);
-        if (request.getReason() == null || request.getReason().isEmpty())
-            throw new AppException(ErrorCode.MISSING_INPUT);
-        if (order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription())) {
-            restoreInventory(order);
-            order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
-            if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription())) {
-                order.setPaymentStatus(PaymentStatus.REFUNDED.getDescription());
-            }
-            order.setReason(request.getReason());
-            repository.save(order);
-            logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
-            sendMailService.sendInvoiceToUserCancelOrder(id, request.getReason());
-            return;
-        }
-        throw new AppException(ErrorCode.CANCEL_ORDER_FAIL);
+        cancelOrderCommon(order, request.getReason(), true);
     }
 
     // Update trạng thái đơn hàng và Trạng thái thanh toán;
@@ -468,6 +455,7 @@ public class OrderService {
                 .name()
                 .equalsIgnoreCase(order.getPaymentMethod().getName());
     }
+
     // Xử lí thanh toán
     private boolean isMomo(Order order) {
         return PaymentMethod.MOMO
