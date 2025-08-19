@@ -15,53 +15,42 @@ import com.fpl.datn.models.ZUserVoucher;
 @Repository
 public interface UserVoucherRepository extends JpaRepository<ZUserVoucher, Integer> {
 
-    // ===== EXISTING METHODS =====
+    // Lấy danh sách voucher đã lưu của một user (có phân trang)
     Page<ZUserVoucher> findByUser_Id(int userId, Pageable pageable);
 
+    // Kiểm tra xem một user đã lưu một voucher cụ thể chưa
     boolean existsByUser_IdAndVoucher_Code(Integer userId, String code);
 
+    // Kiểm tra xem một voucher có đang được sử dụng hay không
     boolean existsByVoucherId(Integer voucherId);
-
-    // ===== NEW METHODS FOR USAGE TRACKING =====
 
     // Đếm số record của user với voucher ID
     @Query("SELECT COUNT(uv) FROM ZUserVoucher uv WHERE uv.user.id = :userId AND uv.voucher.id = :voucherId")
     long countByUser_IdAndVoucher_Id(@Param("userId") Integer userId, @Param("voucherId") Integer voucherId);
 
-    // Đếm tổng số record của voucher
+    // Đếm tổng số record của voucher (ĐÃ KHÔI PHỤC)
     @Query("SELECT COUNT(uv) FROM ZUserVoucher uv WHERE uv.voucher.id = :voucherId")
     long countByVoucher_Id(@Param("voucherId") Integer voucherId);
 
-    // Lấy danh sách user đã claim voucher
-    @Query("SELECT DISTINCT uv.user.id FROM ZUserVoucher uv WHERE uv.voucher.id = :voucherId")
-    List<Integer> findUserIdsByVoucherId(@Param("voucherId") Integer voucherId);
-
-    // Lấy danh sách voucher của user
-    @Query("SELECT uv FROM ZUserVoucher uv WHERE uv.user.id = :userId")
-    List<ZUserVoucher> findAllByUserId(@Param("userId") Integer userId);
-
-    /// Phương thức để đếm số lượng voucher đã được sử dụng toàn cầu cho một voucher cụ thể
+    // Đếm số lượng voucher đã được sử dụng toàn cầu
     @Query("SELECT COUNT(zuv) FROM ZUserVoucher zuv WHERE zuv.voucher.id = :voucherId AND zuv.isUsed = true")
     long countUsedVouchersByVoucherId(@Param("voucherId") Integer voucherId);
 
-    // ĐÃ SỬA: Lấy danh sách ID của các voucher mà người dùng đã sử dụng (isUsed = true)
-    @Query("SELECT zuv.voucher.id FROM ZUserVoucher zuv WHERE zuv.user.id = :userId AND zuv.isUsed = true")
-    List<Integer> findFullyUsedVoucherIdsByUserId(@Param("userId") Integer userId);
-
+    // Lấy danh sách các voucher khả dụng cho người dùng (có Join Fetch để tối ưu)
     @Query(
             """
-			SELECT uv
-			FROM ZUserVoucher uv
-			JOIN FETCH uv.voucher v
-			WHERE uv.user.id = :userId
-			AND uv.isUsed = false
-			AND CURRENT_TIMESTAMP < v.endAt
-	""")
+          SELECT uv
+          FROM ZUserVoucher uv
+          JOIN FETCH uv.voucher v
+          WHERE uv.user.id = :userId
+          AND uv.isUsed = false
+          AND CURRENT_TIMESTAMP < v.endAt
+    """)
     Page<ZUserVoucher> findAvailableVouchersForUser(@Param("userId") Integer userId, Pageable pageable);
 
-    // Phương thức mới cần thêm vào
+    // Tìm một bản ghi ZUserVoucher dựa trên ID người dùng và ID voucher
     Optional<ZUserVoucher> findByUserIdAndVoucherId(Integer userId, Integer voucherId);
 
-    // Các phương thức khác của bạn (nếu có)
+    // Lấy danh sách voucher của một user theo trạng thái đã dùng hay chưa
     List<ZUserVoucher> findByUserIdAndIsUsed(Integer userId, Boolean isUsed);
 }

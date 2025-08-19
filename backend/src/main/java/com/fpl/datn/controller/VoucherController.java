@@ -80,34 +80,10 @@ public class VoucherController {
                 .build();
     }
 
-    // API mới để quản lý voucher hết hạn
-    @GetMapping("/expired/count")
-    public ApiResponse<Long> getExpiredVouchersCount() {
-        return ApiResponse.<Long>builder()
-                .result(voucherService.countExpiredVouchers())
-                .message("Số lượng voucher hết hạn")
-                .build();
-    }
 
-    @PostMapping("/update-expired")
-    @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
-    public ApiResponse<Void> updateExpiredVouchers() {
-        voucherService.updateExpiredVouchers();
-        return ApiResponse.<Void>builder()
-                .message("Đã cập nhật trạng thái voucher hết hạn!")
-                .build();
-    }
 
-    @GetMapping("/expiring")
-    public ApiResponse<PageResponse<VoucherResponse>> getExpiringVouchers(
-            @RequestParam(required = false, defaultValue = "7") int days,
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int size) {
-        return ApiResponse.<PageResponse<VoucherResponse>>builder()
-                .result(voucherService.getExpiringVouchers(days, page, size))
-                .message("Danh sách voucher sắp hết hạn trong " + days + " ngày")
-                .build();
-    }
+
+   
 
     @GetMapping("/available")
     public ApiResponse<PageResponse<VoucherResponse>> getAvailableVouchers(

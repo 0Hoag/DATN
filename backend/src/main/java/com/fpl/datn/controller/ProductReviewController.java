@@ -69,40 +69,6 @@ public class ProductReviewController {
         return ApiResponse.<Void>builder().message("Xóa đánh giá thành công!").build();
     }
 
-    @PostMapping("/hideReview/{id}")
-    public ApiResponse<Void> hideReview(@PathVariable int id) {
-        productReviewService.hideReview(id);
-        return ApiResponse.<Void>builder().message("Ẩn đánh giá thành công!").build();
-    }
-
-    // ===== FIX: CUSTOMER + ADMIN có thể xóa review của mình =====
-    @DeleteMapping("/my/{id}")
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
-    public ApiResponse<Void> deleteMyReview(@PathVariable int id) {
-        productReviewService.deleteMyReview(id);
-        return ApiResponse.<Void>builder()
-                .message("Xóa đánh giá của bạn thành công!")
-                .build();
-    }
-
-    // ===== MỚI: THỐNG KÊ ĐÁNH GIÁ THEO SẢN PHẨM =====
-    @GetMapping("/stats/{productId}")
-    public ApiResponse<ProductReviewStatsResponse> getReviewStats(@PathVariable Integer productId) {
-        return ApiResponse.<ProductReviewStatsResponse>builder()
-                .result(productReviewService.getReviewStats(productId))
-                .message("Lấy thống kê đánh giá thành công!")
-                .build();
-    }
-
-    // ===== FIX: CUSTOMER + ADMIN có thể check review status =====
-    @GetMapping("/check-reviewed/{productId}")
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
-    public ApiResponse<Boolean> hasUserReviewedProduct(@PathVariable Integer productId) {
-        return ApiResponse.<Boolean>builder()
-                .result(productReviewService.hasUserReviewedProduct(productId))
-                .message("Kiểm tra trạng thái đánh giá thành công!")
-                .build();
-    }
 
     @GetMapping("/search")
     public ApiResponse<PageResponse<ProductReviewResponse>> searchReviewsByProductName(
@@ -114,13 +80,4 @@ public class ProductReviewController {
                 .build();
     }
 
-    // ===== FIX: CUSTOMER + ADMIN có thể check purchase status =====
-    @GetMapping("/check-purchased/{productId}")
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
-    public ApiResponse<Boolean> hasUserPurchasedProduct(@PathVariable Integer productId) {
-        return ApiResponse.<Boolean>builder()
-                .result(productReviewService.hasUserPurchasedProduct(productId))
-                .message("Kiểm tra trạng thái mua hàng thành công!")
-                .build();
-    }
 }

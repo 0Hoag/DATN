@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.ProductReviewRequest;
 import com.fpl.datn.dto.response.ProductReviewResponse;
-import com.fpl.datn.dto.response.ProductReviewStatsResponse;
 import com.fpl.datn.enums.OrderStatus;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
@@ -107,8 +106,6 @@ public class ProductReviewService {
             throw new AppException(ErrorCode.PRODUCT_INACTIVE);
         }
 
-        if (!product.getIsActive()) throw new AppException(ErrorCode.PRODUCT_INACTIVE);
-
         if (!orderDetail.getOrder().getOrderStatus().equals(OrderStatus.RECEIED.getDescription()))
             throw new AppException(ErrorCode.ORDER_NOT_RECEIVED);
 
@@ -134,79 +131,7 @@ public class ProductReviewService {
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public void deleteReview(int id) {
         var review = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
-
         repository.deleteById(review.getId());
-    }
-
-    @Transactional
-    @PreAuthorize("hasRole('ADMIN')")
-    public void hideReview(Integer orderDetailId) {
-        var orderDetail = orderDetailRepository
-                .findById(orderDetailId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_DETAIL_NOT_FOUND));
-        var review = repository
-                .findById(orderDetail.getProductReview().getId())
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
-
-        review.setIsVisible(false);
-        repository.save(review);
-    }
-
-    // ===== FIX: CUSTOMER + ADMIN có thể xóa review của mình =====
-    @Transactional
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
-    public void deleteMyReview(int id) {
-        var currentUserResponse = userService.getMyInfo();
-        User currentUser = userRepository
-                .findById(currentUserResponse.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        var review = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_REVIEW_NOT_FOUND));
-
-        // Kiểm tra quyền sở hữu (trừ ADMIN có thể xóa bất kỳ)
-        boolean isAdmin =
-                currentUser.getRoles().stream().anyMatch(role -> role.getName().equals("ADMIN"));
-
-        if (!isAdmin && !review.getUser().getId().equals(currentUser.getId())) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-
-        repository.deleteById(id);
-    }
-
-    // ===== MỚI: ĐẾM SỐ ĐÁNH GIÁ THEO SẢN PHẨM =====
-    public ProductReviewStatsResponse getReviewStats(Integer productId) {
-        // Validate sản phẩm tồn tại
-        Product product =
-                productRepository.findById(productId).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-        // Đếm tổng số đánh giá
-        Long totalReviews = repository.countByProductId(productId);
-
-        // Tính rating trung bình
-        Double averageRating = repository.getAverageRatingByProductId(productId);
-        if (averageRating == null) {
-            averageRating = 0.0;
-        }
-
-        // Đếm số đánh giá theo từng sao
-        Long fiveStars = repository.countByProductIdAndRating(productId, 5);
-        Long fourStars = repository.countByProductIdAndRating(productId, 4);
-        Long threeStars = repository.countByProductIdAndRating(productId, 3);
-        Long twoStars = repository.countByProductIdAndRating(productId, 2);
-        Long oneStar = repository.countByProductIdAndRating(productId, 1);
-
-        return ProductReviewStatsResponse.builder()
-                .productId(productId)
-                .productName(product.getName())
-                .totalReviews(totalReviews)
-                .averageRating(Math.round(averageRating * 10.0) / 10.0) // Làm tròn 1 chữ số thập phân
-                .fiveStars(fiveStars)
-                .fourStars(fourStars)
-                .threeStars(threeStars)
-                .twoStars(twoStars)
-                .oneStar(oneStar)
-                .build();
     }
 
     public PageResponse<ProductReviewResponse> searchReviewsByProductName(String name, int page, int size) {
@@ -221,20 +146,6 @@ public class ProductReviewService {
                 .totalElements(pageData.getTotalElements())
                 .data(data)
                 .build();
-    }
-
-    // ===== FIX: CUSTOMER + ADMIN có thể check review status =====
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
-    public boolean hasUserReviewedProduct(Integer productId) {
-        var currentUserResponse = userService.getMyInfo();
-        return repository.existsByUserIdAndProductId(currentUserResponse.getId(), productId);
-    }
-
-    // ===== FIX: CUSTOMER + ADMIN có thể check purchase status =====
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
-    public boolean hasUserPurchasedProduct(Integer productId) {
-        var currentUserResponse = userService.getMyInfo();
-        return orderDetailRepository.hasUserPurchasedProduct(currentUserResponse.getId(), productId);
     }
 
     private void validateProductName(String name) {

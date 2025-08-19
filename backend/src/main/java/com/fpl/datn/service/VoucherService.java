@@ -36,8 +36,6 @@ public class VoucherService {
 
     @Transactional
     public PageResponse<VoucherResponse> getAll(int page, int size, boolean isDesc) {
-        // Tự động cập nhật voucher hết hạn
-        checkAndUpdateExpiredVouchers();
 
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
@@ -140,8 +138,6 @@ public class VoucherService {
     // Hàm search voucher
     @Transactional
     public PageResponse<VoucherResponse> search(String keyword, int page, int size, boolean isDesc) {
-        // Cập nhật trạng thái voucher hết hạn trước khi search
-        updateExpiredVouchers();
 
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
@@ -160,46 +156,7 @@ public class VoucherService {
                 .build();
     }
 
-    // Method để cập nhật tất cả voucher hết hạn
-    @Transactional
-    public void updateExpiredVouchers() {
-        LocalDateTime now = LocalDateTime.now();
-        var expiredVouchers = repository.findByIsActiveTrueAndEndAtBefore(now);
 
-        if (!expiredVouchers.isEmpty()) {
-            expiredVouchers.forEach(voucher -> {
-                voucher.setIsActive(false);
-                voucher.setUpdatedAt(now);
-            });
-            repository.saveAll(expiredVouchers);
-        }
-    }
-
-    // Method để lấy số lượng voucher hết hạn
-    public long countExpiredVouchers() {
-        LocalDateTime now = LocalDateTime.now();
-        return repository.countByIsActiveTrueAndEndAtBefore(now);
-    }
-
-    // Method để lấy danh sách voucher sắp hết hạn (trong vòng X ngày)
-    public PageResponse<VoucherResponse> getExpiringVouchers(int days, int page, int size) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime futureDate = now.plusDays(days);
-
-        Sort sort = Sort.by(Sort.Direction.ASC, "endAt");
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-        var pageData = repository.findByIsActiveTrueAndEndAtBetween(now, futureDate, pageable);
-        var data = pageData.stream().map(mapper::toVoucherResponse).toList();
-
-        return PageResponse.<VoucherResponse>builder()
-                .currentPage(page)
-                .totalPages(pageData.getTotalPages())
-                .pageSize(pageData.getSize())
-                .totalElements(pageData.getTotalElements())
-                .data(data)
-                .build();
-    }
 
     private void validateBasic(
             String code, java.math.BigDecimal discountValue, LocalDateTime startAt, LocalDateTime endAt) {
@@ -222,18 +179,6 @@ public class VoucherService {
         return voucher.getEndAt().isBefore(now);
     }
 
-    private void checkAndUpdateExpiredVouchers() {
-        LocalDateTime now = LocalDateTime.now();
-        var expiredVouchers = repository.findByIsActiveTrueAndEndAtBefore(now);
-
-        if (!expiredVouchers.isEmpty()) {
-            expiredVouchers.forEach(voucher -> {
-                voucher.setIsActive(false);
-                voucher.setUpdatedAt(now);
-            });
-            repository.saveAll(expiredVouchers);
-        }
-    }
 
     public PageResponse<VoucherResponse> getAvailableForUser(int page, int size) {
         LocalDateTime now = LocalDateTime.now();
