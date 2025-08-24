@@ -6,7 +6,7 @@
             <div class="row g-4">
                 <div class="col-lg-5 col-md-6">
                     <h5 class="text-warning mb-3">
-                        <i class="fas fa-mobile-alt me-2"></i>TechZone
+                        <i class="fas fa-mobile-alt me-2"></i>PhoneZone
                     </h5>
                     <p class="mb-3">Siêu thị công nghệ hàng đầu Việt Nam với hơn 10 năm kinh nghiệm</p>
                     <div class="d-flex gap-2">
@@ -65,7 +65,7 @@
                     </div>
                     <div class="mb-2">
                         <i class="fas fa-envelope me-2"></i>
-                        <a href="mailto:info@techzone.vn" class="text-light text-decoration-none">info@techzone.vn</a>
+                        <a href="https://mail.google.com/mail/u/0/?fs=1&to=phonezone.shop11@gmail.com&tf=cm" target="_blank" class="text-light text-decoration-none">phonezone.shop11@gmail.com</a>
                     </div>
                     <div class="mb-2">
                         <i class="fas fa-clock me-2"></i>
