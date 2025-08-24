@@ -652,6 +652,7 @@ function validateForm() {
   }
   return true;
 }
+
 async function submitFormEdit() {
   try {
     showLoading();
@@ -668,9 +669,44 @@ async function submitFormEdit() {
   }
 }
 
+const validateUpdateVariant = () => {
+  let errorMessage = "";
+
+  const errorVariants = variants.value.filter(
+    (variant) =>
+      variant.images.length === 0 ||
+      !variant.variantName.trim() ||
+      variant.price === 0 ||
+      variant.quantity === 0
+  );
+
+  if (errorVariants.length > 0) {
+    errorMessage = "Có lỗi ở các biến thể sau:\n";
+    errorVariants.forEach((variant, index) => {
+      let errs = [];
+      if (variant.images.length === 0) errs.push("Chọn ít nhất 1 hình ảnh");
+      if (!variant.variantName.trim()) errs.push("Biến thể sản phẩm chưa có tên");
+      if (variant.price === 0) errs.push("giá = 0");
+      if (variant.quantity === 0) errs.push("số lượng = 0");
+
+      errorMessage += `- Biến thể vị trí ${index + 1} (${
+        variant.variantName ?? "Chưa có tên"
+      }): ${errs.join(", ")}\n`;
+    });
+
+    toast.error(errorMessage);
+    return false;
+  }
+
+  // Nếu qua hết -> hợp lệ
+  return true;
+};
+
 const updateVariant = async (variant) => {
   try {
     showLoading();
+
+    if (!validateUpdateVariant()) return;
 
     await ProductService.updateProductVariant(variant.id, variant);
     if (listRemoveImage.value.length > 0) await deleteVariantImage();
@@ -791,6 +827,14 @@ watch(
     productModel.value.slug = generateSlug(newValue);
   }
 );
+
+watch(
+  variants,
+  (newVal, oldVal) => {
+    console.log("Variants thay đổi:", newVal)
+  },
+  { deep: true } // 👈 cần deep để bắt thay đổi bên trong object
+)
 onMounted(async () => {
   await fetchListCategory();
   await fetchProductById();

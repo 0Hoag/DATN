@@ -631,29 +631,80 @@ function resetForm() {
 }
 function validateForm() {
   let errorMessage = "";
+
   if (!productModel.value.name) {
     errorMessage = "Vui lòng nhập tên sản phẩm";
-  } else if (!productModel.value.slug) {
+    toast.error(errorMessage);
+    return false;
+  }
+
+  if (!productModel.value.slug) {
     errorMessage = "Vui lòng nhập đường dẫn tĩnh";
-  } else if (!productModel.value.description) {
+    toast.error(errorMessage);
+    return false;
+  }
+
+  if (!productModel.value.description) {
     errorMessage = "Vui lòng nhập mô tả ngắn về sản phẩm";
-  } else if (!productModel.value.content) {
+    toast.error(errorMessage);
+    return false;
+  }
+
+  if (!productModel.value.content) {
     errorMessage = "Vui lòng nhập thông số kỹ thuật";
-  } else if (!selectedCategory.value) {
+    toast.error(errorMessage);
+    return false;
+  }
+
+  if (!selectedCategory.value) {
     errorMessage = "Vui lòng chọn danh mục";
-  } else if (!selectedBrand.value) {
+    toast.error(errorMessage);
+    return false;
+  }
+
+  if (!selectedBrand.value) {
     errorMessage = "Vui lòng chọn thương hiệu";
-  } else if (!variants.value.length) {
+    toast.error(errorMessage);
+    return false;
+  }
+
+  if (!variants.value.length) {
     errorMessage = "Vui lòng tạo biến thể sản phẩm";
     toast.error(errorMessage);
     return false;
   }
-  if (errorMessage) {
+
+  // validate các biến thể
+  const errorVariants = variants.value.filter(
+    (variant) =>
+      variant.images.length === 0 ||
+      !variant.variantName.trim() ||
+      variant.price === 0 ||
+      variant.quantity === 0
+  );
+
+  if (errorVariants.length > 0) {
+    errorMessage = "Có lỗi ở các biến thể sau:\n";
+    errorVariants.forEach((variant, index) => {
+      let errs = [];
+      if (variant.images.length === 0) errs.push("Chọn ít nhất 1 hình ảnh");
+      if (!variant.variantName.trim()) errs.push("Biến thể sản phẩm chưa có tên");
+      if (variant.price === 0) errs.push("giá = 0");
+      if (variant.quantity === 0) errs.push("số lượng = 0");
+
+      errorMessage += `- Biến thể vị trí ${index + 1} (${
+        variant.variantName ?? "Chưa có tên"
+      }): ${errs.join(", ")}\n`;
+    });
+
     toast.error(errorMessage);
     return false;
   }
+
+  // Nếu qua hết -> hợp lệ
   return true;
 }
+
 async function submitFormAdd() {
   try {
     showLoading();

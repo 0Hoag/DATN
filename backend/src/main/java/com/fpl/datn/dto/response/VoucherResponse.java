@@ -20,6 +20,8 @@ public class VoucherResponse {
     String description;
     BigDecimal discountValue;
     BigDecimal minOrderValue;
+    Integer usageCount;
+    Integer quantity;
     LocalDateTime startAt;
     LocalDateTime endAt;
     Boolean isActive;
