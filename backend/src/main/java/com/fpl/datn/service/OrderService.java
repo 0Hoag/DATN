@@ -345,18 +345,30 @@ public class OrderService {
                     .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         }
         Address address = null;
-        if (request.getAddressId() == null && request.getInputAddress() != null) {
-            if (request.getInputFullname() == null) throw new AppException(ErrorCode.FULLNAME_NOT_NULL);
-            if (request.getInputPhone() == null) throw new AppException(ErrorCode.PHONE_NOT_NULL);
+        if (request.getAddressId() == null
+                && request.getInputAddress() != null
+                && !request.getInputAddress().trim().isEmpty()) {
+
+            if (request.getInputFullname() == null
+                    || request.getInputFullname().trim().isEmpty()) {
+                throw new AppException(ErrorCode.FULLNAME_NOT_NULL);
+            }
+
+            if (request.getInputPhone() == null
+                    || request.getInputPhone().trim().isEmpty()) {
+                throw new AppException(ErrorCode.PHONE_NOT_NULL);
+            }
+
             address = Address.builder()
-                    .addressLine(request.getInputAddress())
-                    .fullName(request.getInputFullname())
-                    .phone(request.getInputPhone())
+                    .addressLine(request.getInputAddress().trim())
+                    .fullName(request.getInputFullname().trim())
+                    .phone(request.getInputPhone().trim())
                     .user(user)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
             addressRepository.save(address);
+
         } else {
             address = addressRepository
                     .findById(request.getAddressId())

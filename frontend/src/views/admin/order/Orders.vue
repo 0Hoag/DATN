@@ -216,6 +216,7 @@
     </template>
   </Modal>
 </template>
+
 <script setup>
 import {
   handleError,
@@ -261,25 +262,27 @@ const pagination = ref({
   pageSize: 10,
   total: 0,
 });
-async function fetchList() {
-  try {
-    const response = await OrderService.fetchListOrder({
-      page: pagination.value.current,
-      size: pagination.value.pageSize,
-    });
-    if (activeType.value === "ALL") {
-      list.value = response.result.data;
-    } else {
-      list.value = response.result.data.filter(
-        (item) => item.orderStatus === activeType.value
-      );
-    }
-    pagination.value.total = response.result.totalElements; // Phân trang: cập nhật tổng số phần tử trên trang
-    console.log(list.value);
-  } catch (error) {
-    console.log(error);
-  }
-}
+
+// async function fetchList() {
+//   try {
+//     const response = await OrderService.fetchListOrder({
+//       page: pagination.value.current,
+//       size: pagination.value.pageSize,
+//     });
+//     if (activeType.value === "ALL") {
+//       list.value = response.result.data;
+//     } else {
+//       list.value = response.result.data.filter(
+//         (item) => item.orderStatus === activeType.value
+//       );
+//     }
+//     pagination.value.total = response.result.totalElements; // Phân trang: cập nhật tổng số phần tử trên trang
+//     console.log(list.value);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
+
 const filterOrderByStatus = async () => {
   console.log("type order", activeType.value);
   try {
@@ -300,6 +303,7 @@ const filterOrderByStatus = async () => {
     hideLoading();
   }
 };
+
 async function searchList() {
   try {
     showLoading();
