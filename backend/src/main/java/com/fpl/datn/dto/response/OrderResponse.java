@@ -22,6 +22,7 @@ public class OrderResponse {
     String paymentMethod;
     String paymentStatus;
     String note;
+    String reason;
     // Thông tin người dùng
     Integer idAddress;
     String address;
