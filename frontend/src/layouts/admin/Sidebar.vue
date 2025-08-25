@@ -20,6 +20,13 @@
         <span>Danh mục</span>
       </a-menu-item>
 
+      <a-menu-item key="users" v-if="hasScope(['ROLE_ADMIN', 'ROLE_MANAGER'])">
+        <template #icon>
+          <font-awesome-icon icon="users" />
+        </template>
+        <span>Người dùng</span>
+      </a-menu-item>
+
       <a-sub-menu>
         <template #icon>
           <font-awesome-icon icon="box" />
@@ -35,14 +42,6 @@
           >Các thuộc tính</a-menu-item
         >
       </a-sub-menu>
-
-      <a-menu-item key="users" v-if="hasScope(['ROLE_ADMIN', 'ROLE_MANAGER'])">
-        <template #icon>
-          <font-awesome-icon icon="users" />
-        </template>
-        <span>Người dùng</span>
-      </a-menu-item>
-
       <a-sub-menu v-if="hasScope(['MANAGE_ORDERS'])">
         <template #icon>
           <font-awesome-icon icon="cart-shopping" />
@@ -67,17 +66,17 @@
         </template>
         <span>Voucher</span>
       </a-menu-item>
-      <a-menu-item key="setting" v-if="hasScope(['ROLE_ADMIN'])">
-        <template #icon>
-          <font-awesome-icon icon="gear" />
-        </template>
-        <span>Nhật ký hoạt động</span>
-      </a-menu-item>
       <a-menu-item key="profile">
         <template #icon>
           <font-awesome-icon icon="user" />
         </template>
         <span>Hồ sơ</span>
+      </a-menu-item>
+      <a-menu-item key="setting" v-if="hasScope(['ROLE_ADMIN'])">
+        <template #icon>
+          <font-awesome-icon icon="gear" />
+        </template>
+        <span>Nhật ký hoạt động</span>
       </a-menu-item>
     </a-menu>
   </a-layout-sider>
