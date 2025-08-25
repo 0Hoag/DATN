@@ -50,10 +50,6 @@ public class TransactionLog {
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "return_id")
-    private OrderReturn orderReturn;
-
-    @ManyToOne
     @JoinColumn(name = "payment_method_id")
     private PaymentMethod paymentMethod;
 }

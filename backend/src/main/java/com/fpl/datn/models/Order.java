@@ -70,8 +70,5 @@ public class Order {
     private List<OrderDetail> orderDetails;
 
     @OneToMany(mappedBy = "order")
-    private List<OrderReturn> orderReturns;
-
-    @OneToMany(mappedBy = "order")
     private List<TransactionLog> transactionLogs;
 }
