@@ -18,7 +18,6 @@
         <th>Sản phẩm</th>
         <th>Đánh giá</th>
         <th>Nội dung</th>
-        <th>Thao tác</th>
       </tr>
     </thead>
     <tbody>
@@ -28,11 +27,6 @@
         <td>{{ review.productName }}</td>
         <td>{{ review.rating }}</td>
         <td>{{ review.content }}</td>
-        <td>
-          <button class="btn btn-danger" @click="showModalDelete(review)">
-            <font-awesome-icon icon="trash" />
-          </button>
-        </td>
       </tr>
       <tr v-if="list.length === 0">
         <td colspan="6" class="text-center py-4">

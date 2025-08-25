@@ -35,6 +35,8 @@ public enum ErrorCode {
             1020, "NEW_PASSWORD_NOT_DUPLICATE_CONFIRM_PASSWORD", HttpStatus.BAD_REQUEST),
     USER_ALREADY_DELETED(1021, "User already deleted", HttpStatus.BAD_REQUEST),
     REQUIRED_FIELD(1022, "Required field", HttpStatus.BAD_REQUEST),
+    USER_BLOCK_ACCOUNT(1023, "Your account block", HttpStatus.BAD_REQUEST),
+
 
     // Permission - Role (1100–1199)
     PERMISSION_NOT_FOUND(1101, "Permission not found", HttpStatus.BAD_REQUEST),

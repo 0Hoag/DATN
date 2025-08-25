@@ -3,6 +3,9 @@ package com.fpl.datn.service;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
+import com.fpl.datn.models.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,14 +34,27 @@ public class ActivitylogService {
 
     public void create(ActivityRequest request) {
         var activity = mapper.toActivityLog(request);
-        Integer userId = authenticationService.extractUserIdFromSecurityContext();
-        var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        activity.setUserAction(user);
-        activity.setCreatedAt(LocalDateTime.now());
-        activity.setUpdatedAt(LocalDateTime.now());
+        if (request.getModule() == ActionActicityModule.User && request.getAction() == ActionActicityLog.Create     ) {
+            User user = userRepository.findById(request.getObjectID()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        repo.save(activity);
+            activity.setUserAction(user);
+            activity.setCreatedAt(LocalDateTime.now());
+            activity.setUpdatedAt(LocalDateTime.now());
+
+            repo.save(activity);
+        } else {
+            Integer userId = authenticationService.extractUserIdFromSecurityContext();
+            var user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+            activity.setUserAction(user);
+            activity.setCreatedAt(LocalDateTime.now());
+            activity.setUpdatedAt(LocalDateTime.now());
+
+            repo.save(activity);
+        }
+
+
     }
 
     public PageResponse<ActivityLogResponse> Get(int page, int size) {

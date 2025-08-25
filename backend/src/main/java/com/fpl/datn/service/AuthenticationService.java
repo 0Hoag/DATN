@@ -83,6 +83,11 @@ public class AuthenticationService {
         var user = userRepository
                 .findByEmail(request.getEmail())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        if (user.getDeletedAt() != null) {
+            throw new AppException(ErrorCode.USER_BLOCK_ACCOUNT);
+        }
+
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
