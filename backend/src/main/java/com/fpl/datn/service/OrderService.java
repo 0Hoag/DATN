@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -84,14 +85,7 @@ public class OrderService {
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = repository.findByIsDeleteFalse(pageable);
-        var data = pageData.stream().map(order -> mapper.toOrderResponse(order)).toList();
-        return PageResponse.<OrderResponse>builder()
-                .currentPage(page)
-                .totalPages(pageData.getTotalPages())
-                .pageSize(pageData.getSize())
-                .totalElements(pageData.getTotalElements())
-                .data(data)
-                .build();
+        return toPageResponse(pageData, page);
     }
 
     public OrderResponse getOrder(int id) {
@@ -117,20 +111,13 @@ public class OrderService {
                 .and(OrderSpecification.hasPaymentStatus(paymentStatus))
                 .and(OrderSpecification.createAtBetween(startDate, endDate));
         var pageData = repository.findAll(spec, pageable);
-        var data = pageData.stream().map(order -> mapper.toOrderResponse(order)).toList();
-        return PageResponse.<OrderResponse>builder()
-                .currentPage(page)
-                .totalPages(pageData.getTotalPages())
-                .pageSize(pageData.getSize())
-                .totalElements(pageData.getTotalElements())
-                .data(data)
-                .build();
+        return toPageResponse(pageData, page);
     }
 
     @Transactional
     public OrderResponse create(OrderRequest request, HttpServletRequest httpRequest) throws Exception {
         var order = prepareOrder(request);
-        var details = processOrderItems(order, request.getItems(), false);
+        var details = createOrderDetails(order, request.getItems());
 
         // tính tổng tiền
         BigDecimal total = calculateTotal(details);
@@ -150,24 +137,6 @@ public class OrderService {
                 .build());
 
         return preparePaymentAndLog(order, httpRequest);
-    }
-
-    private OrderResponse preparePaymentAndLog(Order order, HttpServletRequest httpRequest) throws Exception {
-        var response = mapper.toOrderResponse(order);
-        String txnRef = null;
-        if (isVnpay(order)) {
-            var payment = vnpayService.createPaymentUrl(order, httpRequest);
-            response.setPaymentUrl(payment.getPaymentUrl());
-            txnRef = payment.getPaymentUrl();
-        }
-        if (isMomo(order)) {
-            var payment = momoService.createMomoPayment(order);
-            response.setPaymentUrl(payment.getPaymentUrl());
-            txnRef = payment.getPaymentUrl();
-        }
-        sendMailService.sendInvoiceToUser(order.getId());
-        logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef, null);
-        return response;
     }
 
     @Transactional
@@ -215,12 +184,13 @@ public class OrderService {
             address.setAddressLine(request.getInputAddress());
             address.setPhone(request.getInputPhone());
             address.setUpdatedAt(LocalDateTime.now());
+
             order.setAddress(addressRepository.save(address));
             order.setUpdatedAt(LocalDateTime.now());
 
             repository.save(order);
             var response = mapper.toOrderResponse(order);
-            if (isVnpay(order)) {
+            if (isPaymentMethod(order, PaymentMethod.VNPAY)) {
                 var paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
                 response.setPaymentUrl(paymentUrl.getPaymentUrl());
             }
@@ -258,28 +228,6 @@ public class OrderService {
                 .build());
 
         logService.logPayment(order, OrderActionType.DELETE.getType(), null, null);
-    }
-
-    private void cancelOrderCommon(Order order, String reason, boolean isAdmin) throws Exception {
-        if (reason == null || reason.isEmpty()) throw new AppException(ErrorCode.MISSING_INPUT);
-        if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription()))
-            throw new AppException(ErrorCode.CANCEL_ORDER_FAIL);
-        restoreInventory(order);
-        order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
-        if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription())) {
-            order.setPaymentStatus(PaymentStatus.REFUNDED.getDescription());
-        }
-        order.setReason(reason);
-        repository.save(order);
-        logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
-        if (isAdmin) sendMailService.sendInvoiceToUserCancelOrder(order.getId(), reason);
-
-        activitylogService.create(ActivityRequest.builder()
-                .action(ActionActicityLog.Delete)
-                .description("Hủy đơn hàng: " + order.getId())
-                .module(ActionActicityModule.Order)
-                .objectID(order.getId())
-                .build());
     }
 
     @Transactional
@@ -339,24 +287,11 @@ public class OrderService {
         return response;
     }
 
-    private Order getValidOrder(int id) {
-        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        if (Boolean.TRUE.equals(order.getIsDelete())) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
-        return order;
-    }
-
     public PageResponse<OrderResponse> getOrderByUser(int id, int page, int size, Boolean isDesc) {
         Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = repository.findByUserId(id, pageable);
-        var data = pageData.stream().map(order -> mapper.toOrderResponse(order)).toList();
-        return PageResponse.<OrderResponse>builder()
-                .currentPage(page)
-                .totalPages(pageData.getTotalPages())
-                .pageSize(pageData.getSize())
-                .totalElements(pageData.getTotalElements())
-                .data(data)
-                .build();
+        return toPageResponse(pageData, page);
     }
 
     public TxnRefResponse payBack(Integer orderId) {
@@ -386,6 +321,39 @@ public class OrderService {
     public static boolean isValidPaymentStatus(String input) {
         return Arrays.stream(PaymentStatus.values())
                 .anyMatch(status -> status.getDescription().equalsIgnoreCase(input));
+    }
+
+    private void cancelOrderCommon(Order order, String reason, boolean isAdmin) throws Exception {
+        if (reason == null || reason.isEmpty()) throw new AppException(ErrorCode.MISSING_INPUT);
+        if (!order.getOrderStatus().equalsIgnoreCase(OrderStatus.PENDING.getDescription()))
+            throw new AppException(ErrorCode.CANCEL_ORDER_FAIL);
+        restoreInventory(order);
+        order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
+        if (order.getPaymentStatus().equalsIgnoreCase(PaymentStatus.PAID.getDescription())) {
+            order.setPaymentStatus(PaymentStatus.REFUNDED.getDescription());
+        }
+        order.setReason(reason);
+        repository.save(order);
+        logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
+        if (isAdmin) sendMailService.sendInvoiceToUserCancelOrder(order.getId(), reason);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Hủy đơn hàng: " + order.getId())
+                .module(ActionActicityModule.Order)
+                .objectID(order.getId())
+                .build());
+    }
+
+    private PageResponse<OrderResponse> toPageResponse(Page<Order> pageData, int page) {
+        var data = pageData.stream().map(mapper::toOrderResponse).toList();
+        return PageResponse.<OrderResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
     }
 
     // Chuẩn bị đặt hàng
@@ -433,7 +401,7 @@ public class OrderService {
                     .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
         }
         String orderStatus = OrderStatus.PENDING.getDescription();
-        String paymentStaus = PaymentStatus.PENDING.getDescription();
+        String paymentStatus = PaymentStatus.PENDING.getDescription();
         if (request.getOrderStatus() != null) {
             if (!isValidOrderStatus(request.getOrderStatus())) throw new AppException(ErrorCode.ORDER_STATUS_NOT_FOUND);
             orderStatus = request.getOrderStatus();
@@ -442,7 +410,7 @@ public class OrderService {
         if (request.getPaymentStatus() != null) {
             if (!isValidPaymentStatus(request.getPaymentStatus()))
                 throw new AppException(ErrorCode.PAYMENT_STATUS_NOT_FOUND);
-            paymentStaus = request.getPaymentStatus();
+            paymentStatus = request.getPaymentStatus();
         }
 
         var order = Order.builder()
@@ -451,7 +419,7 @@ public class OrderService {
                 .paymentMethod(payment)
                 .note(request.getNote())
                 .orderStatus(orderStatus)
-                .paymentStatus(paymentStaus)
+                .paymentStatus(paymentStatus)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .isReturn(false)
@@ -461,23 +429,6 @@ public class OrderService {
         return order;
     }
 
-    // Xử lý đặt hàng
-    private List<OrderDetail> processOrderItems(Order order, List<OrderItemResponse> items, boolean isDelete) {
-        if (isDelete) restoreInventory(order);
-        return createOrderDetails(order, items);
-    }
-
-    // Xử lí hoàn hàng tồn kho
-    private void restoreInventory(Order order) {
-        if (order.getOrderDetails() != null) {
-            for (OrderDetail detail : order.getOrderDetails()) {
-                var variant = detail.getProductVariant();
-                variant.setQuantity(variant.getQuantity() + detail.getQuantity());
-                variant.setSold(variant.getSold() - detail.getQuantity());
-                variantRepository.save(variant);
-            }
-        }
-    }
     // Xử lí tạo hàng tồn kho
     private List<OrderDetail> createOrderDetails(Order order, List<OrderItemResponse> items) {
         List<OrderDetail> details = new ArrayList<>();
@@ -519,20 +470,6 @@ public class OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Xử lí thanh toán
-    private boolean isVnpay(Order order) {
-        return PaymentMethod.VNPAY
-                .name()
-                .equalsIgnoreCase(order.getPaymentMethod().getName());
-    }
-
-    // Xử lí thanh toán
-    private boolean isMomo(Order order) {
-        return PaymentMethod.MOMO
-                .name()
-                .equalsIgnoreCase(order.getPaymentMethod().getName());
-    }
-
     // Xử lí voucher
     private BigDecimal applyVoucher(Order order, BigDecimal total) {
         var voucher = order.getVoucher();
@@ -546,16 +483,16 @@ public class OrderService {
         }
         boolean isExpired = voucher.getStartAt().isAfter(LocalDateTime.now())
                 || voucher.getEndAt().isBefore(LocalDateTime.now());
-        boolean isOverused = voucher.getUsageCount() >= voucher.getQuantity();
+        boolean voucherUsageExceeded = voucher.getUsageCount() >= voucher.getQuantity();
         boolean notEnoughMinOrder =
                 voucher.getMinOrderValue() != null && total.compareTo(voucher.getMinOrderValue()) < 0;
-        if (!Boolean.TRUE.equals(voucher.getIsActive()) || isExpired || isOverused) {
+        if (!Boolean.TRUE.equals(voucher.getIsActive())) {
             throw new AppException(ErrorCode.VOUCHER_INVALID);
         }
         if (isExpired) {
             throw new AppException(ErrorCode.VOUCHER_EXPIRED);
         }
-        if (isOverused) {
+        if (voucherUsageExceeded) {
             throw new AppException(ErrorCode.VOUCHER_OVERUSED);
         }
         if (notEnoughMinOrder) {
@@ -580,5 +517,45 @@ public class OrderService {
         userVoucher.setIsUsed(true);
         userVoucherRepository.save(userVoucher);
         return total;
+    }
+
+    private OrderResponse preparePaymentAndLog(Order order, HttpServletRequest httpRequest) throws Exception {
+        var response = mapper.toOrderResponse(order);
+        String paymentUrl = null;
+        if (isPaymentMethod(order, PaymentMethod.VNPAY)) {
+            var payment = vnpayService.createPaymentUrl(order, httpRequest);
+            response.setPaymentUrl(payment.getPaymentUrl());
+            paymentUrl = payment.getPaymentUrl();
+        }
+        if (isPaymentMethod(order, PaymentMethod.MOMO)) {
+            var payment = momoService.createMomoPayment(order);
+            response.setPaymentUrl(payment.getPaymentUrl());
+            paymentUrl = payment.getPaymentUrl();
+        }
+        sendMailService.sendInvoiceToUser(order.getId());
+        logService.logPayment(order, OrderActionType.CREATE.getType(), paymentUrl, null);
+        return response;
+    }
+
+    // Xử lí hoàn hàng tồn kho
+    private void restoreInventory(Order order) {
+        if (order.getOrderDetails() != null) {
+            for (OrderDetail detail : order.getOrderDetails()) {
+                var variant = detail.getProductVariant();
+                variant.setQuantity(variant.getQuantity() + detail.getQuantity());
+                variant.setSold(variant.getSold() - detail.getQuantity());
+                variantRepository.save(variant);
+            }
+        }
+    }
+
+    private Order getValidOrder(int id) {
+        var order = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+        if (Boolean.TRUE.equals(order.getIsDelete())) throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+        return order;
+    }
+
+    private boolean isPaymentMethod(Order order, PaymentMethod method) {
+        return method.name().equalsIgnoreCase(order.getPaymentMethod().getName());
     }
 }

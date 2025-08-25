@@ -26,12 +26,10 @@ import com.fpl.datn.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Slf4j
 public class CartService {
     CartRepository repository;
     CartItemRepository cartItemRepository;
@@ -41,6 +39,7 @@ public class CartService {
     CartItemMapper cartItemMapper;
     AuthenticationService authenticationService;
 
+    @Transactional
     public CartResponse addToCart(AddCartRequest request, HttpSession session) {
         Integer variantId = request.getVariantId();
         int requestedQty = request.getQuantity();
@@ -142,20 +141,20 @@ public class CartService {
                 : repository.findBySessionId(sessionId).orElseGet(() -> createCartForSession(sessionId));
     }
 
-    private Cart findExistingCart(HttpSession session) {
-        String sessionId = session.getId();
-        Integer userId = authenticationService.extractUserIdFromSecurityContext();
-        return (userId == null)
-                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
-                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
-    }
-
     public Cart getCartByUser(Integer userId) {
         return repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
     }
 
     public Cart getCartBySession(String sessionId) {
         return repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+    }
+
+    private Cart findExistingCart(HttpSession session) {
+        String sessionId = session.getId();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
+        return (userId == null)
+                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
+                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
     }
 
     private Cart createCartForUser(Integer userId) {

@@ -26,7 +26,6 @@ import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.models.Order;
 import com.fpl.datn.repository.OrderRepository;
-import com.fpl.datn.repository.TransactionLogRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class VnpayService {
     OrderRepository orderRepository;
-    TransactionLogRepository logRepository;
     TransactionLogService logService;
     VnpayConfig config;
 

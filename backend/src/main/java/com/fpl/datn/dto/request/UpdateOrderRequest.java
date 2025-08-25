@@ -14,8 +14,8 @@ public class UpdateOrderRequest {
     int addressId;
     //    int paymentMethodId;
     String note;
-    String inputFullname;
     String inputAddress;
+    String inputFullname;
     String inputPhone;
     //    LocalDate updatedAt;
     //    List<OrderItemResponse> items;
