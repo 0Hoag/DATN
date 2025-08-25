@@ -86,7 +86,7 @@
           />
         </div>
         <!-- Địa chỉ tự nhập -->
-        <div class="col-sm-6 mb-3" v-if="selectedAddress === 'custom'">
+        <div class="col-sm-12 mb-3" v-if="selectedAddress === '' || customAddress">
           <label for="customAddress" class="form-label fw-bold">Nhập địa chỉ</label>
           <a-input
             id="customAddress"
@@ -417,8 +417,8 @@ function getFormEdit() {
     // voucherId: null,
     note: note.value,
     inputFullname: customFullname.value,
+    inputAddress: customAddress.value,
     inputPhone: customPhone.value,
-    // items: cart.value.map((item) => ({
     // items: cart.value.map((item) => ({
     //   productVariantId: item.id,
     //   quantity: item.quantity,

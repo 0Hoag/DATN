@@ -15,6 +15,7 @@ public class UpdateOrderRequest {
     //    int paymentMethodId;
     String note;
     String inputFullname;
+    String inputAddress;
     String inputPhone;
     //    LocalDate updatedAt;
     //    List<OrderItemResponse> items;

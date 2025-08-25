@@ -212,6 +212,7 @@ public class OrderService {
                     .findById(request.getAddressId())
                     .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
             address.setFullName(request.getInputFullname());
+            address.setAddressLine(request.getInputAddress());
             address.setPhone(request.getInputPhone());
             address.setUpdatedAt(LocalDateTime.now());
             order.setAddress(addressRepository.save(address));
