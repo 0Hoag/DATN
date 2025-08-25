@@ -76,6 +76,7 @@ export const handleError = (error) => {
     1020: "Mật khẩu mới không được trùng với xác nhận mật khẩu.",
     1021: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
     1022: "Mã OTP không hợp lệ.",
+    1023: "Người dùng đã bị chặn, vui lòng liên hệ admin",
 
     // Permission - Role
     1101: "Không tìm thấy quyền.",

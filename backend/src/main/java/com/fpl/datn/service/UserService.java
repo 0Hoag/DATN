@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.transaction.Transactional;
+
 import org.springframework.data.domain.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -214,6 +216,7 @@ public class UserService {
     }
 
     // Api client
+    @Transactional
     public UserResponse Register(RegisterRequest request) {
         Set<Role> roles = new HashSet<>();
         roles.add(Role.builder().name(PredefinedRole.ROLE_CUSTOMER).build());
@@ -326,6 +329,7 @@ public class UserService {
                 .action(ActionActicityLog.Update)
                 .description("Cập nhập mật khẩu người dùng")
                 .module(ActionActicityModule.User)
+                .objectID(user.getId())
                 .build());
 
         return true;

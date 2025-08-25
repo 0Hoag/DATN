@@ -9,6 +9,7 @@ import org.mapstruct.*;
 import com.fpl.datn.dto.request.CategoryRequest;
 import com.fpl.datn.dto.request.UpdateCategoryRequest;
 import com.fpl.datn.dto.response.CategoryResponse;
+import com.fpl.datn.dto.response.ChildrenResponse;
 import com.fpl.datn.models.Category;
 import com.fpl.datn.models.Product;
 
@@ -16,10 +17,20 @@ import com.fpl.datn.models.Product;
 public interface CategoryMapper {
 
     @Mapping(target = "parent", source = "parent", qualifiedByName = "parentToId")
-    @Mapping(target = "children", source = "children")
+    @Mapping(target = "children", source = "children", qualifiedByName = "filterVisibleChildren")
     @Mapping(target = "products", source = "products", qualifiedByName = "productsToNameList")
     @Mapping(target = "nameParent", source = "parent", qualifiedByName = "parentToName")
     CategoryResponse toCategoryResponse(Category category);
+
+    @Named("filterVisibleChildren")
+    default List<ChildrenResponse> filterVisibleChildren(List<Category> children) {
+        if (children == null) return java.util.Collections.emptyList();
+
+        return children.stream()
+                .filter(c -> Boolean.TRUE.equals(c.getIsShow())) // chỉ lấy children có isShow = true
+                .map(c -> new ChildrenResponse(c.getId(), c.getName(), c.getSlug(), c.getIsShow()))
+                .collect(Collectors.toList());
+    }
 
     @Mapping(target = "parent", expression = "java(mapParentIdToCategory(request.getParent()))")
     Category toCategory(CategoryRequest request);
