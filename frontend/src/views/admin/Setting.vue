@@ -364,7 +364,7 @@ const fetchListLogs = async () => {
       page: pagination.value.current,
     });
     logs.value.push(...res.result.data);
-    pagination.value.totalPages = response.result.totalPages;
+    pagination.value.totalPages = res.result.totalPages;
     pagination.value.current++;
   } catch (error) {
     handleError(error);
@@ -374,6 +374,7 @@ const fetchListLogs = async () => {
 };
 
 onMounted(() => {
+  fetchListLogs();
   observer = new IntersectionObserver(
     (entries) => {
       if (entries[0].isIntersecting) {
