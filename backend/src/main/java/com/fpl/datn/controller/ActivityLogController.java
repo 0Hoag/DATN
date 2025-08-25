@@ -24,10 +24,11 @@ public class ActivityLogController {
     @GetMapping
     ApiResponse<PageResponse<ActivityLogResponse>> get(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
         return ApiResponse.<PageResponse<ActivityLogResponse>>builder()
                 .code(1000)
-                .result(activitySV.Get(page, size))
+                .result(activitySV.Get(page, size, sort))
                 .build();
     }
 }

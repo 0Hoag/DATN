@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
@@ -57,8 +58,9 @@ public class ActivitylogService {
         }
     }
 
-    public PageResponse<ActivityLogResponse> Get(int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
+    public PageResponse<ActivityLogResponse> Get(int page, int size, boolean isDesc) {
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = repo.findAll(pageable);
 
         var data = pageData.getContent().stream().map(mapper::toActivity).collect(Collectors.toList());
