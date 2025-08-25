@@ -21,7 +21,7 @@ import lombok.experimental.FieldDefaults;
 public class ActivityLogController {
     ActivitylogService activitySV;
 
-    @GetMapping("/")
+    @GetMapping
     ApiResponse<PageResponse<ActivityLogResponse>> get(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size) {

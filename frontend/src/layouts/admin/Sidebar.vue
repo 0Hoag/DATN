@@ -67,7 +67,7 @@
         </template>
         <span>Voucher</span>
       </a-menu-item>
-      <a-menu-item key="setting">
+      <a-menu-item key="setting" v-if="hasScope(['ROLE_ADMIN'])">
         <template #icon>
           <font-awesome-icon icon="gear" />
         </template>

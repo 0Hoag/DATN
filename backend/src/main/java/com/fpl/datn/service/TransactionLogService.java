@@ -1,10 +1,13 @@
 package com.fpl.datn.service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.response.TransactionlogResponse;
 import com.fpl.datn.mapper.TransactionLogMapper;
 import com.fpl.datn.models.Order;
@@ -25,9 +28,20 @@ public class TransactionLogService {
     PaymentMethodRepository methodRepository;
     TransactionLogMapper mapper;
 
-    public List<TransactionlogResponse> Get() {
-        var response = repository.findAll();
-        return response.stream().map(log -> mapper.toLogResponse(log)).toList();
+    public PageResponse<TransactionlogResponse> Get(int page, int size, boolean isDesc) {
+        Sort sort = isDesc ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(Sort.Direction.ASC, "id");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
+        var pageData = repository.findAll(pageable);
+        var data = pageData.stream()
+                .map(transactionlog -> mapper.toLogResponse(transactionlog))
+                .toList();
+        return PageResponse.<TransactionlogResponse>builder()
+                .currentPage(page)
+                .totalPages(pageData.getTotalPages())
+                .pageSize(pageData.getSize())
+                .totalElements(pageData.getTotalElements())
+                .data(data)
+                .build();
     }
 
     public void logPayment(Order order, String acctionType, String transactionRef, String transactionNo) {

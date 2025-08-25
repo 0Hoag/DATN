@@ -1,12 +1,12 @@
 package com.fpl.datn.controller;
 
-import java.util.List;
-
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fpl.datn.dto.ApiResponse;
+import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.response.TransactionlogResponse;
 import com.fpl.datn.service.TransactionLogService;
 
@@ -22,9 +22,12 @@ public class TransactionLogController {
     TransactionLogService transactionLogService;
 
     @GetMapping
-    ApiResponse<List<TransactionlogResponse>> GetAll() {
-        return ApiResponse.<List<TransactionlogResponse>>builder()
-                .result(transactionLogService.Get())
+    ApiResponse<PageResponse<TransactionlogResponse>> GetAll(
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(required = false, defaultValue = "true") boolean sort) {
+        return ApiResponse.<PageResponse<TransactionlogResponse>>builder()
+                .result(transactionLogService.Get(page, size, sort))
                 .build();
     }
 }

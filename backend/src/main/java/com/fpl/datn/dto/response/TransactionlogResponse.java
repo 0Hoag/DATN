@@ -19,7 +19,7 @@ public class TransactionlogResponse {
     String actionType;
     Integer orderId;
     String message;
-    String transactionRef;
-    String transactionNo;
     LocalDateTime createdAt;
+    //    String transactionRef;
+    //    String transactionNo;
 }
