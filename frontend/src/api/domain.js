@@ -138,4 +138,7 @@ UPDATE_CATEGORY: DOMAIN + "category",
 
   //pdf
   EXPORT_INVOICE : DOMAIN + 'pdf/order',
+
+  //activity log
+  LIST_ACTIVITY_LOGS: DOMAIN + 'activity',
 };

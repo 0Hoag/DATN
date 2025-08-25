@@ -143,6 +143,7 @@ export const handleError = (error) => {
     1074: "Thứ tự sắp xếp ảnh không được để trống.",
     1075: "ID biến thể của ảnh không được để trống.",
     1076: "URL ảnh không được để trống.",
+    1077: "Thuộc tính này đã được gán nên không thể xóa.",
 
     // Cart
     1601: "Sản phẩm đã tồn tại trong giỏ hàng.",

@@ -12,4 +12,6 @@ public interface ProductVariantAttributeValueRepository extends JpaRepository<Pr
     boolean existsByProductVariantIdAndAttributeValueId(Integer variantId, Integer valueId);
 
     List<ProductVariantAttributeValue> findAllByProductVariant_Id(Integer productVariantId);
+
+    boolean existsByAttributeValueId(Integer id);
 }
