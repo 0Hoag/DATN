@@ -112,7 +112,10 @@ public enum ErrorCode {
     PRODUCT_IMAGE_VARIANT_ID_REQUIRED(1075, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_URL_REQUIRED(1076, "Image URL must not be null", HttpStatus.BAD_REQUEST),
     PRODUCT_VARIANT_ID_REQUIRED(1540, "Product variant ID must not be null", HttpStatus.BAD_REQUEST),
-    VARIANT_ATTRIBUTE_ALREADY_USED(1077, "The attribute value has already been assigned to an existing product variant.", HttpStatus.BAD_REQUEST),
+    VARIANT_ATTRIBUTE_ALREADY_USED(
+            1077,
+            "The attribute value has already been assigned to an existing product variant.",
+            HttpStatus.BAD_REQUEST),
 
     // THÊM CÁC ERROR CODE MỚI CHO PRODUCT REVIEW (ĐÃ CẬP NHẬT MÃ SỐ VÀ THÔNG ĐIỆP)
     PRODUCT_INACTIVE(1527, "Product is not active", HttpStatus.BAD_REQUEST),
