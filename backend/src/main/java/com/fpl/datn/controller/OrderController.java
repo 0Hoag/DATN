@@ -24,6 +24,7 @@ import com.fpl.datn.dto.request.OrderRequest;
 import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
 import com.fpl.datn.dto.response.OrderResponse;
+import com.fpl.datn.dto.response.TxnRefResponse;
 import com.fpl.datn.service.OrderService;
 
 import lombok.AccessLevel;
@@ -51,6 +52,13 @@ public class OrderController {
     ApiResponse<OrderResponse> getOrder(@PathVariable int id) {
         return ApiResponse.<OrderResponse>builder()
                 .result(orderService.getOrder(id))
+                .build();
+    }
+
+    @GetMapping("/payBack/{id}")
+    ApiResponse<TxnRefResponse> payBack(@PathVariable int id) {
+        return ApiResponse.<TxnRefResponse>builder()
+                .result(orderService.payBack(id))
                 .build();
     }
 

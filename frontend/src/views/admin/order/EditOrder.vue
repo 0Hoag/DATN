@@ -416,7 +416,9 @@ function getFormEdit() {
     // orderStatus: selectedOrderStatus.value,
     // voucherId: null,
     note: note.value,
-    // customAddress: customAddress.value,
+    inputFullname: customFullname.value,
+    inputPhone: customPhone.value,
+    // items: cart.value.map((item) => ({
     // items: cart.value.map((item) => ({
     //   productVariantId: item.id,
     //   quantity: item.quantity,

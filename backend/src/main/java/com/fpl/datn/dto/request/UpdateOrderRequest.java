@@ -11,10 +11,11 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateOrderRequest {
-    //    int userId;
     int addressId;
     //    int paymentMethodId;
     String note;
+    String inputFullname;
+    String inputPhone;
     //    LocalDate updatedAt;
     //    List<OrderItemResponse> items;
 }

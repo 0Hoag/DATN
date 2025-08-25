@@ -25,6 +25,7 @@ public class ProductReviewResponse {
     // Thông tin sản phẩm
     Integer productId;
     String productName;
+    String productSlug;
     String productThumbnail;
 
     // Thông tin người dùng

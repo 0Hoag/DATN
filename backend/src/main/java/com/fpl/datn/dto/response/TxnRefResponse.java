@@ -1,7 +1,5 @@
 package com.fpl.datn.dto.response;
 
-import java.util.List;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,8 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ChartData {
-    List<ChartPointResponse> revenueChart;
-    List<ChartPointIntResponse> orderChart;
-    List<ChartPointIntResponse> productChart;
+public class TxnRefResponse {
+    String txnRef;
 }

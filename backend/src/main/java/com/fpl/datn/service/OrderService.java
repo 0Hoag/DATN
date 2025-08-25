@@ -28,6 +28,7 @@ import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
 import com.fpl.datn.dto.response.OrderItemResponse;
 import com.fpl.datn.dto.response.OrderResponse;
+import com.fpl.datn.dto.response.TxnRefResponse;
 import com.fpl.datn.enums.ActionActicityLog;
 import com.fpl.datn.enums.ActionActicityModule;
 import com.fpl.datn.enums.OrderActionType;
@@ -47,6 +48,7 @@ import com.fpl.datn.repository.AddressRepository;
 import com.fpl.datn.repository.OrderRepository;
 import com.fpl.datn.repository.PaymentMethodRepository;
 import com.fpl.datn.repository.ProductVariantRepository;
+import com.fpl.datn.repository.TransactionLogRepository;
 import com.fpl.datn.repository.UserRepository;
 import com.fpl.datn.repository.UserVoucherRepository;
 import com.fpl.datn.repository.VoucherRepository;
@@ -67,6 +69,7 @@ public class OrderService {
     ProductVariantRepository variantRepository;
     VoucherRepository voucherRepository;
     UserVoucherRepository userVoucherRepository;
+    TransactionLogRepository transactionLogRepository;
     OrderMapper mapper;
     TransactionLogService logService;
     VnpayService vnpayService;
@@ -155,12 +158,12 @@ public class OrderService {
         if (isVnpay(order)) {
             var payment = vnpayService.createPaymentUrl(order, httpRequest);
             response.setPaymentUrl(payment.getPaymentUrl());
-            txnRef = payment.getTxnRef();
+            txnRef = payment.getPaymentUrl();
         }
         if (isMomo(order)) {
             var payment = momoService.createMomoPayment(order);
             response.setPaymentUrl(payment.getPaymentUrl());
-            txnRef = payment.getTxnRef();
+            txnRef = payment.getPaymentUrl();
         }
         sendMailService.sendInvoiceToUser(order.getId());
         logService.logPayment(order, OrderActionType.CREATE.getType(), txnRef, null);
@@ -208,7 +211,10 @@ public class OrderService {
             var address = addressRepository
                     .findById(request.getAddressId())
                     .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
-            order.setAddress(address);
+            address.setFullName(request.getInputFullname());
+            address.setPhone(request.getInputPhone());
+            address.setUpdatedAt(LocalDateTime.now());
+            order.setAddress(addressRepository.save(address));
             order.setUpdatedAt(LocalDateTime.now());
 
             repository.save(order);
@@ -352,6 +358,15 @@ public class OrderService {
                 .build();
     }
 
+    public TxnRefResponse payBack(Integer orderId) {
+        var transactionLog = transactionLogRepository
+                .findByOrderIdAndActionTypeAndPaymentMethodId(orderId, "CREATE ORDER ", 2)
+                .orElseThrow(() -> new AppException(ErrorCode.TRANCSACTION_LOG_NOT_FOUND));
+        TxnRefResponse response = new TxnRefResponse();
+        response.setTxnRef(transactionLog.getTransactionRef());
+        return response;
+    }
+
     public static boolean isValidPaymentCOD(Order order) {
         return order.getPaymentMethod().getName().equalsIgnoreCase(PaymentMethod.COD.name())
                 && order.getOrderStatus().equalsIgnoreCase(OrderStatus.RECEIED.getDescription());
@@ -452,7 +467,7 @@ public class OrderService {
     }
 
     // Xử lí hoàn hàng tồn kho
-    public void restoreInventory(Order order) {
+    private void restoreInventory(Order order) {
         if (order.getOrderDetails() != null) {
             for (OrderDetail detail : order.getOrderDetails()) {
                 var variant = detail.getProductVariant();
