@@ -85,9 +85,11 @@ public class CategoryService {
     }
     // hien thi cho user
     public List<CategoryResponse> list() {
-        return repo.findAllByIsShowTrue().stream()
+        var list = repo.findAllByIsShowTrue().stream()
                 .map(mapper::toCategoryResponse)
                 .collect(Collectors.toList());
+
+        return list;
     }
     // dung cho admin
     public PageResponse<CategoryResponse> get(int page, int size) {
