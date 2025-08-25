@@ -1,7 +1,6 @@
 package com.fpl.datn.service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -11,22 +10,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.xml.bind.DatatypeConverter;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fpl.datn.configuration.VnpayConfig;
 import com.fpl.datn.dto.response.PaymentResponse;
 import com.fpl.datn.enums.OrderActionType;
@@ -34,7 +25,6 @@ import com.fpl.datn.enums.PaymentStatus;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.models.Order;
-import com.fpl.datn.models.OrderReturn;
 import com.fpl.datn.repository.OrderRepository;
 import com.fpl.datn.repository.TransactionLogRepository;
 
@@ -80,73 +70,6 @@ public class VnpayService {
                 .txnRef(vnp_TxnRef)
                 .paymentUrl(paymentUrl)
                 .build();
-        return response;
-    }
-
-    public String refund(OrderReturn orderReturn, String createBy, HttpServletRequest request)
-            throws JsonMappingException, JsonProcessingException {
-
-        var transactionLog = logRepository.findFirstByOrderIdAndActionTypeOrderByCreatedAtDesc(
-                orderReturn.getOrder().getId(), OrderActionType.PAYMENT_SUCCESS.getType());
-        if (transactionLog == null) throw new AppException(ErrorCode.TRANCSACTION_LOG_NOT_FOUND);
-        String txnRef = transactionLog.getTransactionRef();
-        String transactionNo = transactionLog.getTransactionNo();
-
-        Map<String, String> vnp_Params = new HashMap<>();
-        vnp_Params.put("vnp_RequestId", UUID.randomUUID().toString());
-        vnp_Params.put("vnp_Version", "2.1.0");
-        vnp_Params.put("vnp_Command", "refund");
-        vnp_Params.put("vnp_TmnCode", config.getTmnCode());
-        vnp_Params.put("vnp_TransactionType", "02"); // 02 = Hoàn tiền toàn bộ
-        vnp_Params.put("vnp_TxnRef", txnRef);
-        vnp_Params.put("vnp_TransactionNo", transactionNo);
-        // BigDecimal vnpAmount =
-        // orderReturn.getRefundAmount().multiply(BigDecimal.valueOf(100));
-        // vnp_Params.put("vnp_Amount", vnpAmount.toBigInteger().toString());
-        BigDecimal vnpAmount =
-                orderReturn.getRefundAmount().multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP);
-        vnp_Params.put("vnp_Amount", vnpAmount.toPlainString());
-        vnp_Params.put("vnp_OrderInfo", "Order Refund:" + orderReturn.getOrder().getId());
-        vnp_Params.put("vnp_CreateBy", createBy);
-        vnp_Params.put("vnp_CreateDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")));
-        vnp_Params.put("vnp_IpAddr", request.getRemoteAddr());
-
-        // xây dựng truy vấn với băm bảo mật
-        String query = buildQueryWithSecureHash(vnp_Params);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        HttpEntity<String> body = new HttpEntity<>(query.toString(), headers);
-
-        String refundUrl = config.getRefundUrl(); // Cấu hình URL riêng cho refund
-        RestTemplate restTemplate = new RestTemplate();
-
-        String response = restTemplate.postForObject(refundUrl, body, String.class);
-
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> responseMap = mapper.readValue(response, Map.class);
-        String responseCode = (String) responseMap.get("vnp_ResponseCode");
-        String message = (String) responseMap.get("vnp_Message");
-
-        // Xử lý kết quả hoàn tiền
-        if ("00".equals(responseCode)) {
-            // Hoàn tiền thành công
-            logService.logReturn(
-                    orderReturn,
-                    OrderActionType.REFUND_SUCCESS.getType(),
-                    txnRef,
-                    transactionNo,
-                    orderReturn.getOrder());
-        } else {
-            // Hoàn tiền thất bại
-            logService.logReturn(
-                    orderReturn,
-                    OrderActionType.REFUND_FAILED.getType(),
-                    txnRef,
-                    transactionNo,
-                    orderReturn.getOrder());
-            throw new RuntimeException("Hoàn tiền thất bại từ VNPAY: " + message);
-        }
         return response;
     }
 

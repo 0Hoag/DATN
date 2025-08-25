@@ -29,7 +29,6 @@ public class UserResponse {
     private List<OrderResponse> orders;
     private List<ProductReviewResponse> productReviews;
     private List<CartResponse> carts;
-    private List<OrderReturnResponse> orderReturns;
     private List<ZUserVoucherResponse> ZUserVouchers;
     private List<ActivityLogResponse> activityLogs;
 
