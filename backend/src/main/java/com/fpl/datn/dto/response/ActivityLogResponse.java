@@ -15,6 +15,9 @@ public class ActivityLogResponse {
     private String action;
     private String description;
     private String module;
+    private Integer objectID;
+    private Integer userId;
+    private String fullName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

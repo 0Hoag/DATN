@@ -18,6 +18,7 @@ import com.fpl.datn.dto.request.AddCartRequest;
 import com.fpl.datn.dto.request.ChangeCartItemRequest;
 import com.fpl.datn.dto.response.CartItemResponse;
 import com.fpl.datn.dto.response.CartResponse;
+import com.fpl.datn.service.ActivitylogService;
 import com.fpl.datn.service.CartService;
 
 import lombok.AccessLevel;
@@ -30,10 +31,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CartController {
     CartService cartService;
+    ActivitylogService activitylogService;
 
     @PostMapping("/add")
     ApiResponse<CartResponse> addtoCart(@RequestBody AddCartRequest request, HttpSession session) {
-
         return ApiResponse.<CartResponse>builder()
                 .result(cartService.addToCart(request, session))
                 .build();
@@ -56,7 +57,7 @@ public class CartController {
 
     @DeleteMapping("/{variantId}")
     ApiResponse<Void> getCart(HttpSession session, @PathVariable Integer variantId) {
-        cartService.delete(session, variantId);
+        cartService.deleteCartItem(session, variantId);
         return ApiResponse.<Void>builder().message("Delete Success!").build();
     }
 }

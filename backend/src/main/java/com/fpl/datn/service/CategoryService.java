@@ -13,9 +13,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.ActivityRequest;
 import com.fpl.datn.dto.request.CategoryRequest;
 import com.fpl.datn.dto.request.UpdateCategoryRequest;
 import com.fpl.datn.dto.response.CategoryResponse;
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.CategoryMapper;
@@ -36,6 +39,7 @@ public class CategoryService {
     CategoryMapper mapper;
     CategoryRepository repo;
     CategoryBuilder builder;
+    ActivitylogService activitylogService;
 
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public Boolean createCategory(CategoryRequest request) {
@@ -70,6 +74,13 @@ public class CategoryService {
         } catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.UNKNOWN_ERROR);
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Create)
+                .description("Tạo danh mục: " + category.getName())
+                .module(ActionActicityModule.Category)
+                .objectID(category.getId())
+                .build());
 
         return true;
     }
@@ -132,6 +143,13 @@ public class CategoryService {
         mapper.update(category, request);
         category.setUpdatedAt(LocalDateTime.now());
 
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Cập nhập danh mục: " + category.getName())
+                .module(ActionActicityModule.Category)
+                .objectID(id)
+                .build());
+
         return mapper.toCategoryResponse(repo.save(category));
     }
 
@@ -145,6 +163,13 @@ public class CategoryService {
         if (category.getProducts() != null && !category.getProducts().isEmpty()) {
             throw new AppException(ErrorCode.CATEGORY_HAS_PRODUCTS);
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Xóa danh mục: " + category.getName())
+                .module(ActionActicityModule.Category)
+                .objectID(id)
+                .build());
 
         repo.delete(category);
     }

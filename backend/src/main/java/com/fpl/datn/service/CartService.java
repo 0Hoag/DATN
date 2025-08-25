@@ -43,6 +43,7 @@ public class CartService {
 
     public CartResponse addToCart(AddCartRequest request, HttpSession session) {
         Integer variantId = request.getVariantId();
+        int requestedQty = request.getQuantity();
 
         Cart cart = getOrCreateCart(session);
 
@@ -50,7 +51,11 @@ public class CartService {
                 .findById(variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTED));
 
-        CartItem cartItems = cartItemRepository
+        if (requestedQty > variant.getQuantity()) {
+            throw new AppException(ErrorCode.PRODUCT_OUT_OF_STOCK);
+        }
+
+        CartItem cartItem = cartItemRepository
                 .findByCartIdAndProductVariantId(cart.getId(), variantId)
                 .orElseGet(() -> CartItem.builder()
                         .cart(cart)
@@ -59,17 +64,14 @@ public class CartService {
                         .price(variant.getPrice())
                         .build());
 
-        cartItems.setQuantity(cartItems.getQuantity() + request.getQuantity());
-        cartItemRepository.save(cartItems);
+        cartItem.setQuantity(cartItem.getQuantity() + request.getQuantity());
+        cartItemRepository.save(cartItem);
+
         return mapper.toCartResponse(cart);
     }
 
     public List<CartItemResponse> getCartItems(HttpSession session) {
-        String sessionId = session.getId();
-        Integer userId = authenticationService.extractUserIdFromSecurityContext();
-        Cart cart = (userId == null)
-                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
-                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+        Cart cart = findExistingCart(session);
         var cartItems = cartItemRepository.findByCartId(cart.getId());
         return cartItems.stream()
                 .map(cartItem -> cartItemMapper.toCartItemResponse(cartItem))
@@ -78,13 +80,9 @@ public class CartService {
 
     @Transactional
     public CartItemResponse changeCartItemQuantity(HttpSession session, ChangeCartItemRequest request) {
-        String sessionId = session.getId();
-        Integer userId = authenticationService.extractUserIdFromSecurityContext();
         Integer variantId = request.getVariantId();
         Integer quantity = request.getQuantity();
-        Cart cart = (userId == null)
-                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
-                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+        Cart cart = findExistingCart(session);
         CartItem cartItem = cartItemRepository
                 .findByCartIdAndProductVariantId(cart.getId(), variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
@@ -94,16 +92,13 @@ public class CartService {
             cartItem.setQuantity(quantity); // Gán trực tiếp số lượng mới
             cartItemRepository.save(cartItem);
         }
+
         return cartItemMapper.toCartItemResponse(cartItem);
     }
 
     @Transactional
-    public void delete(HttpSession session, Integer variantId) {
-        String sessionId = session.getId();
-        Integer userId = authenticationService.extractUserIdFromSecurityContext();
-        Cart cart = (userId == null)
-                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
-                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
+    public void deleteCartItem(HttpSession session, Integer variantId) {
+        Cart cart = findExistingCart(session);
         CartItem cartItem = cartItemRepository
                 .findByCartIdAndProductVariantId(cart.getId(), variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.CART_ITEM_NOT_FOUND));
@@ -137,7 +132,6 @@ public class CartService {
     public void clearCart(Cart cart) {
         cartItemRepository.deleteAll(cart.getCartItems());
         cart.getCartItems().clear();
-        repository.save(cart);
     }
 
     public Cart getOrCreateCart(HttpSession session) {
@@ -146,6 +140,14 @@ public class CartService {
         return userId != null
                 ? repository.findByUserId(userId).orElseGet(() -> createCartForUser(userId))
                 : repository.findBySessionId(sessionId).orElseGet(() -> createCartForSession(sessionId));
+    }
+
+    private Cart findExistingCart(HttpSession session) {
+        String sessionId = session.getId();
+        Integer userId = authenticationService.extractUserIdFromSecurityContext();
+        return (userId == null)
+                ? repository.findBySessionId(sessionId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED))
+                : repository.findByUserId(userId).orElseThrow(() -> new AppException(ErrorCode.CART_NOT_EXISTED));
     }
 
     public Cart getCartByUser(Integer userId) {

@@ -10,9 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.ActivityRequest;
 import com.fpl.datn.dto.request.UpdateVoucherRequest;
 import com.fpl.datn.dto.request.VoucherRequest;
 import com.fpl.datn.dto.response.VoucherResponse;
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.VoucherMapper;
@@ -32,6 +35,7 @@ import lombok.experimental.FieldDefaults;
 public class VoucherService {
     VoucherRepository repository;
     UserVoucherRepository userVoucherRepository;
+    ActivitylogService activitylogService;
     VoucherMapper mapper;
 
     @Transactional
@@ -86,6 +90,13 @@ public class VoucherService {
 
         repository.save(voucher);
 
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Create)
+                .description("Tạo mã giảm giá: " + voucher.getCode())
+                .module(ActionActicityModule.Voucher)
+                .objectID(voucher.getId())
+                .build());
+
         return mapper.toVoucherResponse(voucher);
     }
 
@@ -120,19 +131,31 @@ public class VoucherService {
 
         repository.save(voucher);
 
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Cập nhập mã giảm giá: " + voucher.getCode())
+                .module(ActionActicityModule.Voucher)
+                .objectID(voucher.getId())
+                .build());
+
         return mapper.toVoucherResponse(voucher);
     }
 
     @PreAuthorize("hasAnyRole('MANAGER', 'ADMIN')")
     public void delete(int id) {
-        if (!repository.existsById(id)) {
-            throw new AppException(ErrorCode.VOUCHER_NOT_FOUND);
-        }
+        var voucher = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
 
         // Check voucher có đang được sử dụng không
         if (userVoucherRepository.existsByVoucherId(id)) {
             throw new AppException(ErrorCode.CART_ITEM_ALREADY_EXISTS);
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Xóa mã giảm giá: " + voucher.getCode())
+                .module(ActionActicityModule.Voucher)
+                .objectID(voucher.getId())
+                .build());
 
         repository.deleteById(id);
     }
@@ -173,6 +196,12 @@ public class VoucherService {
             });
             repository.saveAll(expiredVouchers);
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Cập nhập hạn sử dụng voucher")
+                .module(ActionActicityModule.Voucher)
+                .build());
     }
 
     // Method để lấy số lượng voucher hết hạn

@@ -20,6 +20,8 @@ import com.fpl.datn.constant.PredefinedRole;
 import com.fpl.datn.dto.PageResponse;
 import com.fpl.datn.dto.request.*;
 import com.fpl.datn.dto.response.UserResponse;
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.UserMapper;
@@ -43,6 +45,7 @@ public class UserService {
     UserMapper userMapper;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
+    ActivitylogService activitylogService;
 
     public void sendSimpleMessage(MailRequest request) {
         SimpleMailMessage message = new SimpleMailMessage();
@@ -74,6 +77,14 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepositories.save(user);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Create)
+                .description("Tạo người dùng: " + user.getFullName())
+                .module(ActionActicityModule.User)
+                .objectID(user.getId())
+                .build());
+
         return true;
     }
 
@@ -93,6 +104,13 @@ public class UserService {
         }
 
         user.setUpdatedAt(LocalDateTime.now());
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Cập nhập người dùng: " + user.getFullName())
+                .module(ActionActicityModule.User)
+                .objectID(user.getId())
+                .build());
 
         return userMapper.toUserResponse(userRepositories.save(user));
     }
@@ -130,13 +148,28 @@ public class UserService {
         sendSimpleMessage(mailRequest);
 
         user.setDeletedAt(LocalDateTime.now());
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Xóa mềm người dùng: " + user.getFullName())
+                .module(ActionActicityModule.User)
+                .objectID(user.getId())
+                .build());
+
         userRepositories.save(user);
     }
 
     @PreAuthorize("hasAuthority('MANAGE_USERS')")
     public void DeleteOne(int id) {
-        userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var user = userRepositories.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         userRepositories.deleteById(id);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Xóa người dùng: " + user.getFullName())
+                .module(ActionActicityModule.User)
+                .objectID(user.getId())
+                .build());
     }
 
     @PreAuthorize("hasAnyAuthority('MANAGE_USERS','MANAGE_ORDERS')")
@@ -199,6 +232,14 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
 
         userRepositories.save(user);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Create)
+                .description("Đăng ký người dùng: " + user.getFullName())
+                .module(ActionActicityModule.User)
+                .objectID(user.getId())
+                .build());
+
         return userMapper.toUserResponse(user);
     }
 
@@ -221,6 +262,14 @@ public class UserService {
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             userMapper.updateProfile(user, request);
+
+            activitylogService.create(ActivityRequest.builder()
+                    .action(ActionActicityLog.Update)
+                    .description("Cập nhập thông tin người dùng: " + user.getFullName())
+                    .module(ActionActicityModule.User)
+                    .objectID(user.getId())
+                    .build());
+
             return userMapper.toUserResponse(userRepositories.save(user));
         } catch (AppException e) {
             throw new AppException(ErrorCode.ERROR_UPDATE_USER);
@@ -247,6 +296,13 @@ public class UserService {
             user.setUpdatedAt(LocalDateTime.now());
             userRepositories.save(user);
 
+            activitylogService.create(ActivityRequest.builder()
+                    .action(ActionActicityLog.Update)
+                    .description("Cập nhập mật khẩu người dùng: " + user.getFullName())
+                    .module(ActionActicityModule.User)
+                    .objectID(user.getId())
+                    .build());
+
             return true;
         }
 
@@ -265,6 +321,12 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         user.setUpdatedAt(LocalDateTime.now());
         userRepositories.save(user);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Cập nhập mật khẩu người dùng")
+                .module(ActionActicityModule.User)
+                .build());
 
         return true;
     }
@@ -326,6 +388,13 @@ public class UserService {
         user.setDeletedAt(null);
         user.setUpdatedAt(LocalDateTime.now());
         userRepositories.save(user);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Khôi phục người dùng: " + user.getFullName())
+                .module(ActionActicityModule.User)
+                .objectID(user.getId())
+                .build());
 
         return userMapper.toUserResponse(user);
     }

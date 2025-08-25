@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.ActivityRequest;
 import com.fpl.datn.dto.request.CancelOrderRequest;
 import com.fpl.datn.dto.request.OrderFromCartRequest;
 import com.fpl.datn.dto.request.OrderRequest;
@@ -27,6 +28,8 @@ import com.fpl.datn.dto.request.OrderStatusRequest;
 import com.fpl.datn.dto.request.UpdateOrderRequest;
 import com.fpl.datn.dto.response.OrderItemResponse;
 import com.fpl.datn.dto.response.OrderResponse;
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
 import com.fpl.datn.enums.OrderActionType;
 import com.fpl.datn.enums.OrderStatus;
 import com.fpl.datn.enums.PaymentMethod;
@@ -70,6 +73,7 @@ public class OrderService {
     MomoService momoService;
     SendMailService sendMailService;
     CartService cartService;
+    ActivitylogService activitylogService;
     AuthenticationService authenticationService;
 
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('VIEW_ORDER')")
@@ -134,6 +138,13 @@ public class OrderService {
         order.setTotalAmount(total);
         order.setOrderDetails(details);
         repository.save(order);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Create)
+                .description("Tạo đơn hàng: " + order.getId())
+                .module(ActionActicityModule.Order)
+                .objectID(order.getId())
+                .build());
 
         return preparePaymentAndLog(order, httpRequest);
     }
@@ -206,6 +217,14 @@ public class OrderService {
                 var paymentUrl = vnpayService.createPaymentUrl(order, httpRequest);
                 response.setPaymentUrl(paymentUrl.getPaymentUrl());
             }
+
+            activitylogService.create(ActivityRequest.builder()
+                    .action(ActionActicityLog.Update)
+                    .description("Cập nhập đơn hàng: " + order.getId())
+                    .module(ActionActicityModule.Order)
+                    .objectID(order.getId())
+                    .build());
+
             return response;
         } else {
             throw new AppException(ErrorCode.ORDER_CANNOT_BE_MODIFIED);
@@ -223,6 +242,14 @@ public class OrderService {
         order.setOrderStatus(OrderStatus.CANCELLED.getDescription());
         order.setIsDelete(true);
         repository.save(order);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Xóa đơn hàng: " + order.getId())
+                .module(ActionActicityModule.Order)
+                .objectID(order.getId())
+                .build());
+
         logService.logPayment(order, OrderActionType.DELETE.getType(), null, null);
     }
 
@@ -239,6 +266,13 @@ public class OrderService {
         repository.save(order);
         logService.logPayment(order, OrderActionType.CANCELLED.getType(), null, null);
         if (isAdmin) sendMailService.sendInvoiceToUserCancelOrder(order.getId(), reason);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Hủy đơn hàng: " + order.getId())
+                .module(ActionActicityModule.Order)
+                .objectID(order.getId())
+                .build());
     }
 
     @Transactional
@@ -287,6 +321,14 @@ public class OrderService {
         if (isValidPaymentCOD(order) || isValidPaymentVNPAY(order)) {
             logService.logPayment(order, OrderActionType.UPDATE_STATUS.getType(), response.getPaymentUrl(), null);
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Cập nhập trạng thái đơn hàng: " + order.getId())
+                .module(ActionActicityModule.Order)
+                .objectID(order.getId())
+                .build());
+
         return response;
     }
 
@@ -345,18 +387,30 @@ public class OrderService {
                     .orElseThrow(() -> new AppException(ErrorCode.VOUCHER_NOT_FOUND));
         }
         Address address = null;
-        if (request.getAddressId() == null && request.getInputAddress() != null) {
-            if (request.getInputFullname() == null) throw new AppException(ErrorCode.FULLNAME_NOT_NULL);
-            if (request.getInputPhone() == null) throw new AppException(ErrorCode.PHONE_NOT_NULL);
+        if (request.getAddressId() == null
+                && request.getInputAddress() != null
+                && !request.getInputAddress().trim().isEmpty()) {
+
+            if (request.getInputFullname() == null
+                    || request.getInputFullname().trim().isEmpty()) {
+                throw new AppException(ErrorCode.FULLNAME_NOT_NULL);
+            }
+
+            if (request.getInputPhone() == null
+                    || request.getInputPhone().trim().isEmpty()) {
+                throw new AppException(ErrorCode.PHONE_NOT_NULL);
+            }
+
             address = Address.builder()
-                    .addressLine(request.getInputAddress())
-                    .fullName(request.getInputFullname())
-                    .phone(request.getInputPhone())
+                    .addressLine(request.getInputAddress().trim())
+                    .fullName(request.getInputFullname().trim())
+                    .phone(request.getInputPhone().trim())
                     .user(user)
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .build();
             addressRepository.save(address);
+
         } else {
             address = addressRepository
                     .findById(request.getAddressId())

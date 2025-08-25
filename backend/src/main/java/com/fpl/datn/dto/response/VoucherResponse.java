@@ -14,14 +14,13 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VoucherResponse {
-    Integer userId;
     Integer id;
     String code;
     String description;
-    BigDecimal discountValue;
-    BigDecimal minOrderValue;
     Integer usageCount;
     Integer quantity;
+    BigDecimal discountValue;
+    BigDecimal minOrderValue;
     LocalDateTime startAt;
     LocalDateTime endAt;
     Boolean isActive;
