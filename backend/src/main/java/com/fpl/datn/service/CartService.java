@@ -66,6 +66,7 @@ public class CartService {
 
         cartItem.setQuantity(cartItem.getQuantity() + request.getQuantity());
         cartItemRepository.save(cartItem);
+
         return mapper.toCartResponse(cart);
     }
 
@@ -91,6 +92,7 @@ public class CartService {
             cartItem.setQuantity(quantity); // Gán trực tiếp số lượng mới
             cartItemRepository.save(cartItem);
         }
+
         return cartItemMapper.toCartItemResponse(cartItem);
     }
 

@@ -6,8 +6,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.fpl.datn.dto.request.ActivityRequest;
 import com.fpl.datn.dto.request.AddressRequest;
 import com.fpl.datn.dto.response.AddressResponse;
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.AddressMapper;
@@ -25,6 +28,7 @@ import lombok.experimental.FieldDefaults;
 public class AddressService {
     AddressRepository repository;
     UserRepository userRepository;
+    ActivitylogService activitylogService;
     AddressMapper mapper;
 
     public List<AddressResponse> findByUserId(int userId) {
@@ -57,6 +61,14 @@ public class AddressService {
         address.setUpdatedAt(LocalDateTime.now());
         address.setIsDelete(false);
         repository.save(address);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Create)
+                .description("Tạo địa chỉ người dùng")
+                .module(ActionActicityModule.Address)
+                .objectID(address.getId())
+                .build());
+
         return mapper.toAddressResoonse(address);
     }
 
@@ -78,6 +90,14 @@ public class AddressService {
         address.setUser(userAddresses.get(0).getUser());
         address.setIsDefault(request.getIsDefault());
         repository.save(address);
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Cập nhập địa chỉ người dùng")
+                .module(ActionActicityModule.Address)
+                .objectID(address.getId())
+                .build());
+
         return mapper.toAddressResoonse(address);
     }
 
@@ -102,5 +122,12 @@ public class AddressService {
                 repository.save(newDefault);
             }
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Xóa địa chỉ người dùng")
+                .module(ActionActicityModule.Address)
+                .objectID(address.getId())
+                .build());
     }
 }

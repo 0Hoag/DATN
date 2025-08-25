@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,11 +21,13 @@ public class ActivityLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private String action;
+    private ActionActicityLog action;
 
     private String description;
 
-    private String module;
+    private ActionActicityModule module;
+
+    private Integer objectID;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

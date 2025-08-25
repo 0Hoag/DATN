@@ -14,16 +14,20 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.fpl.datn.dto.PageResponse;
+import com.fpl.datn.dto.request.ActivityRequest;
 import com.fpl.datn.dto.request.Product.ProductRequest;
 import com.fpl.datn.dto.request.Product.ProductVariantRequest;
 import com.fpl.datn.dto.request.Product.UpdateProductRequest;
 import com.fpl.datn.dto.response.Product.ProductResponse;
 import com.fpl.datn.dto.response.Product.ProductSaleResponse;
+import com.fpl.datn.enums.ActionActicityLog;
+import com.fpl.datn.enums.ActionActicityModule;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.mapper.Product.ProductMapper;
 import com.fpl.datn.models.*;
 import com.fpl.datn.repository.*;
+import com.fpl.datn.service.ActivitylogService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +42,7 @@ public class ProductService {
     ProductRepository repo;
     ProductMapper mapper;
     CategoryRepository cateRepo;
+    ActivitylogService activitylogService;
     ProductVariantService productVariantService;
     ProductReviewRepository reviewRepo;
 
@@ -59,12 +64,20 @@ public class ProductService {
         Category category = cateRepo.findById(request.getCategory())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_EXISTED));
         product.setCategory(category);
-        Product savedProduct = repo.save(product);
+        var savedProduct = repo.save(product);
         repo.flush(); // Quan trọng để lấy productId khi sinh SKU
         for (ProductVariantRequest variantRequest : request.getProductVariants()) {
             variantRequest.setProductId(savedProduct.getId()); // cần ID cha
             productVariantService.create(variantRequest); // gọi đúng logic sinh SKU
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Create)
+                .description("Tạo sản phầm: " + product.getName())
+                .module(ActionActicityModule.Product)
+                .objectID(product.getId())
+                .build());
+
         return mapper.toProductResponse(product);
     }
 
@@ -87,6 +100,13 @@ public class ProductService {
         repo.save(product);
         Product productWithCategory =
                 repo.findByIdWithCategory(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Update)
+                .description("Cập nhập sản phầm: " + product.getName())
+                .module(ActionActicityModule.Product)
+                .objectID(product.getId())
+                .build());
 
         return mapper.toProductResponse(productWithCategory);
     }
@@ -131,6 +151,14 @@ public class ProductService {
                 }
             }
         }
+
+        activitylogService.create(ActivityRequest.builder()
+                .action(ActionActicityLog.Delete)
+                .description("Xóa sản phầm: " + product.getName())
+                .module(ActionActicityModule.Product)
+                .objectID(product.getId())
+                .build());
+
         repo.delete(product);
     }
 
