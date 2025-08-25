@@ -25,8 +25,16 @@
       <!-- Search Bar -->
       <div class="search-bar flex-grow-1 mx-4">
         <div class="input-group">
-          <input type="text" class="form-control" placeholder="Bạn cần tìm gì hôm nay?" @keyup.enter="handleSearch" v-model="searchKeyword"/>
-          <button><font-awesome-icon icon="fa-solid fa-magnifying-glass" /></button>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Bạn cần tìm gì hôm nay?"
+            @keyup.enter="handleSearch"
+            v-model="searchKeyword"
+          />
+          <button @click="handleSearch">
+            <font-awesome-icon icon="fa-solid fa-magnifying-glass" />
+          </button>
         </div>
       </div>
 
@@ -124,7 +132,6 @@ const { hasScope } = useAuth();
 const store = useUserStore();
 const router = useRouter();
 
-
 const categories = ref([
   // { id: 1, name: "Điện thoại", slug: "dien-thoai", children: [] },
   // {
@@ -184,16 +191,16 @@ function adjustPosition(event) {
   }
 }
 //search
-const searchKeyword = ref('');
+const searchKeyword = ref("");
 function handleSearch() {
-  const value =  searchKeyword.value.trim() ;
-  if(!value) return;
+  const value = searchKeyword.value.trim();
+  if (!value) return;
 
   router.push({
-    name: 'search',
-    query: {q: value},
-  })
-  searchKeyword.value = '';
+    name: "search",
+    query: { q: value },
+  });
+  searchKeyword.value = "";
 }
 onMounted(() => {
   getListCategory();

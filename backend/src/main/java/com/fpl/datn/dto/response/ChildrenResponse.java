@@ -16,4 +16,5 @@ public class ChildrenResponse {
     Integer id;
     String name;
     String slug;
+    Boolean isShow;
 }
