@@ -25,7 +25,7 @@
           <font-awesome-icon icon="box" />
         </template>
         <template #title> Sản phẩm </template>
-        <a-menu-item key="products" >Tất cả sản phẩm</a-menu-item>
+        <a-menu-item key="products">Tất cả sản phẩm</a-menu-item>
         <a-menu-item key="product-create" v-if="hasScope(['MANAGE_PRODUCTS'])"
           >Thêm sản phẩm</a-menu-item
         >
@@ -67,12 +67,12 @@
         </template>
         <span>Voucher</span>
       </a-menu-item>
-      <!-- <a-menu-item key="setting">
+      <a-menu-item key="setting">
         <template #icon>
           <font-awesome-icon icon="gear" />
         </template>
-        <span>Cài đặt</span>
-      </a-menu-item> -->
+        <span>Nhật ký hoạt động</span>
+      </a-menu-item>
       <a-menu-item key="profile">
         <template #icon>
           <font-awesome-icon icon="user" />
@@ -90,9 +90,9 @@ import { useAuth } from "@/composable/useAuth";
 import { useUserStore } from "@/store/userStore";
 
 const store = useUserStore();
-const {  hasScope } = useAuth();
-console.log(hasScope(['ROLE_ADMIN', 'ROLE_MANAGER']))
-console.log('scope',store.scope)
+const { hasScope } = useAuth();
+console.log(hasScope(["ROLE_ADMIN", "ROLE_MANAGER"]));
+console.log("scope", store.scope);
 const collapsed = ref(false);
 
 const route = useRoute();
@@ -106,7 +106,5 @@ function handleMenuClick({ key }) {
   }
 }
 
-
 // Check if the user has permission to access the sidebar
-
 </script>

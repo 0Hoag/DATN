@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.fpl.datn.exception.AppException;
 import com.fpl.datn.exception.ErrorCode;
 import com.fpl.datn.models.VariantAttributeValue;
+import com.fpl.datn.repository.ProductVariantAttributeValueRepository;
 import com.fpl.datn.repository.VariantAttributeValueRepository;
 
 import lombok.AccessLevel;
@@ -18,10 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class VariantAttributeValueService {
     VariantAttributeValueRepository repo;
+    ProductVariantAttributeValueRepository productVariantAttributeValueRepository;
 
     public void delete(Integer id) {
-        VariantAttributeValue variantAttributeValue =
-                repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTED));
-        repo.delete(variantAttributeValue);
+        boolean existProductVariantAttributeValue = productVariantAttributeValueRepository.existsByAttributeValueId(id);
+        if (existProductVariantAttributeValue) {
+            throw new AppException(ErrorCode.VARIANT_ATTRIBUTE_ALREADY_USED);
+        } else {
+            VariantAttributeValue variantAttributeValue =
+                    repo.findById(id).orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_EXISTED));
+            repo.delete(variantAttributeValue);
+        }
     }
 }
