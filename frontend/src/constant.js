@@ -6,6 +6,9 @@ export const BRANDS = [
   'Realme',
   'Vivo',
   'Asus',
-  'ACER'
+  'ACER',
+  'Rolex',
+  'Hublot',
+  'Casio'
 ];
 

@@ -26,6 +26,7 @@
           <label for="customer" class="form-label fw-bold">Phương thức thanh toán</label>
           <a-select
             id="customer"
+            disabled
             v-model:value="selectedPaymentMethod"
             show-search
             placeholder="Phương thức thanh toán"
@@ -56,6 +57,7 @@
             id="customer"
             v-model:value="selectedOrderStatus"
             show-search
+            disabled
             placeholder="Trạng thái đơn hàng"
             :options="orderStatus"
             :filter-option="filterOrderStatus"
@@ -64,7 +66,7 @@
           />
         </div>
         <!-- Tên tự nhập -->
-        <div class="col-sm-12 mb-3" v-if="selectedAddress === '' || customFullname">
+        <div class="col-sm-12 mb-3">
           <label for="customFullname" class="form-label fw-bold">Tên người nhận</label>
           <a-input
             id="customFullname"
@@ -74,7 +76,7 @@
           />
         </div>
         <!-- Số điện thoại tự nhập -->
-        <div class="col-sm-12 mb-3" v-if="selectedAddress === '' || customPhone">
+        <div class="col-sm-12 mb-3">
           <label for="customPhone" class="form-label fw-bold"
             >Số điện thoại người nhận</label
           >
@@ -86,7 +88,7 @@
           />
         </div>
         <!-- Địa chỉ tự nhập -->
-        <div class="col-sm-6 mb-3" v-if="selectedAddress === 'custom'">
+        <div class="col-sm-12 mb-3">
           <label for="customAddress" class="form-label fw-bold">Nhập địa chỉ</label>
           <a-input
             id="customAddress"
@@ -188,7 +190,7 @@
   </div> -->
 
   <!-- Nút lưu -->
-  <div class="d-flex justify-content-start mt-3">
+  <div class="d-flex justify-content-start mt-3" v-if="selectedOrderStatus == 'PENDING'">
     <button class="btn btn-primary" type="button" @click="submitFormEdit">Lưu</button>
   </div>
 </template>
@@ -198,6 +200,7 @@ import { handleError, hideLoading, showLoading } from "@/api/functions/common";
 import { AccountService } from "@/api/service/AccountService";
 import { AddressService } from "@/api/service/AddressService";
 import { OrderService } from "@/api/service/OrderService";
+import { PaymentService } from "@/api/service/PaymentService";
 import { ProductService } from "@/api/service/ProductService";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
@@ -416,6 +419,9 @@ function getFormEdit() {
     // orderStatus: selectedOrderStatus.value,
     // voucherId: null,
     note: note.value,
+    inputFullname: customFullname.value,
+    inputAddress: customAddress.value,
+    inputPhone: customPhone.value,
     // customAddress: customAddress.value,
     // items: cart.value.map((item) => ({
     //   productVariantId: item.id,
@@ -424,16 +430,29 @@ function getFormEdit() {
   };
 }
 function validateForm() {
-  let errorMessage = "";
+  const regexPhone = /^0\d{9}$/;
+  const phone = (customPhone.value || "").trim();
+
   if (!selectedAddress.value) {
-    errorMessage = "Vui lòng chọn địa chỉ";
-  }
-  if (errorMessage) {
-    toast.error(errorMessage);
+    toast.error("Vui lòng chọn địa chỉ");
+    return false;
+  } else if (!customAddress.value) {
+    toast.error("Vui lòng nhập địa chỉ");
+    return false;
+  } else if (!customPhone.value) {
+    toast.error("Vui lòng nhập số điện thoại");
+    return false;
+  } else if (!customFullname.value) {
+    toast.error("Vui lòng nhập tên");
+    return false;
+  } else if (!regexPhone.test(phone)) {
+    toast.error("Số điện thoại phải bắt đầu bằng 0 và có 10 chữ số");
     return false;
   }
+
   return true;
 }
+
 async function submitFormEdit() {
   try {
     showLoading();
@@ -468,11 +487,39 @@ function resetForm() {
 //   },
 //   { deep: true }
 // );
-
+watch(selectedAddress, () => {
+  fetchAddressByIdAddress();
+  // console.log("watch", selectedAddress.value);
+});
 const totalCart = computed(() =>
   cart.value.reduce((sum, item) => sum + item.price * item.quantity, 0)
 );
+
+const fetchPaymentMethods = async () => {
+  try {
+    const res = await PaymentService.fetchPaymentMethods();
+    paymentMethod.value = res.result.map((item) => ({
+      value: item.id,
+      label: item.description,
+    }));
+  } catch (error) {
+    handleError(error);
+  }
+};
+
+const fetchAddressByIdAddress = async () => {
+  try {
+    const res = await AddressService.fetchAddressByIdAddress(selectedAddress.value);
+    const { fullName, phone, addressLine } = res.result;
+    customAddress.value = addressLine;
+    customFullname.value = fullName;
+    customPhone.value = phone;
+  } catch (error) {
+    handleError(error);
+  }
+};
 onMounted(() => {
   fetchOrderById();
+  fetchPaymentMethods();
 });
 </script>

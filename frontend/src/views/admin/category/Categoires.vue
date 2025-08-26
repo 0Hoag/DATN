@@ -20,14 +20,7 @@ const pagination = ref({
   total: 0,
 });
 
-const listCategory = ref([
-  // {
-  //   id: 1,
-  //   name: "Xiaomi",
-  //   slug: "xiaomi",
-  //   parent: null,
-  // },
-]);
+const listCategory = ref([]);
 
 const categoryData = ref({
   id: "",
@@ -73,20 +66,7 @@ async function fetchListCategory() {
       page: pagination.value.current,
       size: pagination.value.pageSize,
     });
-    // const rawList = response.result;
 
-    // // Tạo Map để tra cứu nhanh
-    // const idToNameMap = new Map();
-    // rawList.forEach((cat) => {
-    //   idToNameMap.set(cat.id, cat.name);
-    // });
-
-    // // Thêm parentName
-    // listCategory.value = rawList.map((cat) => ({
-    //   ...cat,
-    //   parentName: cat.parent ? idToNameMap.get(cat.parent) || null : null,
-    // }));
-    // pagination.value.total = listCategory.value.length;
     listCategory.value = response.result.data;
     pagination.value.total = response.result.totalElements;
   } catch (error) {
@@ -381,10 +361,7 @@ onMounted(() => {
             <option
               :value="category.id"
               v-for="category in listCategory.filter(
-                (item) =>
-                  item.parent === null &&
-                  item.children.length == 0 &&
-                  item.products.length == 0
+                (item) => item.parent === null && item.products.length == 0
               )"
               :key="category.id"
             >
@@ -454,13 +431,24 @@ onMounted(() => {
             <option :value="null">Chọn danh mục</option>
             <option
               :value="category.id"
-              v-for="category in listCategory.filter(
-                (item) =>
-                  item.id !== categoryData.id &&
-                  item.parent == null &&
-                   item.products.length == 0 &&
-                  (item.children.length === 0 || item.id === categoryData.parent)
-              )"
+              v-for="category in listCategory.filter((item) => {
+                if (item.id === categoryData.id) return false;
+
+                if (item.parent !== null) return false;
+
+                if (item.products?.length > 0) return false;
+
+                // nếu đang chỉnh sửa danh mục gốc mà nó đã có con => loại các danh mục gốc khác
+                if (
+                  categoryData.parent === null &&
+                  categoryData.children?.length > 0 &&
+                  item.id !== categoryData.parent
+                ) {
+                  return false;
+                }
+
+                return true;
+              })"
               :key="category.id"
             >
               {{ category.name }}

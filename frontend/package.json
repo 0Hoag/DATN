@@ -16,6 +16,7 @@
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@vueup/vue-quill": "^1.2.0",
     "ant-design-vue": "^4.2.6",
+    "aos": "^2.3.4",
     "axios": "^1.9.0",
     "bootstrap": "^5.3.6",
     "chart.js": "^4.4.9",

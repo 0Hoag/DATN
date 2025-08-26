@@ -208,7 +208,11 @@ public class OrderService {
             var address = addressRepository
                     .findById(request.getAddressId())
                     .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
-            order.setAddress(address);
+            address.setFullName(request.getInputFullname());
+            address.setAddressLine(request.getInputAddress());
+            address.setPhone(request.getInputPhone());
+            address.setUpdatedAt(LocalDateTime.now());
+            order.setAddress(addressRepository.save(address));
             order.setUpdatedAt(LocalDateTime.now());
 
             repository.save(order);

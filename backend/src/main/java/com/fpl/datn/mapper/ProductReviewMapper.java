@@ -16,5 +16,7 @@ public interface ProductReviewMapper {
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "productThumbnail", source = "product.thumbnail")
     @Mapping(target = "isReviewed", source = "orderDetail.isReviewed")
+    @Mapping(target = "slug", source = "product.thumbnail")
+
     ProductReviewResponse toProductReviewResponse(ProductReview productReview);
 }

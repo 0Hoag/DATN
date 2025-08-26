@@ -27,10 +27,17 @@ import lombok.experimental.FieldDefaults;
 public class AddressController {
     AddressService addressService;
 
-    @GetMapping("/{userId}")
+    @GetMapping("/user/{userId}")
     public ApiResponse<List<AddressResponse>> getAddressByUserId(@PathVariable int userId) {
         return ApiResponse.<List<AddressResponse>>builder()
                 .result(addressService.findByUserId(userId))
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    public ApiResponse<AddressResponse> getAddressId(@PathVariable int id) {
+        return ApiResponse.<AddressResponse>builder()
+                .result(addressService.getAddressId(id))
                 .build();
     }
 

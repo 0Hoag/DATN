@@ -26,6 +26,9 @@ import "@vueup/vue-quill/dist/vue-quill.snow.css";
 import { createPinia } from "pinia";
 import { useUserStore } from "./store/userStore";
 
+import AOS from "aos";
+import "aos/dist/aos.css";
+
 const pinia = createPinia();
 const app = createApp(App);
 app.component("font-awesome-icon", FontAwesomeIcon);

@@ -26,7 +26,7 @@ public class ProductReviewResponse {
     Integer productId;
     String productName;
     String productThumbnail;
-
+    String slug;
     // Thông tin người dùng
     Integer userId;
     String userFullName;

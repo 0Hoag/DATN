@@ -59,35 +59,52 @@
             <div v-else-if="isResetPassword" class="" role="alert">
               <div class="mt-3">
                 <div class="mb-3">
-                  <label for="newPassword">Mật khẩu mới:</label>
-                  <input
-                    id="newPassword"
-                    type="password"
-                    class="form-control mt-2"
-                    :class="{ 'is-invalid': errors.newPassword }"
-                    placeholder="Nhập mật khẩu mới"
-                    v-model="newPassword"
-                    required
-                  />
-                  <div v-if="errors.newPassword" class="invalid-feedback d-block">
-                    {{ errors.newPassword }}
+                  <label class="form-label d-block">Mật khẩu mới</label>
+                  <div class="input-group">
+                    <input
+                      :type="showPassword ? 'text' : 'password'"
+                      class="form-control"
+                      v-model="newPassword"
+                      required
+                      :class="{ 'is-invalid': errors.newPassword }"
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      @click="togglePassword"
+                    >
+                      <font-awesome-icon :icon="showPassword ? 'eye-slash' : 'eye'" />
+                    </button>
+                    <div class="invalid-feedback">
+                      {{ errors.newPassword }}
+                    </div>
                   </div>
                 </div>
+
+                <!-- Xác nhận mật khẩu -->
                 <div class="mb-3">
-                  <label for="confirmNewPassword">Xác nhận mật khẩu</label>
-                  <input
-                    id="confirmNewPassword"
-                    type="password"
-                    class="form-control mt-2"
-                    placeholder="Xác nhận mật khẩu mới"
-                    v-model="confirmNewPassword"
-                    :class="{ 'is-invalid': errors.confirmNewPassword }"
-                    required
-                  />
-                  <div v-if="errors.confirmNewPassword" class="invalid-feedback">
-                    {{ errors.confirmNewPassword }}
+                  <label class="form-label d-block">Xác nhận mật khẩu</label>
+                  <div class="input-group">
+                    <input
+                      :type="showPassword ? 'text' : 'password'"
+                      class="form-control"
+                      v-model="confirmNewPassword"
+                      required
+                      :class="{ 'is-invalid': errors.confirmNewPassword }"
+                    />
+                    <button
+                      class="btn btn-outline-secondary"
+                      type="button"
+                      @click="togglePassword"
+                    >
+                      <font-awesome-icon :icon="showPassword ? 'eye-slash' : 'eye'" />
+                    </button>
+                    <div class="invalid-feedback">
+                      {{ errors.confirmNewPassword }}
+                    </div>
                   </div>
                 </div>
+
                 <button
                   class="btn btn-primary mt-2"
                   @click="handleResetPassword"
@@ -98,7 +115,8 @@
               </div>
               <div class="alert alert-success text-center mt-2" v-if="isRessetSuccess">
                 <i class="fas fa-check-circle me-2"></i>
-                Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập bằng mật khẩu mới.
+                Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập bằng mật khẩu
+                mới.
               </div>
               <div class="text-center">
                 <router-link
@@ -194,6 +212,10 @@ const isLoadingResetOtp = ref(false);
 const isSuccess = ref(false);
 const isResetPassword = ref(false);
 const generalError = ref("");
+const showPassword = ref(false);
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
 
 // Form validation errors
 const errors = ref({
@@ -385,7 +407,6 @@ const handleResetPassword = async () => {
     isLoading.value = false;
   }
 };
-
 </script>
 
 <style scoped>

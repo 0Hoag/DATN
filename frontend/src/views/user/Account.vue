@@ -217,9 +217,9 @@ async function updateStatusReceived(order) {
   }
 }
 // lấy thông tin user
-const nameUser = ref('');
-const emailUser = ref('');
-const phoneUser = ref('');
+const nameUser = ref("");
+const emailUser = ref("");
+const phoneUser = ref("");
 const updateProfileErrors = ref({
   fullName: "",
   phone: "",
@@ -742,7 +742,7 @@ onMounted(() => {
                       :class="{ 'is-invalid': updateProfileErrors.phone }"
                       id="profilePhone"
                       v-model="phoneUser"
-                      required
+                      readonly
                     />
                     <div class="invalid-feedback">
                       {{ updateProfileErrors.phone }}

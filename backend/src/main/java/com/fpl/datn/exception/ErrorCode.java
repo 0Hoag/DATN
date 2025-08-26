@@ -161,7 +161,7 @@ public enum ErrorCode {
     VOUCHER_INVALID(2105, "Voucher is invalid", HttpStatus.BAD_REQUEST),
     VOUCHER_OVERUSED(2106, "Voucher has been overused", HttpStatus.BAD_REQUEST),
     VOUCHER_ALREADY_USED(2107, "Voucher has been used", HttpStatus.BAD_REQUEST),
-
+    VOUCHER_CODE_EXISTED(2108 , "Voucher has been used", HttpStatus.BAD_REQUEST),
     // Category (2200–2299)
     CATEGORY_NOT_EXISTED(2201, "Category does not exist", HttpStatus.BAD_REQUEST),
     CATEGORY_HAS_CHILDREN(2202, "Category has child categories", HttpStatus.BAD_REQUEST),

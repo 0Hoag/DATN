@@ -54,36 +54,44 @@
           {{ h }}:{{ m }}:{{ s }}
         </div>
       </div>
-      <Swiper :modules="[Navigation,Pagination]" :loop="true" :slides-per-view="5" navigation  pagination>
+      <Swiper
+        :modules="[Navigation, Pagination]"
+        :loop="true"
+        :slides-per-view="5"
+        navigation
+        pagination
+      >
         <SwiperSlide v-for="(product, index) in flashSaleProducts" :key="index">
-       <router-link :to="{name: 'product', params: {slug: product.slug}}">
+          <router-link :to="{ name: 'product', params: { slug: product.slug } }">
             <div
               class="card flash-sale-card shadow-sm position-relative d-flex flex-column h-100"
               style="flex: 0 0 auto; width: 220px"
             >
               <span class="flash-badge">SALE</span>
-  
+
               <div class="product-img-wrapper">
                 <img :src="product.imageUrl" :alt="product.title" />
               </div>
-  
-              <div class="card-body d-flex flex-column justify-content-between flex-grow-1">
+
+              <div
+                class="card-body d-flex flex-column justify-content-between flex-grow-1"
+              >
                 <h6 class="card-title text-start text-truncate">
                   {{ product.name }}
                 </h6>
-  
+
                 <div class="mb-1 text-warning d-flex align-items-center mt-auto">
                   <i class="fa fa-star"></i>
                   <span class="text-muted small ms-1">({{ product.averageRating }})</span>
                 </div>
-  
+
                 <p class="text-danger fw-bold mb-1 text-start">
                   {{ formatPrice(product.minSalePrice) }}<br />
                   <del class="text-muted">{{ formatPrice(product.minOriginPrice) }}</del>
                 </p>
               </div>
             </div>
-       </router-link>
+          </router-link>
         </SwiperSlide>
       </Swiper>
     </div>
@@ -262,39 +270,15 @@ import { Swiper, SwiperSlide } from "swiper/vue";
 import "swiper/css"; // style cơ bản
 import "swiper/css/navigation";
 import "swiper/css/autoplay";
-
-const menus = ref([
-  { name: "Điện thoại", items: ["iPhone", "Samsung", "Xiaomi", "OPPO"] },
-  { name: "Laptop", items: ["MacBook", "Asus", "Acer", "MSI"] },
-  { name: "Đồng hồ", items: ["Apple Watch", "Xiaomi", "Amazfit", "Huawei"] },
-  { name: "Phụ kiện", items: ["Cáp sạc", "Ốp lưng", "Pin dự phòng", "Hub USB"] },
-  { name: "Âm thanh", items: ["Tai nghe Bluetooth", "Loa Bluetooth", "Tai nghe Gaming"] },
-]);
-
-const categories = ref([
-  { icon: "bi bi-phone", label: "Điện thoại, Tablet" },
-  { icon: "bi bi-laptop", label: "Laptop" },
-  { icon: "bi bi-headphones", label: "Âm thanh, Mic thu âm" },
-  { icon: "bi bi-camera", label: "Đồng hồ, Camera" },
-  { icon: "bi bi-controller", label: "Đồ gia dụng" },
-  { icon: "bi bi-usb-symbol", label: "Phụ kiện" },
-  { icon: "bi bi-pc-display-horizontal", label: "PC, Màn hình" },
-  { icon: "bi bi-tv", label: "Tivi" },
-  { icon: "bi bi-arrow-repeat", label: "Thu cũ đổi mới" },
-  { icon: "bi bi-bag", label: "Hàng cũ" },
-  { icon: "bi bi-tags", label: "Khuyến mãi" },
-  { icon: "bi bi-newspaper", label: "Tin công nghệ" },
-]);
-
 import banner1 from "@/assets/image/banner1.png";
 import banner3 from "@/assets/image/banner3.jpg";
 import banner4 from "@/assets/image/banner4.jpg";
-import { faL } from "@fortawesome/free-solid-svg-icons";
 import { Navigation, Pagination } from "swiper/modules";
+import { AOS } from "aos";
+import "aos/dist/aos.css";
 
 const rightBanners = ref([banner1, banner4, banner3]);
-const flashSaleProducts = ref([
-]);
+const flashSaleProducts = ref([]);
 // danh sach san pham new
 
 const getListProductSale = async () => {

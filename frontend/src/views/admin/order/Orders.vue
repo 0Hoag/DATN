@@ -101,6 +101,7 @@
           <th>Trạng thái thanh toán</th>
           <th>Phương thức thanh toán</th>
           <th>Ngày tạo</th>
+          <th>Lý do hủy đơn hàng</th>
           <th>Thao tác</th>
         </tr>
       </thead>
@@ -110,9 +111,12 @@
           <td>{{ order.id }}</td>
           <td>{{ order.user.fullName || "Chưa có tên" }} - {{ order.user.email }}</td>
           <td>{{ order.orderStatus }}</td>
+
           <td>{{ order.paymentStatus }}</td>
           <td>{{ order.paymentMethod }}</td>
           <td>{{ order.createdAt }}</td>
+          <td v-if="order.orderStatus == 'CANCELLED'">{{ order.reason || "Khác" }}</td>
+          <td v-else></td>
           <td>
             <button
               class="btn btn-success mx-2"
@@ -156,7 +160,10 @@
             </button>
             <button
               class="btn btn-success mx-2"
-              v-if="['CONFIRMED','DELIVERED','RECEIED'].includes(order.orderStatus) || order.paymentStatus == 'PAID'"
+              v-if="
+                ['CONFIRMED', 'DELIVERED', 'RECEIED'].includes(order.orderStatus) ||
+                order.paymentStatus == 'PAID'
+              "
               @click="exportInvoice(order)"
               title="Xuất hóa đơn"
             >
@@ -175,7 +182,7 @@
           </td>
         </tr>
         <tr v-if="list.length === 0">
-          <td colspan="7" class="text-center py-4">
+          <td colspan="9" class="text-center py-4">
             <font-awesome-icon
               icon="circle-exclamation"
               size="2x"

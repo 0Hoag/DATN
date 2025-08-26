@@ -12,8 +12,6 @@ import EditOrder from "@/views/admin/order/EditOrder.vue";
 import CreateProduct from "../views/admin/product/CreateProduct.vue";
 import EditProduct from "@/views/admin/product/EditProduct.vue";
 import VariantAttribute from "@/views/admin/product/VariantAttribute.vue";
-import ReturnOrder from "@/views/admin/order/ReturnOrder.vue";
-import { all } from "axios";
 import MyProfile from "@/views/admin/profile/MyProfile.vue";
 
 const admin = [
@@ -31,8 +29,9 @@ const admin = [
         path: "categories",
         name: "categories",
         component: Categoires,
-        meta: { title: "Quản lý danh mục" ,
-           allowedRoles: ["ROLE_ADMIN","ROLE_MANAGER" ],
+        meta: {
+          title: "Quản lý danh mục",
+          allowedRoles: ["ROLE_ADMIN", "ROLE_MANAGER"],
         },
       },
       {
@@ -45,24 +44,27 @@ const admin = [
         path: "products/create-product",
         name: "product-create",
         component: CreateProduct,
-        meta: { title: "Tạo sản phẩm",
-           allowedRoles: ["MANAGE_PRODUCTS" ],
-         },
+        meta: {
+          title: "Tạo sản phẩm",
+          allowedRoles: ["MANAGE_PRODUCTS"],
+        },
       },
       {
         path: "products/edit-product/:id",
         name: "product-edit",
         component: EditProduct,
-        meta: { title: "Chỉnh sửa sản phẩm" ,
-           allowedRoles: ["MANAGE_PRODUCTS" ],
+        meta: {
+          title: "Chỉnh sửa sản phẩm",
+          allowedRoles: ["MANAGE_PRODUCTS"],
         },
       },
       {
         path: "products/variant-attribute",
         name: "variant-attribute",
         component: VariantAttribute,
-        meta: { title: "Thuộc tính biến thể" ,
-            allowedRoles: ["MANAGE_PRODUCTS" ],
+        meta: {
+          title: "Thuộc tính biến thể",
+          allowedRoles: ["MANAGE_PRODUCTS"],
         },
       },
 
@@ -70,8 +72,9 @@ const admin = [
         path: "users",
         name: "users",
         component: Users,
-        meta: { title: "Quản lý người dùng" ,
-            allowedRoles: ["MANAGE_USERS"],
+        meta: {
+          title: "Quản lý người dùng",
+          allowedRoles: ["MANAGE_USERS"],
         },
       },
       {
@@ -95,12 +98,6 @@ const admin = [
         meta: {
           title: "Chỉnh sửa đơn hàng",
         },
-      },
-      {
-        path: "orders/return-order",
-        name: "order-return",
-        component: ReturnOrder,
-        meta: { title: "Danh sách trả hàng" },
       },
       {
         path: "setting",

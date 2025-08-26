@@ -51,7 +51,6 @@
         </template>
         <a-menu-item key="orders"> Tất cả đơn hàng </a-menu-item>
         <a-menu-item key="order-create"> Thêm đơn hàng </a-menu-item>
-        <!-- <a-menu-item key="order-return"> Trả hàng </a-menu-item> -->
       </a-sub-menu>
 
       <a-menu-item key="reviews" v-if="hasScope(['ROLE_ADMIN', 'ROLE_MANAGER'])">

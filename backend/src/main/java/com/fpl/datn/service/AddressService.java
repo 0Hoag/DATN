@@ -72,6 +72,11 @@ public class AddressService {
         return mapper.toAddressResoonse(address);
     }
 
+
+    public AddressResponse getAddressId(int id) {
+        var address = repository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+        return mapper.toAddressResoonse(address);
+    }
     public AddressResponse updateByUserId(int userId, AddressRequest request) {
         var userAddresses = repository.findByIsDeleteFalseAndUser_Id(userId);
         if (userAddresses == null || userAddresses.isEmpty()) {

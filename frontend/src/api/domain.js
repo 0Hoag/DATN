@@ -108,7 +108,8 @@ UPDATE_CATEGORY: DOMAIN + "category",
   DELETE_ROLE: DOMAIN + "roles/list",
 
   // Adress
-  LIST_ADDRESS_BY_USER: DOMAIN + "address",
+  LIST_ADDRESS_BY_USER: DOMAIN + "address/user",
+  GET_ADDRESS_BY_ID_ADDRESS: DOMAIN + "address",
   CREATE_ADDRESS_BY_USER: DOMAIN + "address",
   DELETE_ADDRESS_BY_USER: DOMAIN + "address",
   //forgot password

@@ -18,6 +18,7 @@
         <th>Sản phẩm</th>
         <th>Đánh giá</th>
         <th>Nội dung</th>
+        <th>Hành động</th>
       </tr>
     </thead>
     <tbody>
@@ -27,6 +28,13 @@
         <td>{{ review.productName }}</td>
         <td>{{ review.rating }}</td>
         <td>{{ review.content }}</td>
+        <td>
+          <router-link
+            :to="{ name: 'product', params: { slug: review.slug } }"
+            class="btn btn-primary"
+            >Xem sản phẩm</router-link
+          >
+        </td>
       </tr>
       <tr v-if="list.length === 0">
         <td colspan="6" class="text-center py-4">
