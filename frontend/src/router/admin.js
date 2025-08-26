@@ -55,7 +55,7 @@ const admin = [
         component: EditProduct,
         meta: {
           title: "Chỉnh sửa sản phẩm",
-          allowedRoles: ["MANAGE_PRODUCTS"],
+          allowedRoles: ["MANAGE_PRODUCTS","VIEW_PRODUCT"],
         },
       },
       {

@@ -85,7 +85,6 @@ async function searchUser() {
   }
 }
 
-
 async function handleSearch() {
   if (timer.value) clearTimeout(timer.value);
 
@@ -95,8 +94,7 @@ async function handleSearch() {
     } else {
       if (!searchKeyword.value.trim()) {
         // await fetchListAccount();
-                await searchUser();
-
+        await searchUser();
       } else {
         await searchUser();
       }
@@ -106,7 +104,17 @@ async function handleSearch() {
 async function fetchListRole() {
   try {
     const response = await RoleService.fetchListRole();
-    listRole.value = response.result.filter((role) => role.name !== "GUEST");
+    if (hasScope(["ROLE_ADMIN"])) {
+      listRole.value = response.result.filter(
+        (role) => role.name !== "GUEST" && role.name !== "ADMIN"
+      );
+    } else {
+      listRole.value = response.result.filter(
+        (role) =>
+          role.name !== "GUEST" && role.name !== "ADMIN" && role.name !== "MANAGER"
+      );
+    }
+
     console.log(listRole.value);
   } catch (error) {
     toast.error("Lỗi khi tải dữ liệu");
@@ -278,7 +286,7 @@ async function submitFormRestoreUser(account) {
 const filterByRole = () => {
   pagination.value.current = 1;
   searchUser();
-}
+};
 watch(
   () => pagination.value.current,
   (newVal, oldVal) => {
@@ -294,7 +302,6 @@ watch(
 
 onMounted(() => {
   fetchListAccount();
-  console.log(hasScope(["MANAGE_USERS"]));
   if (hasScope(["MANAGE_USERS"])) {
     fetchListRole();
   }
@@ -343,7 +350,7 @@ onMounted(() => {
           <th>Vai trò</th>
           <th>Trạng thái</th>
           <th>Ngày tham gia</th>
-          <th>Thao tác</th>
+          <th v-if="hasScope(['ROLE_ADMIN'])">Thao tác</th>
         </tr>
       </thead>
       <tbody>
@@ -356,13 +363,28 @@ onMounted(() => {
           <td>{{ account.deletedAt == null ? "Hoạt động" : "Khóa" }}</td>
           <td>{{ dayjs(account.createdAt).format("DD-MM-YYYY") }}</td>
           <td>
-            <button class="btn btn-primary mx-2" title="Chỉnh sửa người dùng" @click="openModalEdit(account)">
+            <button
+              class="btn btn-primary mx-2"
+              title="Chỉnh sửa người dùng"
+              @click="openModalEdit(account)"
+              v-if="hasScope(['ROLE_ADMIN'])"
+            >
               <font-awesome-icon icon="pen-to-square" />
             </button>
-            <button class="btn btn-success mx-2" title="Khôi phục người dùng"  @click="confirmRestoreUser(account)" v-if="account.deletedAt">
+            <button
+              class="btn btn-success mx-2"
+              title="Khôi phục người dùng"
+              @click="confirmRestoreUser(account)"
+              v-if="hasScope(['ROLE_ADMIN']) && account.deletedAt"
+            >
               <font-awesome-icon icon="fa-solid fa-arrow-rotate-left" />
             </button>
-            <button class="btn btn-danger" title="Chặn người dùng" @click="openModalBlockUser(account)" v-if="!account.deletedAt">
+            <button
+              class="btn btn-danger"
+              title="Chặn người dùng"
+              @click="openModalBlockUser(account)"
+              v-if="hasScope(['ROLE_ADMIN']) && !account.deletedAt"
+            >
               <font-awesome-icon icon="ban" />
             </button>
           </td>
@@ -494,6 +516,7 @@ onMounted(() => {
             <label for="editEmail" class="form-label fw-bold">Email</label>
             <input
               type="email"
+              readonly
               class="form-control"
               id="editEmail"
               placeholder="Email"
@@ -551,18 +574,18 @@ onMounted(() => {
   <Modal ref="blockUserModalRef">
     <template #header>Lý do chặn người dùng</template>
     <template #body>
-      <form id="reasonBlockUser" @submit.prevent='confirmBlockUser'>
+      <form id="reasonBlockUser" @submit.prevent="confirmBlockUser">
         <div class="form-floating">
           <textarea
             id="formBlockUser"
             v-model="blockUserModel.reason"
             class="form-control"
             placeholder="Nhập lý do chặn người dùng"
-          required
+            required
           ></textarea>
           <label for="formBlockUser">Nhập lý do chặn người dùng</label>
         </div>
-        <button class="btn btn-primary my-3" >Xác nhận</button>
+        <button class="btn btn-primary my-3">Xác nhận</button>
       </form>
     </template>
   </Modal>
