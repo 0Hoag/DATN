@@ -42,17 +42,17 @@ const hotProducts = [
   },
 ];
 const banners = [
-  { image: 'https://picsum.photos/1200/400?random=1' },
-  { image: 'https://picsum.photos/1200/400?random=2' },
-  { image: 'https://picsum.photos/1200/400?random=3' }
-]
+  { image: "https://picsum.photos/1200/400?random=1" },
+  { image: "https://picsum.photos/1200/400?random=2" },
+  { image: "https://picsum.photos/1200/400?random=3" },
+];
 </script>
 <template>
   <BannerCarousel :banners="banners" />
 
   <ProductCarousel :products="hotProducts" :title="'Sản phẩm 1'" />
 
-  <Banner image="https://picsum.photos/1200/400?random=1"/>
+  <Banner image="https://picsum.photos/1200/400?random=1" />
 
-    <ProductCarousel :products="hotProducts" :title="'Sản phẩm 2'" />
+  <ProductCarousel :products="hotProducts" :title="'Sản phẩm 2'" />
 </template>
